@@ -1,0 +1,1153 @@
+// =============================================================================
+// RotaGest — modelo de dados
+//
+// Convenções (ver docs/ARCHITECTURE.md §4):
+// - UUID em todos os identificadores.
+// - Decimal(14,2) para valores monetários; nunca Float.
+// - Toda entidade de negócio carrega companyId (tenant) e expõe
+//   @@unique([companyId, id]) para que filhos referenciem o pai por
+//   chave estrangeira COMPOSTA (companyId, xId). Assim o banco recusa,
+//   por construção, um vínculo entre registros de empresas diferentes.
+// - Chaves compostas usam onDelete: Restrict. Registros de negócio não são
+//   apagados fisicamente: são inativados/arquivados/cancelados.
+// - Datas de competência/vencimento/pagamento são DATE (@db.Date), sem fuso.
+// - Fonte única de verdade de saldo: AccountTransaction (razão imutável).
+// =============================================================================
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// -----------------------------------------------------------------------------
+// Enums — SaaS
+// -----------------------------------------------------------------------------
+
+enum PlatformRole {
+  USER
+  SUPER_ADMIN
+}
+
+enum UserStatus {
+  ACTIVE
+  DISABLED
+}
+
+enum CompanyStatus {
+  ACTIVE
+  SUSPENDED
+  CANCELED
+}
+
+enum PersonType {
+  INDIVIDUAL // CPF
+  COMPANY // CNPJ
+}
+
+enum MemberRole {
+  OWNER
+  MANAGER
+  FINANCIAL
+  DRIVER
+}
+
+enum MemberStatus {
+  ACTIVE
+  INACTIVE
+}
+
+enum InvitationStatus {
+  PENDING
+  ACCEPTED
+  REVOKED
+  EXPIRED
+}
+
+enum BillingInterval {
+  MONTHLY
+  YEARLY
+}
+
+enum PlanStatus {
+  ACTIVE
+  ARCHIVED
+}
+
+enum SubscriptionStatus {
+  TRIALING
+  ACTIVE
+  PAST_DUE
+  CANCELED
+  SUSPENDED
+}
+
+// -----------------------------------------------------------------------------
+// Enums — Transporte
+// -----------------------------------------------------------------------------
+
+enum VehicleStatus {
+  ACTIVE
+  MAINTENANCE
+  INACTIVE
+}
+
+enum EmploymentType {
+  EMPLOYEE // CLT
+  CONTRACTOR // autônomo / PJ
+  PARTNER // sócio
+  OTHER
+}
+
+enum RecordStatus {
+  ACTIVE
+  INACTIVE
+}
+
+enum TransportType {
+  SCHOOL
+  MUNICIPAL
+  CORPORATE
+  CHARTER
+  INTERCITY
+  OTHER
+}
+
+enum ContractorKind {
+  SCHOOL
+  CITY_HALL
+  PRIVATE_COMPANY
+  INDIVIDUAL
+  OTHER
+}
+
+enum ContractBillingType {
+  MONTHLY
+  FIXED_PERIOD
+  VARIABLE
+}
+
+enum ContractStatus {
+  DRAFT
+  ACTIVE
+  SUSPENDED
+  ENDED
+  CANCELED
+}
+
+enum MaintenanceType {
+  PREVENTIVE
+  CORRECTIVE
+  OIL_CHANGE
+  TIRES
+  MECHANICAL
+  ELECTRICAL
+  OTHER
+}
+
+enum FuelType {
+  DIESEL
+  DIESEL_S10
+  GASOLINE
+  ETHANOL
+  CNG
+  OTHER
+}
+
+// -----------------------------------------------------------------------------
+// Enums — Financeiro
+// -----------------------------------------------------------------------------
+
+enum FinancialAccountType {
+  CHECKING
+  SAVINGS
+  CASH
+  OTHER
+}
+
+enum CategoryType {
+  INCOME
+  EXPENSE
+}
+
+enum EntryKind {
+  SINGLE
+  RECURRING
+  INSTALLMENT
+}
+
+// "Vencida" (OVERDUE) não é persistido: é derivado de dueDate < hoje com
+// saldo em aberto, para nunca ficar desatualizado.
+enum PayableStatus {
+  PENDING
+  PARTIALLY_PAID
+  PAID
+  CANCELED
+}
+
+enum ReceivableStatus {
+  PENDING
+  PARTIALLY_RECEIVED
+  RECEIVED
+  CANCELED
+}
+
+enum ApprovalStatus {
+  APPROVED
+  PENDING_APPROVAL
+  REJECTED
+}
+
+enum SettlementType {
+  PAYMENT // liquidação de conta a pagar (saída)
+  RECEIPT // liquidação de conta a receber (entrada)
+}
+
+enum PaymentMethod {
+  PIX
+  CASH
+  TRANSFER
+  DEPOSIT
+  BOLETO
+  CARD
+  OTHER
+}
+
+enum TransactionDirection {
+  IN
+  OUT
+}
+
+enum TransactionKind {
+  OPENING_BALANCE
+  SETTLEMENT
+  TRANSFER
+  ADJUSTMENT
+  REVERSAL
+}
+
+enum AllocationMethod {
+  DIRECT // 100% para um destino
+  EQUAL
+  PERCENT
+  FIXED
+  REVENUE_PROPORTIONAL
+}
+
+enum RecurrenceTarget {
+  PAYABLE
+  RECEIVABLE
+}
+
+enum RecurrenceFrequency {
+  WEEKLY
+  MONTHLY
+  YEARLY
+}
+
+enum ClosingStatus {
+  CLOSED
+  REOPENED
+}
+
+// =============================================================================
+// SaaS
+// =============================================================================
+
+model User {
+  id           String       @id @default(uuid()) @db.Uuid
+  name         String
+  email        String       @unique // sempre normalizado em minúsculas
+  passwordHash String
+  platformRole PlatformRole @default(USER)
+  status       UserStatus   @default(ACTIVE)
+  lastLoginAt  DateTime?
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  memberships         CompanyMember[]
+  refreshSessions     RefreshSession[]
+  passwordResetTokens PasswordResetToken[]
+  invitationsSent     CompanyInvitation[]  @relation("InvitationInvitedBy")
+  invitationsAccepted CompanyInvitation[]  @relation("InvitationAcceptedBy")
+
+  @@map("users")
+}
+
+/// Sessão de refresh token. O token em si nunca é armazenado: só seu SHA-256.
+/// Rotação a cada uso; reuso de um token já rotacionado revoga a família.
+model RefreshSession {
+  id              String    @id @default(uuid()) @db.Uuid
+  userId          String    @db.Uuid
+  familyId        String    @db.Uuid
+  tokenHash       String    @unique
+  activeCompanyId String?   @db.Uuid
+  expiresAt       DateTime
+  revokedAt       DateTime?
+  rotatedAt       DateTime?
+  userAgent       String?
+  ip              String?
+  createdAt       DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([familyId])
+  @@map("refresh_sessions")
+}
+
+model PasswordResetToken {
+  id        String    @id @default(uuid()) @db.Uuid
+  userId    String    @db.Uuid
+  tokenHash String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("password_reset_tokens")
+}
+
+/// Tenant.
+model Company {
+  id         String        @id @default(uuid()) @db.Uuid
+  tradeName  String
+  legalName  String?
+  personType PersonType
+  document   String // apenas dígitos (CPF 11 / CNPJ 14)
+  phone      String?
+  email      String?
+  address    String?
+  city       String?
+  state      String?       @db.Char(2)
+  postalCode String?
+  status     CompanyStatus @default(ACTIVE)
+  createdAt  DateTime      @default(now())
+  updatedAt  DateTime      @updatedAt
+
+  members      CompanyMember[]
+  invitations  CompanyInvitation[]
+  subscription Subscription?
+  auditLogs    AuditLog[]
+
+  vehicles           Vehicle[]
+  drivers            Driver[]
+  routes             Route[]
+  routeAssignments   RouteAssignment[]
+  contractors        Contractor[]
+  contracts          Contract[]
+  contractVehicles   ContractVehicle[]
+  contractRoutes     ContractRoute[]
+  maintenances       Maintenance[]
+  fuelDetails        FuelExpenseDetail[]
+  financialAccounts  FinancialAccount[]
+  categories         FinancialCategory[]
+  costCenters        CostCenter[]
+  payables           Payable[]
+  receivables        Receivable[]
+  settlements        Settlement[]
+  transactions       AccountTransaction[]
+  transfers          FinancialTransfer[]
+  expenseAllocations ExpenseAllocation[]
+  revenueAllocations RevenueAllocation[]
+  recurrenceRules    RecurrenceRule[]
+  monthlyClosings    MonthlyClosing[]
+  attachments        Attachment[]
+
+  @@index([document])
+  @@index([status])
+  @@map("companies")
+}
+
+model CompanyMember {
+  id            String       @id @default(uuid()) @db.Uuid
+  companyId     String       @db.Uuid
+  userId        String       @db.Uuid
+  role          MemberRole
+  /// Permissões adicionais (ex.: MANAGER configurável). Somadas às do papel.
+  permissions   String[]     @default([])
+  status        MemberStatus @default(ACTIVE)
+  joinedAt      DateTime     @default(now())
+  deactivatedAt DateTime?
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Restrict)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Restrict)
+  driver  Driver?
+
+  @@unique([companyId, userId])
+  @@unique([companyId, id])
+  @@index([userId, status])
+  @@map("company_members")
+}
+
+model CompanyInvitation {
+  id           String           @id @default(uuid()) @db.Uuid
+  companyId    String           @db.Uuid
+  email        String
+  role         MemberRole
+  permissions  String[]         @default([])
+  tokenHash    String           @unique
+  status       InvitationStatus @default(PENDING)
+  expiresAt    DateTime
+  invitedById  String           @db.Uuid
+  acceptedById String?          @db.Uuid
+  acceptedAt   DateTime?
+  revokedAt    DateTime?
+  createdAt    DateTime         @default(now())
+
+  company    Company @relation(fields: [companyId], references: [id], onDelete: Restrict)
+  invitedBy  User    @relation("InvitationInvitedBy", fields: [invitedById], references: [id])
+  acceptedBy User?   @relation("InvitationAcceptedBy", fields: [acceptedById], references: [id])
+
+  @@index([companyId, status])
+  @@index([email, status])
+  @@map("company_invitations")
+}
+
+model Plan {
+  id          String          @id @default(uuid()) @db.Uuid
+  code        String          @unique
+  name        String
+  description String?
+  price       Decimal         @db.Decimal(14, 2)
+  currency    String          @default("BRL") @db.Char(3)
+  interval    BillingInterval @default(MONTHLY)
+  /// null = ilimitado
+  maxVehicles Int?
+  /// null = ilimitado
+  maxUsers    Int?
+  status      PlanStatus      @default(ACTIVE)
+  isPublic    Boolean         @default(true)
+  sortOrder   Int             @default(0)
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+
+  features      PlanFeature[]
+  subscriptions Subscription[]
+
+  @@map("plans")
+}
+
+model PlanFeature {
+  id      String  @id @default(uuid()) @db.Uuid
+  planId  String  @db.Uuid
+  key     String
+  enabled Boolean @default(true)
+  limit   Int?
+
+  plan Plan @relation(fields: [planId], references: [id], onDelete: Cascade)
+
+  @@unique([planId, key])
+  @@map("plan_features")
+}
+
+/// Assinatura SaaS da empresa. Totalmente separada do financeiro operacional
+/// do transportador (nunca gera Payable/Receivable/AccountTransaction).
+model Subscription {
+  id                  String             @id @default(uuid()) @db.Uuid
+  companyId           String             @unique @db.Uuid
+  planId              String             @db.Uuid
+  status              SubscriptionStatus @default(TRIALING)
+  trialEndsAt         DateTime?
+  currentPeriodStart  DateTime           @default(now())
+  currentPeriodEnd    DateTime?
+  canceledAt          DateTime?
+  /// Limites negociados (plano Business). Sobrepõem os do plano quando definidos.
+  overrideMaxVehicles Int?
+  overrideMaxUsers    Int?
+  /// Preparação para gateway de pagamento (não usado enquanto não integrado).
+  externalProvider    String?
+  externalCustomerId  String?
+  externalId          String?
+  createdAt           DateTime           @default(now())
+  updatedAt           DateTime           @updatedAt
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Restrict)
+  plan    Plan    @relation(fields: [planId], references: [id], onDelete: Restrict)
+
+  @@index([status])
+  @@map("subscriptions")
+}
+
+/// Trilha de auditoria append-only (UPDATE/DELETE bloqueados por trigger).
+model AuditLog {
+  id          String   @id @default(uuid()) @db.Uuid
+  companyId   String?  @db.Uuid
+  actorUserId String?  @db.Uuid
+  action      String
+  entityType  String
+  entityId    String?
+  before      Json?
+  after       Json?
+  reason      String?
+  ip          String?
+  userAgent   String?
+  createdAt   DateTime @default(now())
+
+  company Company? @relation(fields: [companyId], references: [id], onDelete: Restrict)
+
+  @@index([companyId, createdAt])
+  @@index([entityType, entityId])
+  @@index([actorUserId, createdAt])
+  @@map("audit_logs")
+}
+
+// =============================================================================
+// Transporte
+// =============================================================================
+
+model Vehicle {
+  id         String        @id @default(uuid()) @db.Uuid
+  companyId  String        @db.Uuid
+  name       String
+  plate      String // normalizada: maiúsculas, sem hífen
+  brand      String?
+  model      String?
+  year       Int?
+  odometerKm Int           @default(0)
+  status     VehicleStatus @default(ACTIVE)
+  notes      String?
+  archivedAt DateTime?
+  createdAt  DateTime      @default(now())
+  updatedAt  DateTime      @updatedAt
+
+  company            Company             @relation(fields: [companyId], references: [id], onDelete: Restrict)
+  routeAssignments   RouteAssignment[]
+  contractVehicles   ContractVehicle[]
+  maintenances       Maintenance[]
+  fuelDetails        FuelExpenseDetail[]
+  payables           Payable[]
+  expenseAllocations ExpenseAllocation[]
+  revenueAllocations RevenueAllocation[]
+
+  @@unique([companyId, id])
+  @@unique([companyId, plate])
+  @@index([companyId, status])
+  @@map("vehicles")
+}
+
+model Driver {
+  id             String         @id @default(uuid()) @db.Uuid
+  companyId      String         @db.Uuid
+  name           String
+  document       String // CPF, apenas dígitos
+  phone          String?
+  hiredAt        DateTime?      @db.Date
+  employmentType EmploymentType @default(EMPLOYEE)
+  status         RecordStatus   @default(ACTIVE)
+  /// Usuário vinculado (opcional) — via CompanyMember da MESMA empresa.
+  memberId       String?        @db.Uuid
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+
+  company          Company           @relation(fields: [companyId], references: [id], onDelete: Restrict)
+  member           CompanyMember?    @relation(fields: [companyId, memberId], references: [companyId, id], onDelete: Restrict)
+  routeAssignments RouteAssignment[]
+  payables         Payable[]
+
+  @@unique([companyId, id])
+  @@unique([companyId, document])
+  @@unique([companyId, memberId])
+  @@index([companyId, status])
+  @@map("drivers")
+}
+
+model Route {
+  id            String        @id @default(uuid()) @db.Uuid
+  companyId     String        @db.Uuid
+  name          String
+  description   String?
+  transportType TransportType @default(SCHOOL)
+  region        String?
+  status        RecordStatus  @default(ACTIVE)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  company            Company             @relation(fields: [companyId], references: [id], onDelete: Restrict)
+  assignments        RouteAssignment[]
+  contractRoutes     ContractRoute[]
+  payables           Payable[]
+  expenseAllocations ExpenseAllocation[]
+  revenueAllocations RevenueAllocation[]
+
+  @@unique([companyId, id])
+  @@unique([companyId, name])
+  @@index([companyId, status])
+  @@map("routes")
+}
+
+/// Atribuição temporal veículo/motorista ↔ rota. Histórico preservado:
+/// encerrar = preencher endDate; nunca sobrescrever.
+model RouteAssignment {
+  id        String    @id @default(uuid()) @db.Uuid
+  companyId String    @db.Uuid
+  routeId   String    @db.Uuid
+  vehicleId String?   @db.Uuid
+  driverId  String?   @db.Uuid
+  startDate DateTime  @db.Date
+  endDate   DateTime? @db.Date
+  notes     String?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  company Company  @relation(fields: [companyId], references: [id], onDelete: Restrict)
+  route   Route    @relation(fields: [companyId, routeId], references: [companyId, id], onDelete: Restrict)
+  vehicle Vehicle? @relation(fields: [companyId, vehicleId], references: [companyId, id], onDelete: Restrict)
+  driver  Driver?  @relation(fields: [companyId, driverId], references: [companyId, id], onDelete: Restrict)
+
+  @@index([companyId, routeId, startDate])
+  @@index([companyId, vehicleId, startDate])
+  @@index([companyId, driverId, startDate])
+  @@map("route_assignments")
+}
+
+/// Contratante: escola, prefeitura, empresa privada...
+model Contractor {
+  id         String         @id @default(uuid()) @db.Uuid
+  companyId  String         @db.Uuid
+  name       String
+  kind       ContractorKind @default(OTHER)
+  personType PersonType?
+  document   String?
+  email      String?
+  phone      String?
+  status     RecordStatus   @default(ACTIVE)
+  createdAt  DateTime       @default(now())
+  updatedAt  DateTime       @updatedAt
+
+  company   Company    @relation(fields: [companyId], references: [id], onDelete: Restrict)
+  contracts Contract[]
+
+  @@unique([companyId, id])
+  @@unique([companyId, document])
+  @@map("contractors")
+}
+
+model Contract {
+  id                String              @id @default(uuid()) @db.Uuid
+  companyId         String              @db.Uuid
+  contractorId      String              @db.Uuid
+  number            String?
+  description       String?
+  billingType       ContractBillingType @default(MONTHLY)
+  amount            Decimal             @db.Decimal(14, 2)
+  startDate         DateTime            @db.Date
+  endDate           DateTime?           @db.Date
+  /// Dia do vencimento (1–31; ajustado ao último dia do mês quando necessário).
+  dueDay            Int?
+  /// Meses após a competência para o vencimento (ex.: competência out → venc. nov = 1).
+  dueMonthOffset    Int                 @default(1)
+  revenueCategoryId String?             @db.Uuid
+  status            ContractStatus      @default(DRAFT)
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+
+  company            Company             @relation(fields: [companyId], references: [id], onDelete: Restrict)
+  contractor         Contractor          @relation(fields: [companyId, contractorId], references: [companyId, id], onDelete: Restrict)
+  revenueCategory    FinancialCategory?  @relation(fields: [companyId, revenueCategoryId], references: [companyId, id], onDelete: Restrict)
+  vehicles           ContractVehicle[]
+  routes             ContractRoute[]
+  receivables        Receivable[]
+  revenueAllocations RevenueAllocation[]
+
+  @@unique([companyId, id])
+  @@unique([companyId, number])
+  @@index([companyId, status])
+  @@map("contracts")
+}
+
+model ContractVehicle {
+  companyId    String   @db.Uuid
+  contractId   String   @db.Uuid
+  vehicleId    String   @db.Uuid
+  /// Participação padrão do veículo nas receitas do contrato (0–100).
+  sharePercent Decimal? @db.Decimal(9, 6)
+  createdAt    DateTime @default(now())
+
+  company  Company  @relation(fields: [companyId], references: [id], onDelete: Restrict)
+  contract Contract @relation(fields: [companyId, contractId], references: [companyId, id], onDelete: Cascade)
+  vehicle  Vehicle  @relation(fields: [companyId, vehicleId], references: [companyId, id], onDelete: Restrict)
+
+  @@id([contractId, vehicleId])
+  @@index([companyId, vehicleId])
+  @@map("contract_vehicles")
+}
+
+model ContractRoute {
+  companyId  String   @db.Uuid
+  contractId String   @db.Uuid
+  routeId    String   @db.Uuid
+  createdAt  DateTime @default(now())
+
+  company  Company  @relation(fields: [companyId], references: [id], onDelete: Restrict)
+  contract Contract @relation(fields: [companyId, contractId], references: [companyId, id], onDelete: Cascade)
+  route    Route    @relation(fields: [companyId, routeId], references: [companyId, id], onDelete: Restrict)
+
+  @@id([contractId, routeId])
+  @@index([companyId, routeId])
+  @@map("contract_routes")
+}
+
+/// Registro operacional de manutenção. O CUSTO financeiro vive somente no
+/// Payable vinculado (payableId); o campo amount é informativo. Assim o
+/// custo nunca é contado duas vezes.
+model Maintenance {
+  id           String          @id @default(uuid()) @db.Uuid
+  companyId    String          @db.Uuid
+  vehicleId    String          @db.Uuid
+  type         MaintenanceType
+  description  String
+  odometerKm   Int?
+  date         DateTime        @db.Date
+  supplierName String?
+  amount       Decimal         @db.Decimal(14, 2)
+  notes        String?
+  payableId    String?         @db.Uuid
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+
+  company     Company      @relation(fields: [companyId], references: [id], onDelete: Restrict)
+  vehicle     Vehicle      @relation(fields: [companyId, vehicleId], references: [companyId, id], onDelete: Restrict)
+  payable     Payable?     @relation(fields: [companyId, payableId], references: [companyId, id], onDelete: Restrict)
+  attachments Attachment[]
+
+  @@unique([companyId, id])
+  @@unique([companyId, payableId])
+  @@index([companyId, vehicleId, date])
+  @@map("maintenances")
+}
+
+/// Detalhe de abastecimento de um Payable da categoria combustível.
+model FuelExpenseDetail {
+  id            String   @id @default(uuid()) @db.Uuid
+  companyId     String   @db.Uuid
+  payableId     String   @db.Uuid
+  vehicleId     String   @db.Uuid
+  fuelType      FuelType @default(DIESEL)
+  liters        Decimal  @db.Decimal(12, 3)
+  pricePerLiter Decimal  @db.Decimal(12, 4)
+  odometerKm    Int?
+  station       String?
+  filledAt      DateTime @db.Date
+  createdAt     DateTime @default(now())
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Restrict)
+  payable Payable @relation(fields: [companyId, payableId], references: [companyId, id], onDelete: Cascade)
+  vehicle Vehicle @relation(fields: [companyId, vehicleId], references: [companyId, id], onDelete: Restrict)
+
+  @@unique([companyId, payableId])
+  @@index([companyId, vehicleId, filledAt])
+  @@map("fuel_expense_details")
+}
+
+// =============================================================================
+// Financeiro
+// =============================================================================
+
+/// Saldo NÃO é armazenado aqui: saldo = Σ AccountTransaction (IN − OUT).
+/// openingBalance/openingBalanceDate espelham a transação OPENING_BALANCE,
+/// criada e alterada na mesma transação de banco.
+model FinancialAccount {
+  id                 String               @id @default(uuid()) @db.Uuid
+  companyId          String               @db.Uuid
+  name               String
+  type               FinancialAccountType
+  bankName           String?
+  openingBalance     Decimal              @default(0) @db.Decimal(14, 2)
+  openingBalanceDate DateTime             @db.Date
+  status             RecordStatus         @default(ACTIVE)
+  createdAt          DateTime             @default(now())
+  updatedAt          DateTime             @updatedAt
+
+  company      Company              @relation(fields: [companyId], references: [id], onDelete: Restrict)
+  transactions AccountTransaction[]
+  settlements  Settlement[]
+  transfersOut FinancialTransfer[]  @relation("TransferFrom")
+  transfersIn  FinancialTransfer[]  @relation("TransferTo")
+
+  @@unique([companyId, id])
+  @@unique([companyId, name])
+  @@map("financial_accounts")
+}
+
+model FinancialCategory {
+  id        String       @id @default(uuid()) @db.Uuid
+  companyId String       @db.Uuid
+  type      CategoryType
+  name      String
+  /// Chave estável para categorias padrão (FUEL, MAINTENANCE, ...). null = personalizada.
+  systemKey String?
+  parentId  String?      @db.Uuid
+  status    RecordStatus @default(ACTIVE)
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+
+  company     Company             @relation(fields: [companyId], references: [id], onDelete: Restrict)
+  parent      FinancialCategory?  @relation("CategoryTree", fields: [companyId, parentId], references: [companyId, id], onDelete: Restrict)
+  children    FinancialCategory[] @relation("CategoryTree")
+  payables    Payable[]
+  receivables Receivable[]
+  contracts   Contract[]
+
+  @@unique([companyId, id])
+  @@unique([companyId, type, name])
+  @@unique([companyId, systemKey])
+  @@map("financial_categories")
+}
+
+model CostCenter {
+  id        String       @id @default(uuid()) @db.Uuid
+  companyId String       @db.Uuid
+  name      String
+  code      String?
+  status    RecordStatus @default(ACTIVE)
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+
+  company            Company             @relation(fields: [companyId], references: [id], onDelete: Restrict)
+  payables           Payable[]
+  receivables        Receivable[]
+  expenseAllocations ExpenseAllocation[]
+  revenueAllocations RevenueAllocation[]
+
+  @@unique([companyId, id])
+  @@unique([companyId, name])
+  @@map("cost_centers")
+}
+
+/// Regra de recorrência. O gerador cria um Payable/Receivable por competência
+/// (idempotente via @@unique([recurrenceRuleId, competence]) nas obrigações).
+model RecurrenceRule {
+  id                String              @id @default(uuid()) @db.Uuid
+  companyId         String              @db.Uuid
+  target            RecurrenceTarget
+  frequency         RecurrenceFrequency @default(MONTHLY)
+  interval          Int                 @default(1)
+  dayOfMonth        Int?
+  startDate         DateTime            @db.Date
+  endDate           DateTime?           @db.Date
+  maxOccurrences    Int?
+  /// Modelo da obrigação a gerar (descrição, valor, categoria, vínculos), validado na aplicação.
+  template          Json
+  lastGeneratedDate DateTime?           @db.Date
+  status            RecordStatus        @default(ACTIVE)
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+
+  company     Company      @relation(fields: [companyId], references: [id], onDelete: Restrict)
+  payables    Payable[]
+  receivables Receivable[]
+
+  @@unique([companyId, id])
+  @@index([companyId, status])
+  @@map("recurrence_rules")
+}
+
+/// Obrigação (conta a pagar). Liquidação = Settlement; movimento = AccountTransaction.
+model Payable {
+  id                 String         @id @default(uuid()) @db.Uuid
+  companyId          String         @db.Uuid
+  description        String
+  categoryId         String         @db.Uuid
+  costCenterId       String?        @db.Uuid
+  vehicleId          String?        @db.Uuid
+  routeId            String?        @db.Uuid
+  driverId           String?        @db.Uuid
+  supplierName       String?
+  amount             Decimal        @db.Decimal(14, 2)
+  /// Cache de Σ settlements não estornados; atualizado SOMENTE na mesma
+  /// transação que cria/estorna o Settlement, sob lock da linha.
+  paidAmount         Decimal        @default(0) @db.Decimal(14, 2)
+  /// Primeiro dia do mês de competência.
+  competence         DateTime       @db.Date
+  dueDate            DateTime       @db.Date
+  status             PayableStatus  @default(PENDING)
+  approvalStatus     ApprovalStatus @default(APPROVED)
+  kind               EntryKind      @default(SINGLE)
+  installmentGroupId String?        @db.Uuid
+  installmentNumber  Int?
+  installmentCount   Int?
+  recurrenceRuleId   String?        @db.Uuid
+  notes              String?
+  canceledAt         DateTime?
+  cancelReason       String?
+  createdById        String         @db.Uuid
+  createdAt          DateTime       @default(now())
+  updatedAt          DateTime       @updatedAt
+
+  company        Company             @relation(fields: [companyId], references: [id], onDelete: Restrict)
+  category       FinancialCategory   @relation(fields: [companyId, categoryId], references: [companyId, id], onDelete: Restrict)
+  costCenter     CostCenter?         @relation(fields: [companyId, costCenterId], references: [companyId, id], onDelete: Restrict)
+  vehicle        Vehicle?            @relation(fields: [companyId, vehicleId], references: [companyId, id], onDelete: Restrict)
+  route          Route?              @relation(fields: [companyId, routeId], references: [companyId, id], onDelete: Restrict)
+  driver         Driver?             @relation(fields: [companyId, driverId], references: [companyId, id], onDelete: Restrict)
+  recurrenceRule RecurrenceRule?     @relation(fields: [companyId, recurrenceRuleId], references: [companyId, id], onDelete: Restrict)
+  settlements    Settlement[]
+  allocations    ExpenseAllocation[]
+  maintenance    Maintenance?
+  fuelDetail     FuelExpenseDetail?
+  attachments    Attachment[]
+
+  @@unique([companyId, id])
+  @@unique([recurrenceRuleId, competence])
+  @@unique([installmentGroupId, installmentNumber])
+  @@index([companyId, status, dueDate])
+  @@index([companyId, competence])
+  @@index([companyId, categoryId])
+  @@index([companyId, vehicleId])
+  @@map("payables")
+}
+
+model Receivable {
+  id                 String           @id @default(uuid()) @db.Uuid
+  companyId          String           @db.Uuid
+  description        String
+  categoryId         String           @db.Uuid
+  contractId         String?          @db.Uuid
+  costCenterId       String?          @db.Uuid
+  amount             Decimal          @db.Decimal(14, 2)
+  /// Cache de Σ settlements não estornados (mesma estratégia de Payable.paidAmount).
+  receivedAmount     Decimal          @default(0) @db.Decimal(14, 2)
+  competence         DateTime         @db.Date
+  dueDate            DateTime         @db.Date
+  status             ReceivableStatus @default(PENDING)
+  kind               EntryKind        @default(SINGLE)
+  installmentGroupId String?          @db.Uuid
+  installmentNumber  Int?
+  installmentCount   Int?
+  recurrenceRuleId   String?          @db.Uuid
+  notes              String?
+  canceledAt         DateTime?
+  cancelReason       String?
+  createdById        String           @db.Uuid
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @updatedAt
+
+  company        Company             @relation(fields: [companyId], references: [id], onDelete: Restrict)
+  category       FinancialCategory   @relation(fields: [companyId, categoryId], references: [companyId, id], onDelete: Restrict)
+  contract       Contract?           @relation(fields: [companyId, contractId], references: [companyId, id], onDelete: Restrict)
+  costCenter     CostCenter?         @relation(fields: [companyId, costCenterId], references: [companyId, id], onDelete: Restrict)
+  recurrenceRule RecurrenceRule?     @relation(fields: [companyId, recurrenceRuleId], references: [companyId, id], onDelete: Restrict)
+  settlements    Settlement[]
+  allocations    RevenueAllocation[]
+  attachments    Attachment[]
+
+  @@unique([companyId, id])
+  /// Uma conta a receber por contrato e competência (geração idempotente).
+  @@unique([contractId, competence])
+  @@unique([recurrenceRuleId, competence])
+  @@unique([installmentGroupId, installmentNumber])
+  @@index([companyId, status, dueDate])
+  @@index([companyId, competence])
+  @@map("receivables")
+}
+
+/// Liquidação (pagamento/recebimento) total ou parcial de uma obrigação.
+/// Exatamente um entre payableId/receivableId (CHECK no banco).
+/// idempotencyKey única por empresa impede liquidação duplicada.
+model Settlement {
+  id             String         @id @default(uuid()) @db.Uuid
+  companyId      String         @db.Uuid
+  type           SettlementType
+  payableId      String?        @db.Uuid
+  receivableId   String?        @db.Uuid
+  accountId      String         @db.Uuid
+  amount         Decimal        @db.Decimal(14, 2)
+  settledAt      DateTime       @db.Date
+  method         PaymentMethod
+  idempotencyKey String
+  notes          String?
+  reversedAt     DateTime?
+  reversalReason String?
+  createdById    String         @db.Uuid
+  createdAt      DateTime       @default(now())
+
+  company      Company              @relation(fields: [companyId], references: [id], onDelete: Restrict)
+  payable      Payable?             @relation(fields: [companyId, payableId], references: [companyId, id], onDelete: Restrict)
+  receivable   Receivable?          @relation(fields: [companyId, receivableId], references: [companyId, id], onDelete: Restrict)
+  account      FinancialAccount     @relation(fields: [companyId, accountId], references: [companyId, id], onDelete: Restrict)
+  transactions AccountTransaction[]
+  attachments  Attachment[]
+
+  @@unique([companyId, id])
+  @@unique([companyId, idempotencyKey])
+  @@index([companyId, settledAt])
+  @@index([payableId])
+  @@index([receivableId])
+  @@map("settlements")
+}
+
+/// Razão (ledger) imutável — FONTE ÚNICA DE VERDADE dos saldos.
+/// Correções são feitas por lançamentos de estorno (REVERSAL), nunca por UPDATE.
+model AccountTransaction {
+  id                    String               @id @default(uuid()) @db.Uuid
+  companyId             String               @db.Uuid
+  accountId             String               @db.Uuid
+  kind                  TransactionKind
+  direction             TransactionDirection
+  /// Sempre positivo (CHECK > 0); o sinal vem de direction.
+  amount                Decimal              @db.Decimal(14, 2)
+  occurredAt            DateTime             @db.Date
+  description           String
+  settlementId          String?              @db.Uuid
+  transferId            String?              @db.Uuid
+  reversesTransactionId String?              @db.Uuid
+  reason                String?
+  createdById           String?              @db.Uuid
+  createdAt             DateTime             @default(now())
+
+  company    Company             @relation(fields: [companyId], references: [id], onDelete: Restrict)
+  account    FinancialAccount    @relation(fields: [companyId, accountId], references: [companyId, id], onDelete: Restrict)
+  settlement Settlement?         @relation(fields: [companyId, settlementId], references: [companyId, id], onDelete: Restrict)
+  transfer   FinancialTransfer?  @relation(fields: [companyId, transferId], references: [companyId, id], onDelete: Restrict)
+  reverses   AccountTransaction? @relation("Reversal", fields: [reversesTransactionId], references: [id], onDelete: Restrict)
+  reversedBy AccountTransaction? @relation("Reversal")
+
+  @@unique([reversesTransactionId])
+  @@index([companyId, accountId, occurredAt])
+  @@index([companyId, occurredAt])
+  @@index([settlementId])
+  @@index([transferId])
+  @@map("account_transactions")
+}
+
+/// Transferência entre contas da mesma empresa: gera 1 OUT + 1 IN.
+/// Nunca é receita nem despesa operacional.
+model FinancialTransfer {
+  id             String    @id @default(uuid()) @db.Uuid
+  companyId      String    @db.Uuid
+  fromAccountId  String    @db.Uuid
+  toAccountId    String    @db.Uuid
+  amount         Decimal   @db.Decimal(14, 2)
+  transferredAt  DateTime  @db.Date
+  description    String?
+  idempotencyKey String
+  reversedAt     DateTime?
+  createdById    String    @db.Uuid
+  createdAt      DateTime  @default(now())
+
+  company      Company              @relation(fields: [companyId], references: [id], onDelete: Restrict)
+  fromAccount  FinancialAccount     @relation("TransferFrom", fields: [companyId, fromAccountId], references: [companyId, id], onDelete: Restrict)
+  toAccount    FinancialAccount     @relation("TransferTo", fields: [companyId, toAccountId], references: [companyId, id], onDelete: Restrict)
+  transactions AccountTransaction[]
+
+  @@unique([companyId, id])
+  @@unique([companyId, idempotencyKey])
+  @@index([companyId, transferredAt])
+  @@map("financial_transfers")
+}
+
+/// Rateio de uma conta a pagar. Σ amount = Payable.amount (validado na
+/// aplicação, em Decimal). Afeta apenas relatórios gerenciais — nunca o caixa.
+model ExpenseAllocation {
+  id           String           @id @default(uuid()) @db.Uuid
+  companyId    String           @db.Uuid
+  payableId    String           @db.Uuid
+  vehicleId    String?          @db.Uuid
+  routeId      String?          @db.Uuid
+  costCenterId String?          @db.Uuid
+  method       AllocationMethod
+  percent      Decimal?         @db.Decimal(9, 6)
+  amount       Decimal          @db.Decimal(14, 2)
+  createdAt    DateTime         @default(now())
+
+  company    Company     @relation(fields: [companyId], references: [id], onDelete: Restrict)
+  payable    Payable     @relation(fields: [companyId, payableId], references: [companyId, id], onDelete: Cascade)
+  vehicle    Vehicle?    @relation(fields: [companyId, vehicleId], references: [companyId, id], onDelete: Restrict)
+  route      Route?      @relation(fields: [companyId, routeId], references: [companyId, id], onDelete: Restrict)
+  costCenter CostCenter? @relation(fields: [companyId, costCenterId], references: [companyId, id], onDelete: Restrict)
+
+  @@index([companyId, payableId])
+  @@index([companyId, vehicleId])
+  @@index([companyId, routeId])
+  @@map("expense_allocations")
+}
+
+model RevenueAllocation {
+  id           String           @id @default(uuid()) @db.Uuid
+  companyId    String           @db.Uuid
+  receivableId String           @db.Uuid
+  vehicleId    String?          @db.Uuid
+  routeId      String?          @db.Uuid
+  contractId   String?          @db.Uuid
+  costCenterId String?          @db.Uuid
+  method       AllocationMethod
+  percent      Decimal?         @db.Decimal(9, 6)
+  amount       Decimal          @db.Decimal(14, 2)
+  createdAt    DateTime         @default(now())
+
+  company    Company     @relation(fields: [companyId], references: [id], onDelete: Restrict)
+  receivable Receivable  @relation(fields: [companyId, receivableId], references: [companyId, id], onDelete: Cascade)
+  vehicle    Vehicle?    @relation(fields: [companyId, vehicleId], references: [companyId, id], onDelete: Restrict)
+  route      Route?      @relation(fields: [companyId, routeId], references: [companyId, id], onDelete: Restrict)
+  contract   Contract?   @relation(fields: [companyId, contractId], references: [companyId, id], onDelete: Restrict)
+  costCenter CostCenter? @relation(fields: [companyId, costCenterId], references: [companyId, id], onDelete: Restrict)
+
+  @@index([companyId, receivableId])
+  @@index([companyId, vehicleId])
+  @@index([companyId, routeId])
+  @@map("revenue_allocations")
+}
+
+/// Fechamento mensal. Enquanto status = CLOSED, nenhuma escrita com
+/// competência ou data de movimento no mês é aceita (PeriodLockService).
+model MonthlyClosing {
+  id           String        @id @default(uuid()) @db.Uuid
+  companyId    String        @db.Uuid
+  year         Int
+  month        Int
+  status       ClosingStatus @default(CLOSED)
+  /// Snapshot imutável dos valores apurados no momento do fechamento.
+  snapshot     Json
+  version      Int           @default(1)
+  closedAt     DateTime      @default(now())
+  closedById   String        @db.Uuid
+  reopenedAt   DateTime?
+  reopenedById String?       @db.Uuid
+  reopenReason String?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Restrict)
+
+  @@unique([companyId, year, month])
+  @@map("monthly_closings")
+}
+
+/// Comprovante armazenado em storage privado. Exatamente um dono (CHECK no banco).
+/// Download somente via API, após validar tenant e permissão.
+model Attachment {
+  id            String    @id @default(uuid()) @db.Uuid
+  companyId     String    @db.Uuid
+  payableId     String?   @db.Uuid
+  receivableId  String?   @db.Uuid
+  settlementId  String?   @db.Uuid
+  maintenanceId String?   @db.Uuid
+  storageKey    String    @unique
+  originalName  String
+  mimeType      String
+  sizeBytes     Int
+  sha256        String
+  uploadedById  String    @db.Uuid
+  deletedAt     DateTime?
+  createdAt     DateTime  @default(now())
+
+  company     Company      @relation(fields: [companyId], references: [id], onDelete: Restrict)
+  payable     Payable?     @relation(fields: [companyId, payableId], references: [companyId, id], onDelete: Restrict)
+  receivable  Receivable?  @relation(fields: [companyId, receivableId], references: [companyId, id], onDelete: Restrict)
+  settlement  Settlement?  @relation(fields: [companyId, settlementId], references: [companyId, id], onDelete: Restrict)
+  maintenance Maintenance? @relation(fields: [companyId, maintenanceId], references: [companyId, id], onDelete: Restrict)
+
+  @@index([companyId, payableId])
+  @@index([companyId, receivableId])
+  @@index([companyId, settlementId])
+  @@index([companyId, maintenanceId])
+  @@map("attachments")
+}

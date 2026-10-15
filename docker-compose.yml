@@ -1,0 +1,37 @@
+# API + PostgreSQL. O rotagest-web roda/implanta separadamente.
+#   cp .env.example .env        (ajuste segredos; em produção NODE_ENV=production e COOKIE_SECURE=true)
+#   docker compose up -d --build
+#   DATABASE_URL=postgresql://rotagest:rotagest@localhost:5432/rotagest npm run prisma:seed
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: rotagest
+      POSTGRES_USER: rotagest
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-rotagest}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U rotagest -d rotagest"]
+      interval: 5s
+      retries: 10
+
+  api:
+    build: .
+    restart: unless-stopped
+    depends_on:
+      db: { condition: service_healthy }
+    env_file: .env
+    environment:
+      DATABASE_URL: postgresql://rotagest:${POSTGRES_PASSWORD:-rotagest}@db:5432/rotagest?schema=public
+    ports:
+      - "3000:3000"
+    volumes:
+      - storage:/app/storage
+
+volumes:
+  pgdata:
+  storage:
