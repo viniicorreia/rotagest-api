@@ -6,6 +6,7 @@ Este repositório contém **todas** as regras de negócio, autenticação, autor
 
 - Arquitetura completa (requisitos, modelo de dados, multi-tenant, regras financeiras, autenticação e plano): [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md)
 - Relatório da Fase 1: [`docs/PHASE-1.md`](docs/PHASE-1.md)
+- Relatório da Fase 2: [`docs/PHASE-2.md`](docs/PHASE-2.md)
 - Segurança, backups e LGPD: [`docs/SECURITY.md`](docs/SECURITY.md)
 
 ## Contrato da API
