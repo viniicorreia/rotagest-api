@@ -73,6 +73,8 @@ function defaultCode(status: number): string {
       return ErrorCode.NOT_FOUND;
     case 409:
       return ErrorCode.CONFLICT;
+    case 422:
+      return ErrorCode.BUSINESS_RULE;
     default:
       return 'ERROR';
   }

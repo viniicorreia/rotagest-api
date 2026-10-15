@@ -1,3 +1,6 @@
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
+
 // Ambiente dos testes: banco isolado e limites de taxa altos (o teste de
 // rate limit cria sua própria app com limite baixo).
 process.env.NODE_ENV = 'test';
@@ -11,3 +14,4 @@ process.env.RATE_LIMIT_AUTH = '100000';
 process.env.DEFAULT_PLAN_CODE = 'starter';
 process.env.TRIAL_DAYS = '14';
 process.env.CORS_ORIGINS = "http://localhost:5173";
+process.env.STORAGE_DIR = join(tmpdir(), 'rotagest-test-storage');
