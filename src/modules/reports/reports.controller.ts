@@ -1,14 +1,12 @@
-import { Controller, Get, Param, ParseEnumPipe, Query, Res } from '@nestjs/common';
+import { Controller, Get, Param, Query, Res } from '@nestjs/common';
 import { ApiBearerAuth, ApiDefaultResponse, ApiOkResponse, ApiOperation, ApiProduces, ApiTags } from '@nestjs/swagger';
 import type { Response } from 'express';
 import { RequirePermissions, Tenant } from '../../common/decorators';
 import { ApiErrorDto } from '../../common/dto/error.dto';
 import type { TenantContext } from '../../common/tenant/tenant-context';
 import { toPdf, toXlsx } from './report-export';
-import { ExportQueryDto, REPORT_KEYS, ReportCatalogDto, ReportDto, type ReportKey, ReportQueryDto } from './reports.dto';
+import { ExportQueryDto, ReportCatalogDto, ReportDto, ReportKeyParamDto, ReportQueryDto } from './reports.dto';
 import { ReportsService } from './reports.service';
-
-const KEYS = Object.fromEntries(REPORT_KEYS.map((k) => [k, k]));
 
 @ApiTags('reports')
 @ApiDefaultResponse({ type: ApiErrorDto, description: 'Erro (formato padrão)' })
@@ -28,7 +26,7 @@ export class ReportsController {
   @RequirePermissions('reports:read')
   @ApiOkResponse({ type: ReportDto })
   @ApiOperation({ summary: 'Relatório da empresa ativa com filtros e comparativo opcional' })
-  get(@Tenant() ctx: TenantContext, @Param('key', new ParseEnumPipe(KEYS)) key: ReportKey, @Query() q: ReportQueryDto) {
+  get(@Tenant() ctx: TenantContext, @Param() { key }: ReportKeyParamDto, @Query() q: ReportQueryDto) {
     return this.reports.build(ctx, key, q);
   }
 
@@ -36,7 +34,7 @@ export class ReportsController {
   @RequirePermissions('reports:read')
   @ApiProduces('application/pdf', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
   @ApiOkResponse({ description: 'Arquivo PDF ou Excel com os mesmos números do relatório' })
-  async export(@Tenant() ctx: TenantContext, @Param('key', new ParseEnumPipe(KEYS)) key: ReportKey, @Query() q: ExportQueryDto, @Res() res: Response) {
+  async export(@Tenant() ctx: TenantContext, @Param() { key }: ReportKeyParamDto, @Query() q: ExportQueryDto, @Res() res: Response) {
     const report = await this.reports.build(ctx, key, q);
     const company = await this.reports.companyName(ctx.companyId);
     const file = q.format === 'pdf' ? await toPdf(report, company) : await toXlsx(report, company);

@@ -41,6 +41,12 @@ export const MAINTENANCE_LABELS: Record<string, string> = {
   OTHER: 'Outros',
 };
 
+export class ReportKeyParamDto {
+  @ApiProperty(ReportKeyEnum)
+  @IsIn(REPORT_KEYS)
+  key: ReportKey;
+}
+
 export class ReportQueryDto {
   @OptionalMonthProperty('Mês inicial (padrão: mês atual)')
   @IsOptional()

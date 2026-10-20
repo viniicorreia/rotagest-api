@@ -4423,6 +4423,14 @@
         "operationId": "Reports_get",
         "parameters": [
           {
+            "name": "key",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "$ref": "#/components/schemas/ReportKey"
+            }
+          },
+          {
             "name": "from",
             "required": false,
             "in": "query",
@@ -4546,6 +4554,14 @@
       "get": {
         "operationId": "Reports_export",
         "parameters": [
+          {
+            "name": "key",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "$ref": "#/components/schemas/ReportKey"
+            }
+          },
           {
             "name": "from",
             "required": false,
