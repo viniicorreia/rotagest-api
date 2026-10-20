@@ -67,7 +67,13 @@ export class AttachmentsService {
     const a = await this.prisma.attachment.findFirst({ where: { id, companyId: ctx.companyId, deletedAt: null } });
     if (!a) throw notFound('Comprovante não encontrado');
     // Sem acesso ao financeiro (motorista), só baixa o que ele mesmo enviou.
-    if (!ctx.permissions.includes('finance:read') && a.uploadedById !== ctx.userId) throw notFound('Comprovante não encontrado');
+    if (!ctx.permissions.includes('finance:read') && a.uploadedById !== ctx.userId) {
+      // Quem aprova despesas do motorista pode ver o comprovante delas.
+      const ofDriverExpense = ctx.permissions.includes('expenses:approve') && a.payableId
+        ? await this.prisma.payable.count({ where: { id: a.payableId, companyId: ctx.companyId, driverId: { not: null } } })
+        : 0;
+      if (!ofDriverExpense) throw notFound('Comprovante não encontrado');
+    }
     return { stream: this.storage.read(a.storageKey), mimeType: a.mimeType, fileName: a.originalName, size: a.sizeBytes };
   }
 

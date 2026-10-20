@@ -262,6 +262,13 @@ describe('Rateio, contratos, manutenção, abastecimento e despesas do motorista
       const mine = await t.http().get('/api/v1/my/expenses').set(bearer(driverUser)).expect(200);
       expect(mine.body.items).toHaveLength(1);
       expect(mine.body.items[0].attachmentsCount).toBe(1);
+      // Quem aprova (sem acesso ao financeiro) vê e baixa o comprovante.
+      await t.prisma.subscription.updateMany({ data: { overrideMaxUsers: 10 } });
+      const { member: approver } = await addMember(t, owner, 'MANAGER');
+      const queue = await t.http().get('/api/v1/expense-approvals').set(bearer(approver)).expect(200);
+      const att = queue.body.items[0].attachments[0];
+      expect(att.originalName).toBe('cupom.pdf');
+      await t.http().get(`/api/v1/attachments/${att.id}/download`).set(bearer(approver)).expect(200);
 
       // Fora da lista padrão de contas a pagar e dos resumos de combustível; não pode ser paga.
       const payables = await t.http().get('/api/v1/payables').set(bearer(owner)).expect(200);

@@ -4,7 +4,7 @@ import { IsEnum, IsIn, IsInt, IsOptional, IsString, IsUUID, Matches, Max, MaxLen
 import { IsDateOnly, IsMoney, IsMonth, MoneyProperty, MonthProperty, OptionalDateProperty, OptionalMoneyProperty, OptionalMonthProperty, PageQueryDto, trimOrNull, trimOrUndefined } from '../../common/validation';
 import { LITERS_PATTERN, PRICE_PER_LITER_PATTERN } from '../../domain';
 import { RefDto, VehicleRefDto } from '../fleet/fleet.dto';
-import { CategoryRefDto, SettleNowDto } from '../obligations/obligations.dto';
+import { AttachmentDto, CategoryRefDto, SettleNowDto } from '../obligations/obligations.dto';
 import { PayableDto } from '../payables/payables.dto';
 
 export const MAINTENANCE_TYPES = ['PREVENTIVE', 'CORRECTIVE', 'OIL_CHANGE', 'TIRES', 'MECHANICAL', 'ELECTRICAL', 'OTHER'] as const;
@@ -336,6 +336,7 @@ export class RejectExpenseDto {
 export class DriverExpenseDto extends PayableDto {
   @ApiProperty({ type: RefDto, nullable: true }) driver: RefDto | null;
   @ApiProperty({ type: FuelingDto, nullable: true }) fuel: Omit<FuelingDto, 'payable'> | null;
+  @ApiProperty({ type: [AttachmentDto] }) attachments: AttachmentDto[];
 }
 
 export class DriverExpenseListDto {

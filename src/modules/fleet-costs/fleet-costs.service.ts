@@ -27,6 +27,7 @@ import { CategoriesService } from '../categories/categories.service';
 import { activeOn, FleetService } from '../fleet/fleet.service';
 import { writeAllocations } from '../obligations/allocation';
 import type { SettleNowDto } from '../obligations/obligations.dto';
+import { attachmentDto } from '../attachments/attachment-dto';
 import { LIST_INCLUDE, PayablesService } from '../payables/payables.service';
 import { SettlementsService } from '../settlements/settlements.service';
 import { PeriodLockService } from '../transactions/period-lock.service';
@@ -59,6 +60,7 @@ const EXPENSE_INCLUDE = {
   ...LIST_INCLUDE,
   driver: { select: { id: true, name: true } },
   fuelDetail: { include: { vehicle: VEHICLE_REF } },
+  attachments: { where: { deletedAt: null }, orderBy: { createdAt: 'asc' } },
 } satisfies Prisma.PayableInclude;
 type ExpenseRow = Prisma.PayableGetPayload<{ include: typeof EXPENSE_INCLUDE }>;
 
@@ -526,6 +528,6 @@ export class FleetCostsService {
 
   private expenseDto(p: ExpenseRow) {
     const fuel = p.fuelDetail ? { ...this.fuelBase(p.fuelDetail), vehicle: p.fuelDetail.vehicle, driver: p.driver, amount: money(p.amount) } : null;
-    return { ...this.payables.toDto(p), driver: p.driver, fuel };
+    return { ...this.payables.toDto(p), driver: p.driver, fuel, attachments: p.attachments.map(attachmentDto) };
   }
 }

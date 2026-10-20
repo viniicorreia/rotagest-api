@@ -42,7 +42,7 @@ export class AttachmentsController {
   }
 
   @Get(':id/download')
-  @RequireAnyPermission('finance:read', 'expenses:own')
+  @RequireAnyPermission('finance:read', 'expenses:own', 'expenses:approve')
   @ApiProduces('application/pdf', 'image/png', 'image/jpeg', 'image/webp')
   @ApiOkResponse({ schema: { type: 'string', format: 'binary' } })
   @ApiOperation({ summary: 'Baixa o comprovante (somente da empresa ativa)' })

@@ -9513,6 +9513,41 @@
           "INSTALLMENT"
         ]
       },
+      "AttachmentDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "originalName": {
+            "type": "string"
+          },
+          "mimeType": {
+            "type": "string"
+          },
+          "sizeBytes": {
+            "type": "number"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "settlementId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "originalName",
+          "mimeType",
+          "sizeBytes",
+          "createdAt",
+          "settlementId"
+        ]
+      },
       "DriverExpenseDto": {
         "type": "object",
         "properties": {
@@ -9638,6 +9673,12 @@
                 "$ref": "#/components/schemas/FuelingDto"
               }
             ]
+          },
+          "attachments": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AttachmentDto"
+            }
           }
         },
         "required": [
@@ -9666,7 +9707,8 @@
           "splitVehicles",
           "createdAt",
           "driver",
-          "fuel"
+          "fuel",
+          "attachments"
         ]
       },
       "DriverExpenseListDto": {
@@ -10019,41 +10061,6 @@
           "page",
           "pageSize",
           "summary"
-        ]
-      },
-      "AttachmentDto": {
-        "type": "object",
-        "properties": {
-          "id": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "originalName": {
-            "type": "string"
-          },
-          "mimeType": {
-            "type": "string"
-          },
-          "sizeBytes": {
-            "type": "number"
-          },
-          "createdAt": {
-            "type": "string",
-            "format": "date-time"
-          },
-          "settlementId": {
-            "type": "string",
-            "format": "uuid",
-            "nullable": true
-          }
-        },
-        "required": [
-          "id",
-          "originalName",
-          "mimeType",
-          "sizeBytes",
-          "createdAt",
-          "settlementId"
         ]
       },
       "AllocationMethod": {
