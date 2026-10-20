@@ -8,6 +8,7 @@ import { AppConfig } from '../../config/app-config.service';
 import { PrismaService } from '../../prisma/prisma.service';
 import { AuditService } from '../audit/audit.service';
 import { AuthService } from '../auth/auth.service';
+import { CategoriesService } from '../categories/categories.service';
 import { SessionService } from '../auth/session.service';
 import type { CreateCompanyDto, UpdateCompanyDto } from './dto/company.dto';
 
@@ -35,6 +36,7 @@ export class CompaniesService {
     private readonly auth: AuthService,
     private readonly sessions: SessionService,
     private readonly config: AppConfig,
+    private readonly categories: CategoriesService,
   ) {}
 
   /**
@@ -49,6 +51,7 @@ export class CompaniesService {
       }
       const created = await tx.company.create({ data: { ...dto, status: 'ACTIVE' }, select: PUBLIC_FIELDS });
       await tx.companyMember.create({ data: { companyId: created.id, userId: user.userId, role: 'OWNER' } });
+      await this.categories.ensureDefaults(created.id, tx);
       const trialDays = this.config.get('TRIAL_DAYS');
       await tx.subscription.create({
         data: {

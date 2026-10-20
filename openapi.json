@@ -995,6 +995,2243 @@
           "invitations"
         ]
       }
+    },
+    "/api/v1/categories": {
+      "get": {
+        "operationId": "Categories_list",
+        "parameters": [
+          {
+            "name": "type",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/CategoryType"
+            }
+          },
+          {
+            "name": "includeInactive",
+            "required": false,
+            "in": "query",
+            "description": "Inclui categorias desativadas",
+            "schema": {
+              "default": false,
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CategoryDto"
+                  }
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Erro (formato padrão)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Categorias padrão e personalizadas da empresa",
+        "tags": [
+          "categories"
+        ]
+      },
+      "post": {
+        "operationId": "Categories_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateCategoryDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CategoryDto"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Erro (formato padrão)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "categories"
+        ]
+      }
+    },
+    "/api/v1/categories/{id}": {
+      "patch": {
+        "operationId": "Categories_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateCategoryDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CategoryDto"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Erro (formato padrão)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Renomeia (só personalizadas) ou ativa/desativa uma categoria",
+        "tags": [
+          "categories"
+        ]
+      }
+    },
+    "/api/v1/accounts": {
+      "get": {
+        "operationId": "Accounts_list",
+        "parameters": [
+          {
+            "name": "includeInactive",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": false,
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccountListDto"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Erro (formato padrão)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Contas financeiras com saldo atual calculado pelo razão",
+        "tags": [
+          "accounts"
+        ]
+      },
+      "post": {
+        "operationId": "Accounts_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateAccountDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccountDto"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Erro (formato padrão)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Cria conta (corrente, poupança, caixa ou outra) com saldo inicial",
+        "tags": [
+          "accounts"
+        ]
+      }
+    },
+    "/api/v1/accounts/{id}": {
+      "get": {
+        "operationId": "Accounts_get",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccountDto"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Erro (formato padrão)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "accounts"
+        ]
+      },
+      "patch": {
+        "operationId": "Accounts_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateAccountDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AccountDto"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Erro (formato padrão)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "accounts"
+        ]
+      }
+    },
+    "/api/v1/accounts/{id}/statement": {
+      "get": {
+        "operationId": "Accounts_statement",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "from",
+            "required": false,
+            "in": "query",
+            "description": "Início (padrão: 1º dia do mês atual)",
+            "schema": {
+              "format": "date",
+              "example": "2026-10-15",
+              "type": "string"
+            }
+          },
+          {
+            "name": "to",
+            "required": false,
+            "in": "query",
+            "description": "Fim (padrão: hoje)",
+            "schema": {
+              "format": "date",
+              "example": "2026-10-15",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/StatementDto"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Erro (formato padrão)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Extrato da conta no período, com saldo anterior e saldo após cada lançamento",
+        "tags": [
+          "accounts"
+        ]
+      }
+    },
+    "/api/v1/accounts/{id}/adjustments": {
+      "post": {
+        "operationId": "Accounts_adjust",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdjustmentDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdjustmentResultDto"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Erro (formato padrão)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Ajuste autorizado de saldo, com justificativa e auditoria",
+        "tags": [
+          "accounts"
+        ]
+      }
+    },
+    "/api/v1/transfers": {
+      "get": {
+        "operationId": "Transfers_list",
+        "parameters": [
+          {
+            "name": "from",
+            "required": false,
+            "in": "query",
+            "description": "Início (padrão: 1º dia do mês atual)",
+            "schema": {
+              "format": "date",
+              "example": "2026-10-15",
+              "type": "string"
+            }
+          },
+          {
+            "name": "to",
+            "required": false,
+            "in": "query",
+            "description": "Fim (padrão: hoje)",
+            "schema": {
+              "format": "date",
+              "example": "2026-10-15",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/TransferDto"
+                  }
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Erro (formato padrão)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "transfers"
+        ]
+      },
+      "post": {
+        "operationId": "Transfers_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateTransferDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TransferDto"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Erro (formato padrão)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Transferência entre contas da empresa (idempotente; não é receita nem despesa)",
+        "tags": [
+          "transfers"
+        ]
+      }
+    },
+    "/api/v1/transfers/{id}/reverse": {
+      "post": {
+        "operationId": "Transfers_reverse",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReverseDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TransferDto"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Erro (formato padrão)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Estorna a transferência com lançamentos opostos (nada é apagado)",
+        "tags": [
+          "transfers"
+        ]
+      }
+    },
+    "/api/v1/settlements/{id}/reverse": {
+      "post": {
+        "operationId": "Settlements_reverse",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReverseSettlementDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SettlementDto"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Erro (formato padrão)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Estorna um pagamento/recebimento: lança o movimento oposto e reabre o saldo da conta a pagar/receber",
+        "tags": [
+          "settlements"
+        ]
+      }
+    },
+    "/api/v1/recurrences": {
+      "get": {
+        "operationId": "Recurrences_list",
+        "parameters": [
+          {
+            "name": "target",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/RecurrenceTarget"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/RecurrenceRuleDto"
+                  }
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Erro (formato padrão)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "recurrences"
+        ]
+      }
+    },
+    "/api/v1/recurrences/{id}": {
+      "patch": {
+        "operationId": "Recurrences_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateRecurrenceDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecurrenceRuleDto"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Erro (formato padrão)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Altera descrição, valor ou dia de vencimento das próximas ocorrências (as já geradas não mudam)",
+        "tags": [
+          "recurrences"
+        ]
+      }
+    },
+    "/api/v1/recurrences/{id}/stop": {
+      "post": {
+        "operationId": "Recurrences_stop",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RecurrenceRuleDto"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Erro (formato padrão)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Encerra a recorrência; lançamentos já gerados continuam",
+        "tags": [
+          "recurrences"
+        ]
+      }
+    },
+    "/api/v1/vehicles": {
+      "get": {
+        "operationId": "Vehicles_list",
+        "parameters": [
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/VehicleStatus"
+            }
+          },
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "description": "Busca por nome ou placa",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "archived",
+            "required": false,
+            "in": "query",
+            "description": "Inclui veículos arquivados",
+            "schema": {
+              "default": false,
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VehicleListDto"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Erro (formato padrão)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Lista veículos e o uso do limite do plano",
+        "tags": [
+          "vehicles"
+        ]
+      },
+      "post": {
+        "operationId": "Vehicles_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateVehicleDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VehicleDto"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Erro (formato padrão)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Cadastra veículo (respeita o limite de veículos do plano)",
+        "tags": [
+          "vehicles"
+        ]
+      }
+    },
+    "/api/v1/vehicles/{id}": {
+      "get": {
+        "operationId": "Vehicles_get",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "from",
+            "required": false,
+            "in": "query",
+            "description": "Competência inicial (AAAA-MM). Padrão: 11 meses antes do mês atual",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "to",
+            "required": false,
+            "in": "query",
+            "description": "Competência final (AAAA-MM). Padrão: mês atual",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VehicleDetailDto"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Erro (formato padrão)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Detalhes do veículo; com finance:read inclui o resultado gerencial (competência) e a evolução mensal",
+        "tags": [
+          "vehicles"
+        ]
+      },
+      "patch": {
+        "operationId": "Vehicles_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateVehicleDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VehicleDto"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Erro (formato padrão)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "vehicles"
+        ]
+      },
+      "delete": {
+        "operationId": "Vehicles_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "default": {
+            "description": "Erro (formato padrão)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Exclui definitivamente um veículo sem histórico; com histórico, use arquivar",
+        "tags": [
+          "vehicles"
+        ]
+      }
+    },
+    "/api/v1/vehicles/{id}/archive": {
+      "post": {
+        "operationId": "Vehicles_archive",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VehicleDto"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Erro (formato padrão)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Arquiva o veículo (preserva o histórico e libera a vaga do plano)",
+        "tags": [
+          "vehicles"
+        ]
+      }
+    },
+    "/api/v1/vehicles/{id}/restore": {
+      "post": {
+        "operationId": "Vehicles_restore",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VehicleDto"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Erro (formato padrão)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Reativa um veículo arquivado (respeita o limite do plano)",
+        "tags": [
+          "vehicles"
+        ]
+      }
+    },
+    "/api/v1/dashboard": {
+      "get": {
+        "operationId": "Dashboard_get",
+        "parameters": [
+          {
+            "name": "from",
+            "required": false,
+            "in": "query",
+            "description": "Competência/mês inicial (padrão: mês atual)",
+            "schema": {
+              "pattern": "^\\d{4}-(0[1-9]|1[0-2])$",
+              "example": "2026-10",
+              "type": "string"
+            }
+          },
+          {
+            "name": "to",
+            "required": false,
+            "in": "query",
+            "description": "Competência/mês final (padrão: igual ao inicial)",
+            "schema": {
+              "pattern": "^\\d{4}-(0[1-9]|1[0-2])$",
+              "example": "2026-10",
+              "type": "string"
+            }
+          },
+          {
+            "name": "vehicleId",
+            "required": false,
+            "in": "query",
+            "description": "Considera só o que foi atribuído a este veículo",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "categoryId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DashboardDto"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Erro (formato padrão)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Indicadores financeiros da empresa ativa (caixa e competência rotulados), com filtros de período, veículo e categoria",
+        "tags": [
+          "dashboard"
+        ]
+      }
+    },
+    "/api/v1/payables": {
+      "get": {
+        "operationId": "Payables_list",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "default": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "pageSize",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20,
+              "type": "number"
+            }
+          },
+          {
+            "name": "dueFrom",
+            "required": false,
+            "in": "query",
+            "description": "Vencimento a partir de",
+            "schema": {
+              "format": "date",
+              "example": "2026-10-15",
+              "type": "string"
+            }
+          },
+          {
+            "name": "dueTo",
+            "required": false,
+            "in": "query",
+            "description": "Vencimento até",
+            "schema": {
+              "format": "date",
+              "example": "2026-10-15",
+              "type": "string"
+            }
+          },
+          {
+            "name": "competenceFrom",
+            "required": false,
+            "in": "query",
+            "description": "Competência a partir de",
+            "schema": {
+              "pattern": "^\\d{4}-(0[1-9]|1[0-2])$",
+              "example": "2026-10",
+              "type": "string"
+            }
+          },
+          {
+            "name": "competenceTo",
+            "required": false,
+            "in": "query",
+            "description": "Competência até",
+            "schema": {
+              "pattern": "^\\d{4}-(0[1-9]|1[0-2])$",
+              "example": "2026-10",
+              "type": "string"
+            }
+          },
+          {
+            "name": "categoryId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "vehicleId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "description": "Busca na descrição",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "description": "OPEN = pendente ou parcial; OVERDUE = em aberto e vencida",
+            "schema": {
+              "$ref": "#/components/schemas/PayableStatusFilter"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PayableListDto"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Erro (formato padrão)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Contas a pagar com filtros, paginação e totais do filtro",
+        "tags": [
+          "payables"
+        ]
+      },
+      "post": {
+        "operationId": "Payables_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreatePayableDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreatePayableResultDto"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Erro (formato padrão)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Cria despesa avulsa, parcelada ou recorrente (opcionalmente já paga)",
+        "tags": [
+          "payables"
+        ]
+      }
+    },
+    "/api/v1/payables/{id}": {
+      "get": {
+        "operationId": "Payables_get",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PayableDetailDto"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Erro (formato padrão)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "payables"
+        ]
+      },
+      "patch": {
+        "operationId": "Payables_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdatePayableDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PayableDetailDto"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Erro (formato padrão)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "payables"
+        ]
+      }
+    },
+    "/api/v1/payables/{id}/cancel": {
+      "post": {
+        "operationId": "Payables_cancel",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CancelObligationDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PayableDetailDto"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Erro (formato padrão)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Cancela (sem apagar). Exige estornar pagamentos antes.",
+        "tags": [
+          "payables"
+        ]
+      }
+    },
+    "/api/v1/payables/{id}/settlements": {
+      "post": {
+        "operationId": "Payables_pay",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SettleDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PayableSettlementResultDto"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Erro (formato padrão)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Registra pagamento total ou parcial (idempotente pela idempotencyKey)",
+        "tags": [
+          "payables"
+        ]
+      }
+    },
+    "/api/v1/receivables": {
+      "get": {
+        "operationId": "Receivables_list",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "default": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "pageSize",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20,
+              "type": "number"
+            }
+          },
+          {
+            "name": "dueFrom",
+            "required": false,
+            "in": "query",
+            "description": "Vencimento a partir de",
+            "schema": {
+              "format": "date",
+              "example": "2026-10-15",
+              "type": "string"
+            }
+          },
+          {
+            "name": "dueTo",
+            "required": false,
+            "in": "query",
+            "description": "Vencimento até",
+            "schema": {
+              "format": "date",
+              "example": "2026-10-15",
+              "type": "string"
+            }
+          },
+          {
+            "name": "competenceFrom",
+            "required": false,
+            "in": "query",
+            "description": "Competência a partir de",
+            "schema": {
+              "pattern": "^\\d{4}-(0[1-9]|1[0-2])$",
+              "example": "2026-10",
+              "type": "string"
+            }
+          },
+          {
+            "name": "competenceTo",
+            "required": false,
+            "in": "query",
+            "description": "Competência até",
+            "schema": {
+              "pattern": "^\\d{4}-(0[1-9]|1[0-2])$",
+              "example": "2026-10",
+              "type": "string"
+            }
+          },
+          {
+            "name": "categoryId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "vehicleId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "description": "Busca na descrição",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "description": "OPEN = pendente ou parcial; OVERDUE = em aberto e vencida",
+            "schema": {
+              "$ref": "#/components/schemas/ReceivableStatusFilter"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReceivableListDto"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Erro (formato padrão)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Contas a receber com filtros, paginação e totais do filtro",
+        "tags": [
+          "receivables"
+        ]
+      },
+      "post": {
+        "operationId": "Receivables_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateReceivableDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CreateReceivableResultDto"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Erro (formato padrão)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Cria receita avulsa, parcelada ou recorrente (opcionalmente já recebida)",
+        "tags": [
+          "receivables"
+        ]
+      }
+    },
+    "/api/v1/receivables/{id}": {
+      "get": {
+        "operationId": "Receivables_get",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReceivableDetailDto"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Erro (formato padrão)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "receivables"
+        ]
+      },
+      "patch": {
+        "operationId": "Receivables_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateReceivableDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReceivableDetailDto"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Erro (formato padrão)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "receivables"
+        ]
+      }
+    },
+    "/api/v1/receivables/{id}/cancel": {
+      "post": {
+        "operationId": "Receivables_cancel",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CancelObligationDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReceivableDetailDto"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Erro (formato padrão)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Cancela (sem apagar). Exige estornar recebimentos antes.",
+        "tags": [
+          "receivables"
+        ]
+      }
+    },
+    "/api/v1/receivables/{id}/settlements": {
+      "post": {
+        "operationId": "Receivables_receive",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SettleDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReceivableSettlementResultDto"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Erro (formato padrão)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Registra recebimento total ou parcial (idempotente pela idempotencyKey)",
+        "tags": [
+          "receivables"
+        ]
+      }
+    },
+    "/api/v1/attachments": {
+      "post": {
+        "operationId": "Attachments_upload",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "file"
+                ],
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary",
+                    "description": "PDF, JPG, PNG ou WEBP"
+                  },
+                  "payableId": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "receivableId": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "settlementId": {
+                    "type": "string",
+                    "format": "uuid"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AttachmentDto"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Erro (formato padrão)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Anexa comprovante a uma conta a pagar, a receber ou a um pagamento/recebimento",
+        "tags": [
+          "attachments"
+        ]
+      }
+    },
+    "/api/v1/attachments/{id}/download": {
+      "get": {
+        "operationId": "Attachments_download",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/pdf": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              },
+              "image/png": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              },
+              "image/jpeg": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              },
+              "image/webp": {
+                "schema": {
+                  "type": "string",
+                  "format": "binary"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Erro (formato padrão)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Baixa o comprovante (somente da empresa ativa)",
+        "tags": [
+          "attachments"
+        ]
+      }
+    },
+    "/api/v1/attachments/{id}": {
+      "delete": {
+        "operationId": "Attachments_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "default": {
+            "description": "Erro (formato padrão)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "attachments"
+        ]
+      }
     }
   },
   "info": {
@@ -2201,6 +4438,2715 @@
           "invitedBy",
           "status",
           "expiresAt"
+        ]
+      },
+      "CategoryType": {
+        "type": "string",
+        "enum": [
+          "INCOME",
+          "EXPENSE"
+        ]
+      },
+      "RecordStatus": {
+        "type": "string",
+        "enum": [
+          "ACTIVE",
+          "INACTIVE"
+        ]
+      },
+      "CategoryDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "type": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/CategoryType"
+              }
+            ]
+          },
+          "name": {
+            "type": "string"
+          },
+          "systemKey": {
+            "type": "string",
+            "nullable": true,
+            "description": "Chave das categorias padrão (FUEL, MAINTENANCE...); null = personalizada"
+          },
+          "status": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/RecordStatus"
+              }
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "type",
+          "name",
+          "systemKey",
+          "status"
+        ]
+      },
+      "CreateCategoryDto": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/CategoryType"
+              }
+            ]
+          },
+          "name": {
+            "type": "string",
+            "example": "Monitora"
+          }
+        },
+        "required": [
+          "type",
+          "name"
+        ]
+      },
+      "UpdateCategoryDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Somente categorias personalizadas podem ser renomeadas"
+          },
+          "status": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/RecordStatus"
+              }
+            ]
+          }
+        }
+      },
+      "FinancialAccountType": {
+        "type": "string",
+        "enum": [
+          "CHECKING",
+          "SAVINGS",
+          "CASH",
+          "OTHER"
+        ]
+      },
+      "AccountDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "type": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/FinancialAccountType"
+              }
+            ]
+          },
+          "bankName": {
+            "type": "string",
+            "nullable": true
+          },
+          "openingBalance": {
+            "type": "string",
+            "example": "2500.00"
+          },
+          "openingBalanceDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "status": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/RecordStatus"
+              }
+            ]
+          },
+          "balance": {
+            "type": "string",
+            "example": "3120.45",
+            "description": "Saldo atual = Σ entradas − Σ saídas do razão"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "type",
+          "bankName",
+          "openingBalance",
+          "openingBalanceDate",
+          "status",
+          "balance"
+        ]
+      },
+      "AccountListDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AccountDto"
+            }
+          },
+          "totalBalance": {
+            "type": "string",
+            "example": "5120.45",
+            "description": "Soma dos saldos das contas ativas"
+          }
+        },
+        "required": [
+          "items",
+          "totalBalance"
+        ]
+      },
+      "TransactionKind": {
+        "type": "string",
+        "enum": [
+          "OPENING_BALANCE",
+          "SETTLEMENT",
+          "TRANSFER",
+          "ADJUSTMENT",
+          "REVERSAL"
+        ]
+      },
+      "TransactionDirection": {
+        "type": "string",
+        "enum": [
+          "IN",
+          "OUT"
+        ]
+      },
+      "StatementEntryDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date"
+          },
+          "kind": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/TransactionKind"
+              }
+            ]
+          },
+          "direction": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/TransactionDirection"
+              }
+            ]
+          },
+          "amount": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string",
+            "nullable": true
+          },
+          "balanceAfter": {
+            "type": "string",
+            "description": "Saldo da conta depois deste lançamento"
+          },
+          "settlementId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "transferId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "reversed": {
+            "type": "boolean",
+            "description": "Este lançamento já foi estornado"
+          }
+        },
+        "required": [
+          "id",
+          "occurredAt",
+          "kind",
+          "direction",
+          "amount",
+          "description",
+          "reason",
+          "balanceAfter",
+          "settlementId",
+          "transferId",
+          "reversed"
+        ]
+      },
+      "StatementDto": {
+        "type": "object",
+        "properties": {
+          "account": {
+            "$ref": "#/components/schemas/AccountDto"
+          },
+          "from": {
+            "type": "string",
+            "format": "date"
+          },
+          "to": {
+            "type": "string",
+            "format": "date"
+          },
+          "openingBalance": {
+            "type": "string",
+            "description": "Saldo antes de `from`"
+          },
+          "closingBalance": {
+            "type": "string",
+            "description": "Saldo ao fim de `to`"
+          },
+          "totalIn": {
+            "type": "string"
+          },
+          "totalOut": {
+            "type": "string"
+          },
+          "entries": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/StatementEntryDto"
+            }
+          }
+        },
+        "required": [
+          "account",
+          "from",
+          "to",
+          "openingBalance",
+          "closingBalance",
+          "totalIn",
+          "totalOut",
+          "entries"
+        ]
+      },
+      "CreateAccountDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Banco do Brasil"
+          },
+          "type": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/FinancialAccountType"
+              }
+            ]
+          },
+          "bankName": {
+            "type": "object",
+            "example": "Banco do Brasil",
+            "nullable": true
+          },
+          "openingBalance": {
+            "type": "string",
+            "example": "2500.00",
+            "pattern": "^-?\\d{1,12}(\\.\\d{1,2})?$",
+            "description": "Saldo na data do saldo inicial; pode ser negativo"
+          },
+          "openingBalanceDate": {
+            "type": "string",
+            "format": "date",
+            "example": "2026-10-15",
+            "description": "Data do saldo inicial (não pode ser futura)"
+          }
+        },
+        "required": [
+          "name",
+          "type",
+          "openingBalance",
+          "openingBalanceDate"
+        ]
+      },
+      "UpdateAccountDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "type": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/FinancialAccountType"
+              }
+            ]
+          },
+          "bankName": {
+            "type": "object",
+            "nullable": true
+          },
+          "status": {
+            "description": "Só é possível desativar uma conta com saldo zero",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/RecordStatus"
+              }
+            ]
+          },
+          "openingBalance": {
+            "type": "string",
+            "example": "2500.00",
+            "pattern": "^-?\\d{1,12}(\\.\\d{1,2})?$"
+          },
+          "openingBalanceDate": {
+            "type": "string",
+            "format": "date",
+            "example": "2026-10-15"
+          }
+        }
+      },
+      "AdjustmentDto": {
+        "type": "object",
+        "properties": {
+          "direction": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/TransactionDirection"
+              }
+            ]
+          },
+          "amount": {
+            "type": "string",
+            "example": "1500.00",
+            "pattern": "^\\d{1,12}(\\.\\d{1,2})?$"
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date",
+            "example": "2026-10-15"
+          },
+          "reason": {
+            "type": "string",
+            "minLength": 10,
+            "example": "Diferença de conciliação com o extrato de outubro"
+          }
+        },
+        "required": [
+          "direction",
+          "amount",
+          "occurredAt",
+          "reason"
+        ]
+      },
+      "AdjustmentResultDto": {
+        "type": "object",
+        "properties": {
+          "entry": {
+            "$ref": "#/components/schemas/StatementEntryDto"
+          },
+          "balance": {
+            "type": "string",
+            "description": "Saldo atual da conta depois do ajuste"
+          }
+        },
+        "required": [
+          "entry",
+          "balance"
+        ]
+      },
+      "TransferDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "fromAccountId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "fromAccountName": {
+            "type": "string"
+          },
+          "toAccountId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "toAccountName": {
+            "type": "string"
+          },
+          "amount": {
+            "type": "string"
+          },
+          "transferredAt": {
+            "type": "string",
+            "format": "date"
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "reversedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "fromAccountId",
+          "fromAccountName",
+          "toAccountId",
+          "toAccountName",
+          "amount",
+          "transferredAt",
+          "description",
+          "reversedAt",
+          "createdAt"
+        ]
+      },
+      "CreateTransferDto": {
+        "type": "object",
+        "properties": {
+          "fromAccountId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "toAccountId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "amount": {
+            "type": "string",
+            "example": "1500.00",
+            "pattern": "^\\d{1,12}(\\.\\d{1,2})?$"
+          },
+          "transferredAt": {
+            "type": "string",
+            "format": "date",
+            "example": "2026-10-15",
+            "description": "Data da transferência (não pode ser futura)"
+          },
+          "description": {
+            "type": "object",
+            "nullable": true
+          },
+          "idempotencyKey": {
+            "type": "string",
+            "description": "Chave gerada pelo cliente por tentativa; repetir a chave não duplica a transferência",
+            "example": "c0a8012e-7f3b-4c55-9a3e-2f1d6b8e9a10"
+          }
+        },
+        "required": [
+          "fromAccountId",
+          "toAccountId",
+          "amount",
+          "transferredAt",
+          "idempotencyKey"
+        ]
+      },
+      "ReverseDto": {
+        "type": "object",
+        "properties": {
+          "reason": {
+            "type": "string",
+            "minLength": 10,
+            "example": "Lançado na conta errada"
+          }
+        },
+        "required": [
+          "reason"
+        ]
+      },
+      "ReverseSettlementDto": {
+        "type": "object",
+        "properties": {
+          "reason": {
+            "type": "string",
+            "minLength": 10,
+            "example": "Pagamento registrado na conta errada"
+          }
+        },
+        "required": [
+          "reason"
+        ]
+      },
+      "SettlementType": {
+        "type": "string",
+        "enum": [
+          "PAYMENT",
+          "RECEIPT"
+        ]
+      },
+      "PaymentMethod": {
+        "type": "string",
+        "enum": [
+          "PIX",
+          "CASH",
+          "TRANSFER",
+          "DEPOSIT",
+          "BOLETO",
+          "CARD",
+          "OTHER"
+        ]
+      },
+      "AccountRefDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name"
+        ]
+      },
+      "SettlementDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "type": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/SettlementType"
+              }
+            ]
+          },
+          "amount": {
+            "type": "string"
+          },
+          "settledAt": {
+            "type": "string",
+            "format": "date",
+            "description": "Data efetiva (caixa)"
+          },
+          "method": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PaymentMethod"
+              }
+            ]
+          },
+          "account": {
+            "$ref": "#/components/schemas/AccountRefDto"
+          },
+          "notes": {
+            "type": "string",
+            "nullable": true
+          },
+          "reversedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "reversalReason": {
+            "type": "string",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "payableId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "receivableId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "type",
+          "amount",
+          "settledAt",
+          "method",
+          "account",
+          "notes",
+          "reversedAt",
+          "reversalReason",
+          "createdAt",
+          "payableId",
+          "receivableId"
+        ]
+      },
+      "RecurrenceTarget": {
+        "type": "string",
+        "enum": [
+          "PAYABLE",
+          "RECEIVABLE"
+        ]
+      },
+      "RecurrenceFrequency": {
+        "type": "string",
+        "enum": [
+          "MONTHLY",
+          "YEARLY"
+        ]
+      },
+      "CategoryRefDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "type": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/CategoryType"
+              }
+            ]
+          },
+          "systemKey": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "type",
+          "systemKey"
+        ]
+      },
+      "RecurrenceRuleDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "target": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/RecurrenceTarget"
+              }
+            ]
+          },
+          "frequency": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/RecurrenceFrequency"
+              }
+            ]
+          },
+          "description": {
+            "type": "string"
+          },
+          "amount": {
+            "type": "string"
+          },
+          "startMonth": {
+            "type": "string",
+            "example": "2026-08"
+          },
+          "endMonth": {
+            "type": "string",
+            "nullable": true,
+            "example": "2027-07"
+          },
+          "maxOccurrences": {
+            "type": "number",
+            "nullable": true
+          },
+          "dueDay": {
+            "type": "number"
+          },
+          "lastGeneratedMonth": {
+            "type": "string",
+            "nullable": true,
+            "example": "2026-11"
+          },
+          "status": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/RecordStatus"
+              }
+            ]
+          },
+          "category": {
+            "$ref": "#/components/schemas/CategoryRefDto"
+          }
+        },
+        "required": [
+          "id",
+          "target",
+          "frequency",
+          "description",
+          "amount",
+          "startMonth",
+          "endMonth",
+          "maxOccurrences",
+          "dueDay",
+          "lastGeneratedMonth",
+          "status",
+          "category"
+        ]
+      },
+      "UpdateRecurrenceDto": {
+        "type": "object",
+        "properties": {
+          "description": {
+            "type": "string"
+          },
+          "amount": {
+            "type": "string",
+            "example": "1500.00",
+            "pattern": "^\\d{1,12}(\\.\\d{1,2})?$",
+            "description": "Novo valor para as próximas ocorrências ainda não geradas"
+          },
+          "dueDay": {
+            "type": "number",
+            "minimum": 1,
+            "maximum": 31
+          }
+        }
+      },
+      "VehicleStatus": {
+        "type": "string",
+        "enum": [
+          "ACTIVE",
+          "MAINTENANCE",
+          "INACTIVE"
+        ]
+      },
+      "VehicleDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "plate": {
+            "type": "string",
+            "description": "Sem hífen, maiúsculas"
+          },
+          "brand": {
+            "type": "string",
+            "nullable": true
+          },
+          "model": {
+            "type": "string",
+            "nullable": true
+          },
+          "year": {
+            "type": "number",
+            "nullable": true
+          },
+          "odometerKm": {
+            "type": "number"
+          },
+          "status": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/VehicleStatus"
+              }
+            ]
+          },
+          "notes": {
+            "type": "string",
+            "nullable": true
+          },
+          "archivedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "plate",
+          "brand",
+          "model",
+          "year",
+          "odometerKm",
+          "status",
+          "notes",
+          "archivedAt",
+          "createdAt"
+        ]
+      },
+      "VehicleUsageDto": {
+        "type": "object",
+        "properties": {
+          "used": {
+            "type": "number",
+            "description": "Veículos não arquivados"
+          },
+          "limit": {
+            "type": "number",
+            "nullable": true,
+            "description": "null = ilimitado"
+          }
+        },
+        "required": [
+          "used",
+          "limit"
+        ]
+      },
+      "VehicleListDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/VehicleDto"
+            }
+          },
+          "usage": {
+            "$ref": "#/components/schemas/VehicleUsageDto"
+          }
+        },
+        "required": [
+          "items",
+          "usage"
+        ]
+      },
+      "VehicleMonthResultDto": {
+        "type": "object",
+        "properties": {
+          "month": {
+            "type": "string",
+            "example": "2026-10"
+          },
+          "revenue": {
+            "type": "string",
+            "example": "12000.00"
+          },
+          "directCost": {
+            "type": "string",
+            "example": "3500.00"
+          },
+          "sharedCost": {
+            "type": "string",
+            "example": "200.00"
+          },
+          "result": {
+            "type": "string",
+            "example": "8300.00"
+          }
+        },
+        "required": [
+          "month",
+          "revenue",
+          "directCost",
+          "sharedCost",
+          "result"
+        ]
+      },
+      "VehicleResultDto": {
+        "type": "object",
+        "properties": {
+          "from": {
+            "type": "string",
+            "example": "2026-01"
+          },
+          "to": {
+            "type": "string",
+            "example": "2026-10"
+          },
+          "regime": {
+            "type": "string",
+            "description": "Regime de competência gerencial"
+          },
+          "revenue": {
+            "type": "string",
+            "description": "Receitas atribuídas ao veículo"
+          },
+          "directCost": {
+            "type": "string",
+            "description": "Despesas lançadas diretamente no veículo"
+          },
+          "sharedCost": {
+            "type": "string",
+            "description": "Parcela do veículo em despesas rateadas"
+          },
+          "result": {
+            "type": "string",
+            "description": "Receitas − despesas (resultado gerencial, não é lucro contábil)"
+          },
+          "months": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/VehicleMonthResultDto"
+            }
+          }
+        },
+        "required": [
+          "from",
+          "to",
+          "regime",
+          "revenue",
+          "directCost",
+          "sharedCost",
+          "result",
+          "months"
+        ]
+      },
+      "VehicleDetailDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "plate": {
+            "type": "string",
+            "description": "Sem hífen, maiúsculas"
+          },
+          "brand": {
+            "type": "string",
+            "nullable": true
+          },
+          "model": {
+            "type": "string",
+            "nullable": true
+          },
+          "year": {
+            "type": "number",
+            "nullable": true
+          },
+          "odometerKm": {
+            "type": "number"
+          },
+          "status": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/VehicleStatus"
+              }
+            ]
+          },
+          "notes": {
+            "type": "string",
+            "nullable": true
+          },
+          "archivedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "financial": {
+            "nullable": true,
+            "description": "null sem a permissão finance:read",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/VehicleResultDto"
+              }
+            ]
+          },
+          "hasHistory": {
+            "type": "boolean",
+            "description": "Possui lançamentos financeiros (não pode ser excluído, só arquivado)"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "plate",
+          "brand",
+          "model",
+          "year",
+          "odometerKm",
+          "status",
+          "notes",
+          "archivedAt",
+          "createdAt",
+          "financial",
+          "hasHistory"
+        ]
+      },
+      "CreateVehicleDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Van 01"
+          },
+          "plate": {
+            "type": "string",
+            "example": "ABC1D23",
+            "description": "Placa antiga ou Mercosul; hífen e minúsculas são aceitos"
+          },
+          "brand": {
+            "type": "object",
+            "example": "Mercedes-Benz",
+            "nullable": true
+          },
+          "model": {
+            "type": "object",
+            "example": "Sprinter 416",
+            "nullable": true
+          },
+          "year": {
+            "type": "object",
+            "example": 2022,
+            "nullable": true
+          },
+          "odometerKm": {
+            "type": "number",
+            "example": 85000,
+            "description": "Quilometragem atual"
+          },
+          "status": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/VehicleStatus"
+              }
+            ]
+          },
+          "notes": {
+            "type": "object",
+            "nullable": true
+          }
+        },
+        "required": [
+          "name",
+          "plate"
+        ]
+      },
+      "UpdateVehicleDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Van 01"
+          },
+          "plate": {
+            "type": "string",
+            "example": "ABC1D23",
+            "description": "Placa antiga ou Mercosul; hífen e minúsculas são aceitos"
+          },
+          "brand": {
+            "type": "object",
+            "example": "Mercedes-Benz",
+            "nullable": true
+          },
+          "model": {
+            "type": "object",
+            "example": "Sprinter 416",
+            "nullable": true
+          },
+          "year": {
+            "type": "object",
+            "example": 2022,
+            "nullable": true
+          },
+          "odometerKm": {
+            "type": "number",
+            "example": 85000,
+            "description": "Quilometragem atual"
+          },
+          "status": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/VehicleStatus"
+              }
+            ]
+          },
+          "notes": {
+            "type": "object",
+            "nullable": true
+          }
+        }
+      },
+      "AccountBalanceDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "type": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/FinancialAccountType"
+              }
+            ]
+          },
+          "balance": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "type",
+          "balance"
+        ]
+      },
+      "BalancesDto": {
+        "type": "object",
+        "properties": {
+          "total": {
+            "type": "string",
+            "description": "Saldo total das contas ativas hoje (sempre da empresa, sem filtros)"
+          },
+          "accounts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AccountBalanceDto"
+            }
+          }
+        },
+        "required": [
+          "total",
+          "accounts"
+        ]
+      },
+      "CashDto": {
+        "type": "object",
+        "properties": {
+          "regime": {
+            "type": "string",
+            "description": "Regime de caixa: recebimentos e pagamentos efetivos no período"
+          },
+          "received": {
+            "type": "string"
+          },
+          "paid": {
+            "type": "string"
+          },
+          "result": {
+            "type": "string",
+            "description": "Recebido − pago"
+          }
+        },
+        "required": [
+          "regime",
+          "received",
+          "paid",
+          "result"
+        ]
+      },
+      "AccrualDto": {
+        "type": "object",
+        "properties": {
+          "regime": {
+            "type": "string",
+            "description": "Competência gerencial: receitas e despesas previstas do período"
+          },
+          "revenue": {
+            "type": "string"
+          },
+          "expense": {
+            "type": "string"
+          },
+          "result": {
+            "type": "string",
+            "description": "Resultado gerencial (não é lucro líquido contábil)"
+          }
+        },
+        "required": [
+          "regime",
+          "revenue",
+          "expense",
+          "result"
+        ]
+      },
+      "OpenObligationsDto": {
+        "type": "object",
+        "properties": {
+          "open": {
+            "type": "string",
+            "description": "Saldo em aberto (todas as datas)"
+          },
+          "openCount": {
+            "type": "number"
+          },
+          "overdue": {
+            "type": "string",
+            "description": "Em aberto e vencido"
+          },
+          "overdueCount": {
+            "type": "number"
+          },
+          "dueSoon": {
+            "type": "string",
+            "description": "Vence de hoje até 7 dias"
+          },
+          "dueSoonCount": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "open",
+          "openCount",
+          "overdue",
+          "overdueCount",
+          "dueSoon",
+          "dueSoonCount"
+        ]
+      },
+      "VehicleResultRowDto": {
+        "type": "object",
+        "properties": {
+          "vehicleId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true,
+            "description": "null = não alocado a veículo"
+          },
+          "name": {
+            "type": "string"
+          },
+          "plate": {
+            "type": "string",
+            "nullable": true
+          },
+          "revenue": {
+            "type": "string"
+          },
+          "cost": {
+            "type": "string"
+          },
+          "result": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "vehicleId",
+          "name",
+          "plate",
+          "revenue",
+          "cost",
+          "result"
+        ]
+      },
+      "VehiclesSummaryDto": {
+        "type": "object",
+        "properties": {
+          "active": {
+            "type": "number"
+          },
+          "costPerVehicle": {
+            "type": "string",
+            "description": "Custo médio por veículo ativo no período (competência)"
+          },
+          "results": {
+            "description": "Resultado por veículo; inclui a linha \"Não alocado\" quando houver",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/VehicleResultRowDto"
+            }
+          }
+        },
+        "required": [
+          "active",
+          "costPerVehicle",
+          "results"
+        ]
+      },
+      "MonthlyPointDto": {
+        "type": "object",
+        "properties": {
+          "month": {
+            "type": "string",
+            "example": "2026-10"
+          },
+          "cashIn": {
+            "type": "string",
+            "description": "Caixa: recebido"
+          },
+          "cashOut": {
+            "type": "string",
+            "description": "Caixa: pago"
+          },
+          "revenue": {
+            "type": "string",
+            "description": "Competência: receitas"
+          },
+          "expense": {
+            "type": "string",
+            "description": "Competência: despesas"
+          },
+          "maintenance": {
+            "type": "string",
+            "description": "Competência: manutenção, peças, pneus e borracharia"
+          },
+          "fuel": {
+            "type": "string",
+            "description": "Competência: combustível"
+          }
+        },
+        "required": [
+          "month",
+          "cashIn",
+          "cashOut",
+          "revenue",
+          "expense",
+          "maintenance",
+          "fuel"
+        ]
+      },
+      "CategoryAmountDto": {
+        "type": "object",
+        "properties": {
+          "categoryId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "systemKey": {
+            "type": "string",
+            "nullable": true
+          },
+          "amount": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "categoryId",
+          "name",
+          "systemKey",
+          "amount"
+        ]
+      },
+      "DashboardDto": {
+        "type": "object",
+        "properties": {
+          "from": {
+            "type": "string",
+            "example": "2026-10"
+          },
+          "to": {
+            "type": "string",
+            "example": "2026-10"
+          },
+          "balances": {
+            "$ref": "#/components/schemas/BalancesDto"
+          },
+          "cash": {
+            "$ref": "#/components/schemas/CashDto"
+          },
+          "accrual": {
+            "$ref": "#/components/schemas/AccrualDto"
+          },
+          "payables": {
+            "$ref": "#/components/schemas/OpenObligationsDto"
+          },
+          "receivables": {
+            "$ref": "#/components/schemas/OpenObligationsDto"
+          },
+          "vehicles": {
+            "$ref": "#/components/schemas/VehiclesSummaryDto"
+          },
+          "monthly": {
+            "description": "Até 12 meses terminando em `to`",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MonthlyPointDto"
+            }
+          },
+          "expensesByCategory": {
+            "description": "Despesas do período por categoria (competência)",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CategoryAmountDto"
+            }
+          }
+        },
+        "required": [
+          "from",
+          "to",
+          "balances",
+          "cash",
+          "accrual",
+          "payables",
+          "receivables",
+          "vehicles",
+          "monthly",
+          "expensesByCategory"
+        ]
+      },
+      "PayableStatusFilter": {
+        "type": "string",
+        "enum": [
+          "PENDING",
+          "PARTIALLY_PAID",
+          "PAID",
+          "CANCELED",
+          "OPEN",
+          "OVERDUE"
+        ]
+      },
+      "PayableStatus": {
+        "type": "string",
+        "enum": [
+          "PENDING",
+          "PARTIALLY_PAID",
+          "PAID",
+          "CANCELED"
+        ]
+      },
+      "EntryKind": {
+        "type": "string",
+        "enum": [
+          "SINGLE",
+          "RECURRING",
+          "INSTALLMENT"
+        ]
+      },
+      "VehicleRefDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "plate": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "plate"
+        ]
+      },
+      "ApprovalStatus": {
+        "type": "string",
+        "enum": [
+          "APPROVED",
+          "PENDING_APPROVAL",
+          "REJECTED"
+        ]
+      },
+      "PayableDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "description": {
+            "type": "string"
+          },
+          "category": {
+            "$ref": "#/components/schemas/CategoryRefDto"
+          },
+          "amount": {
+            "type": "string"
+          },
+          "paidAmount": {
+            "type": "string"
+          },
+          "openAmount": {
+            "type": "string",
+            "description": "Saldo em aberto = valor − pago"
+          },
+          "competence": {
+            "type": "string",
+            "example": "2026-10"
+          },
+          "dueDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "status": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PayableStatus"
+              }
+            ]
+          },
+          "overdue": {
+            "type": "boolean",
+            "description": "Derivado: em aberto e vencimento antes de hoje"
+          },
+          "kind": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/EntryKind"
+              }
+            ]
+          },
+          "installmentNumber": {
+            "type": "number",
+            "nullable": true
+          },
+          "installmentCount": {
+            "type": "number",
+            "nullable": true
+          },
+          "installmentGroupId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "recurrenceRuleId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "vehicle": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/VehicleRefDto"
+              }
+            ]
+          },
+          "supplierName": {
+            "type": "string",
+            "nullable": true
+          },
+          "notes": {
+            "type": "string",
+            "nullable": true
+          },
+          "approvalStatus": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ApprovalStatus"
+              }
+            ]
+          },
+          "canceledAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "cancelReason": {
+            "type": "string",
+            "nullable": true
+          },
+          "attachmentsCount": {
+            "type": "number"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "description",
+          "category",
+          "amount",
+          "paidAmount",
+          "openAmount",
+          "competence",
+          "dueDate",
+          "status",
+          "overdue",
+          "kind",
+          "installmentNumber",
+          "installmentCount",
+          "installmentGroupId",
+          "recurrenceRuleId",
+          "vehicle",
+          "supplierName",
+          "notes",
+          "approvalStatus",
+          "canceledAt",
+          "cancelReason",
+          "attachmentsCount",
+          "createdAt"
+        ]
+      },
+      "ObligationSummaryDto": {
+        "type": "object",
+        "properties": {
+          "amount": {
+            "type": "string",
+            "description": "Valor total (sem canceladas)"
+          },
+          "settled": {
+            "type": "string",
+            "description": "Já liquidado"
+          },
+          "open": {
+            "type": "string",
+            "description": "Saldo em aberto"
+          },
+          "overdue": {
+            "type": "string",
+            "description": "Saldo em aberto vencido"
+          },
+          "overdueCount": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "amount",
+          "settled",
+          "open",
+          "overdue",
+          "overdueCount"
+        ]
+      },
+      "PayableListDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PayableDto"
+            }
+          },
+          "total": {
+            "type": "number"
+          },
+          "page": {
+            "type": "number"
+          },
+          "pageSize": {
+            "type": "number"
+          },
+          "summary": {
+            "description": "Totais de todo o filtro (não só da página)",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ObligationSummaryDto"
+              }
+            ]
+          }
+        },
+        "required": [
+          "items",
+          "total",
+          "page",
+          "pageSize",
+          "summary"
+        ]
+      },
+      "AttachmentDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "originalName": {
+            "type": "string"
+          },
+          "mimeType": {
+            "type": "string"
+          },
+          "sizeBytes": {
+            "type": "number"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "settlementId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "originalName",
+          "mimeType",
+          "sizeBytes",
+          "createdAt",
+          "settlementId"
+        ]
+      },
+      "AllocationMethod": {
+        "type": "string",
+        "enum": [
+          "DIRECT",
+          "EQUAL",
+          "PERCENT",
+          "FIXED",
+          "REVENUE_PROPORTIONAL"
+        ]
+      },
+      "AllocationDto": {
+        "type": "object",
+        "properties": {
+          "vehicle": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/VehicleRefDto"
+              }
+            ]
+          },
+          "method": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/AllocationMethod"
+              }
+            ]
+          },
+          "amount": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "vehicle",
+          "method",
+          "amount"
+        ]
+      },
+      "PayableDetailDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "description": {
+            "type": "string"
+          },
+          "category": {
+            "$ref": "#/components/schemas/CategoryRefDto"
+          },
+          "amount": {
+            "type": "string"
+          },
+          "paidAmount": {
+            "type": "string"
+          },
+          "openAmount": {
+            "type": "string",
+            "description": "Saldo em aberto = valor − pago"
+          },
+          "competence": {
+            "type": "string",
+            "example": "2026-10"
+          },
+          "dueDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "status": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PayableStatus"
+              }
+            ]
+          },
+          "overdue": {
+            "type": "boolean",
+            "description": "Derivado: em aberto e vencimento antes de hoje"
+          },
+          "kind": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/EntryKind"
+              }
+            ]
+          },
+          "installmentNumber": {
+            "type": "number",
+            "nullable": true
+          },
+          "installmentCount": {
+            "type": "number",
+            "nullable": true
+          },
+          "installmentGroupId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "recurrenceRuleId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "vehicle": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/VehicleRefDto"
+              }
+            ]
+          },
+          "supplierName": {
+            "type": "string",
+            "nullable": true
+          },
+          "notes": {
+            "type": "string",
+            "nullable": true
+          },
+          "approvalStatus": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ApprovalStatus"
+              }
+            ]
+          },
+          "canceledAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "cancelReason": {
+            "type": "string",
+            "nullable": true
+          },
+          "attachmentsCount": {
+            "type": "number"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "settlements": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SettlementDto"
+            }
+          },
+          "attachments": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AttachmentDto"
+            }
+          },
+          "allocations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AllocationDto"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "description",
+          "category",
+          "amount",
+          "paidAmount",
+          "openAmount",
+          "competence",
+          "dueDate",
+          "status",
+          "overdue",
+          "kind",
+          "installmentNumber",
+          "installmentCount",
+          "installmentGroupId",
+          "recurrenceRuleId",
+          "vehicle",
+          "supplierName",
+          "notes",
+          "approvalStatus",
+          "canceledAt",
+          "cancelReason",
+          "attachmentsCount",
+          "createdAt",
+          "settlements",
+          "attachments",
+          "allocations"
+        ]
+      },
+      "RecurrenceInputDto": {
+        "type": "object",
+        "properties": {
+          "frequency": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/RecurrenceFrequency"
+              }
+            ]
+          },
+          "endMonth": {
+            "type": "string",
+            "example": "2026-10",
+            "pattern": "^\\d{4}-(0[1-9]|1[0-2])$",
+            "description": "Última competência (inclusive). Sem fim se omitido"
+          },
+          "maxOccurrences": {
+            "type": "number",
+            "minimum": 1,
+            "maximum": 360,
+            "description": "Número máximo de ocorrências"
+          }
+        },
+        "required": [
+          "frequency"
+        ]
+      },
+      "SettleNowDto": {
+        "type": "object",
+        "properties": {
+          "accountId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "settledAt": {
+            "type": "string",
+            "format": "date",
+            "example": "2026-10-15",
+            "description": "Data efetiva (padrão: hoje; não pode ser futura)"
+          },
+          "method": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PaymentMethod"
+              }
+            ]
+          },
+          "idempotencyKey": {
+            "type": "string",
+            "description": "Chave gerada pelo cliente por tentativa"
+          }
+        },
+        "required": [
+          "accountId",
+          "method",
+          "idempotencyKey"
+        ]
+      },
+      "CreatePayableDto": {
+        "type": "object",
+        "properties": {
+          "description": {
+            "type": "string",
+            "example": "Seguro da Van 01"
+          },
+          "categoryId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Categoria de despesa ativa"
+          },
+          "amount": {
+            "type": "string",
+            "example": "1500.00",
+            "pattern": "^\\d{1,12}(\\.\\d{1,2})?$",
+            "description": "Valor; em despesa parcelada é o valor TOTAL, dividido entre as parcelas"
+          },
+          "competence": {
+            "type": "string",
+            "example": "2026-10",
+            "pattern": "^\\d{4}-(0[1-9]|1[0-2])$",
+            "description": "Competência (mês a que a despesa pertence)"
+          },
+          "dueDate": {
+            "type": "string",
+            "format": "date",
+            "example": "2026-10-15",
+            "description": "Vencimento (da primeira parcela/ocorrência)"
+          },
+          "vehicleId": {
+            "type": "object",
+            "format": "uuid",
+            "nullable": true,
+            "description": "Veículo: a despesa é alocada 100% nele (custo direto)"
+          },
+          "supplierName": {
+            "type": "object",
+            "nullable": true,
+            "example": "Auto Peças Central"
+          },
+          "notes": {
+            "type": "object",
+            "nullable": true
+          },
+          "kind": {
+            "default": "SINGLE",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/EntryKind"
+              }
+            ]
+          },
+          "installmentCount": {
+            "type": "number",
+            "minimum": 2,
+            "maximum": 120,
+            "description": "Obrigatório quando kind = INSTALLMENT"
+          },
+          "recurrence": {
+            "description": "Obrigatório quando kind = RECURRING",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/RecurrenceInputDto"
+              }
+            ]
+          },
+          "settleNow": {
+            "description": "Lançar já pago (somente kind = SINGLE)",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/SettleNowDto"
+              }
+            ]
+          }
+        },
+        "required": [
+          "description",
+          "categoryId",
+          "amount",
+          "competence",
+          "dueDate"
+        ]
+      },
+      "CreatePayableResultDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "description": "Obrigações criadas (1 avulsa, n parcelas ou as ocorrências já geradas da recorrência)",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PayableDto"
+            }
+          },
+          "recurrenceRuleId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          }
+        },
+        "required": [
+          "items",
+          "recurrenceRuleId"
+        ]
+      },
+      "UpdatePayableDto": {
+        "type": "object",
+        "properties": {
+          "description": {
+            "type": "string"
+          },
+          "categoryId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "amount": {
+            "type": "string",
+            "example": "1500.00",
+            "pattern": "^\\d{1,12}(\\.\\d{1,2})?$",
+            "description": "Não pode ficar abaixo do valor já pago"
+          },
+          "competence": {
+            "type": "string",
+            "example": "2026-10",
+            "pattern": "^\\d{4}-(0[1-9]|1[0-2])$"
+          },
+          "dueDate": {
+            "type": "string",
+            "format": "date",
+            "example": "2026-10-15"
+          },
+          "vehicleId": {
+            "type": "object",
+            "format": "uuid",
+            "nullable": true
+          },
+          "supplierName": {
+            "type": "object",
+            "nullable": true
+          },
+          "notes": {
+            "type": "object",
+            "nullable": true
+          }
+        }
+      },
+      "CancelScope": {
+        "type": "string",
+        "enum": [
+          "ONE",
+          "THIS_AND_FUTURE"
+        ],
+        "description": "THIS_AND_FUTURE cancela também as parcelas/ocorrências seguintes em aberto (e encerra a recorrência)"
+      },
+      "CancelObligationDto": {
+        "type": "object",
+        "properties": {
+          "reason": {
+            "type": "string",
+            "minLength": 3,
+            "example": "Lançado em duplicidade"
+          },
+          "scope": {
+            "default": "ONE",
+            "description": "THIS_AND_FUTURE cancela também as parcelas/ocorrências seguintes em aberto (e encerra a recorrência)",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/CancelScope"
+              }
+            ]
+          }
+        },
+        "required": [
+          "reason"
+        ]
+      },
+      "SettleDto": {
+        "type": "object",
+        "properties": {
+          "accountId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "settledAt": {
+            "type": "string",
+            "format": "date",
+            "example": "2026-10-15",
+            "description": "Data efetiva (padrão: hoje; não pode ser futura)"
+          },
+          "method": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PaymentMethod"
+              }
+            ]
+          },
+          "idempotencyKey": {
+            "type": "string",
+            "description": "Chave gerada pelo cliente por tentativa"
+          },
+          "amount": {
+            "type": "string",
+            "example": "1500.00",
+            "pattern": "^\\d{1,12}(\\.\\d{1,2})?$",
+            "description": "Valor desta liquidação (padrão: todo o saldo em aberto). Parcial é permitido."
+          },
+          "notes": {
+            "type": "object",
+            "nullable": true
+          }
+        },
+        "required": [
+          "accountId",
+          "method",
+          "idempotencyKey"
+        ]
+      },
+      "PayableSettlementResultDto": {
+        "type": "object",
+        "properties": {
+          "settlement": {
+            "$ref": "#/components/schemas/SettlementDto"
+          },
+          "payable": {
+            "$ref": "#/components/schemas/PayableDto"
+          }
+        },
+        "required": [
+          "settlement",
+          "payable"
+        ]
+      },
+      "ReceivableStatusFilter": {
+        "type": "string",
+        "enum": [
+          "PENDING",
+          "PARTIALLY_RECEIVED",
+          "RECEIVED",
+          "CANCELED",
+          "OPEN",
+          "OVERDUE"
+        ]
+      },
+      "ReceivableStatus": {
+        "type": "string",
+        "enum": [
+          "PENDING",
+          "PARTIALLY_RECEIVED",
+          "RECEIVED",
+          "CANCELED"
+        ]
+      },
+      "ReceivableDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "description": {
+            "type": "string"
+          },
+          "category": {
+            "$ref": "#/components/schemas/CategoryRefDto"
+          },
+          "amount": {
+            "type": "string"
+          },
+          "receivedAmount": {
+            "type": "string"
+          },
+          "openAmount": {
+            "type": "string",
+            "description": "Saldo em aberto = valor − recebido"
+          },
+          "competence": {
+            "type": "string",
+            "example": "2026-10"
+          },
+          "dueDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "status": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ReceivableStatus"
+              }
+            ]
+          },
+          "overdue": {
+            "type": "boolean",
+            "description": "Derivado: em aberto e vencimento antes de hoje"
+          },
+          "kind": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/EntryKind"
+              }
+            ]
+          },
+          "installmentNumber": {
+            "type": "number",
+            "nullable": true
+          },
+          "installmentCount": {
+            "type": "number",
+            "nullable": true
+          },
+          "installmentGroupId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "recurrenceRuleId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "vehicle": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/VehicleRefDto"
+              }
+            ]
+          },
+          "notes": {
+            "type": "string",
+            "nullable": true
+          },
+          "canceledAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "cancelReason": {
+            "type": "string",
+            "nullable": true
+          },
+          "attachmentsCount": {
+            "type": "number"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "description",
+          "category",
+          "amount",
+          "receivedAmount",
+          "openAmount",
+          "competence",
+          "dueDate",
+          "status",
+          "overdue",
+          "kind",
+          "installmentNumber",
+          "installmentCount",
+          "installmentGroupId",
+          "recurrenceRuleId",
+          "vehicle",
+          "notes",
+          "canceledAt",
+          "cancelReason",
+          "attachmentsCount",
+          "createdAt"
+        ]
+      },
+      "ReceivableListDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReceivableDto"
+            }
+          },
+          "total": {
+            "type": "number"
+          },
+          "page": {
+            "type": "number"
+          },
+          "pageSize": {
+            "type": "number"
+          },
+          "summary": {
+            "description": "Totais de todo o filtro (não só da página)",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ObligationSummaryDto"
+              }
+            ]
+          }
+        },
+        "required": [
+          "items",
+          "total",
+          "page",
+          "pageSize",
+          "summary"
+        ]
+      },
+      "ReceivableDetailDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "description": {
+            "type": "string"
+          },
+          "category": {
+            "$ref": "#/components/schemas/CategoryRefDto"
+          },
+          "amount": {
+            "type": "string"
+          },
+          "receivedAmount": {
+            "type": "string"
+          },
+          "openAmount": {
+            "type": "string",
+            "description": "Saldo em aberto = valor − recebido"
+          },
+          "competence": {
+            "type": "string",
+            "example": "2026-10"
+          },
+          "dueDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "status": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ReceivableStatus"
+              }
+            ]
+          },
+          "overdue": {
+            "type": "boolean",
+            "description": "Derivado: em aberto e vencimento antes de hoje"
+          },
+          "kind": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/EntryKind"
+              }
+            ]
+          },
+          "installmentNumber": {
+            "type": "number",
+            "nullable": true
+          },
+          "installmentCount": {
+            "type": "number",
+            "nullable": true
+          },
+          "installmentGroupId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "recurrenceRuleId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "vehicle": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/VehicleRefDto"
+              }
+            ]
+          },
+          "notes": {
+            "type": "string",
+            "nullable": true
+          },
+          "canceledAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "cancelReason": {
+            "type": "string",
+            "nullable": true
+          },
+          "attachmentsCount": {
+            "type": "number"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "settlements": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SettlementDto"
+            }
+          },
+          "attachments": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AttachmentDto"
+            }
+          },
+          "allocations": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AllocationDto"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "description",
+          "category",
+          "amount",
+          "receivedAmount",
+          "openAmount",
+          "competence",
+          "dueDate",
+          "status",
+          "overdue",
+          "kind",
+          "installmentNumber",
+          "installmentCount",
+          "installmentGroupId",
+          "recurrenceRuleId",
+          "vehicle",
+          "notes",
+          "canceledAt",
+          "cancelReason",
+          "attachmentsCount",
+          "createdAt",
+          "settlements",
+          "attachments",
+          "allocations"
+        ]
+      },
+      "CreateReceivableDto": {
+        "type": "object",
+        "properties": {
+          "description": {
+            "type": "string",
+            "example": "Contrato Escola Municipal — outubro"
+          },
+          "categoryId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Categoria de receita ativa"
+          },
+          "amount": {
+            "type": "string",
+            "example": "1500.00",
+            "pattern": "^\\d{1,12}(\\.\\d{1,2})?$",
+            "description": "Valor; em receita parcelada é o valor TOTAL, dividido entre as parcelas"
+          },
+          "competence": {
+            "type": "string",
+            "example": "2026-10",
+            "pattern": "^\\d{4}-(0[1-9]|1[0-2])$",
+            "description": "Competência (mês a que a receita pertence)"
+          },
+          "dueDate": {
+            "type": "string",
+            "format": "date",
+            "example": "2026-10-15",
+            "description": "Vencimento (da primeira parcela/ocorrência)"
+          },
+          "vehicleId": {
+            "type": "object",
+            "format": "uuid",
+            "nullable": true,
+            "description": "Veículo: a receita é atribuída 100% a ele"
+          },
+          "notes": {
+            "type": "object",
+            "nullable": true
+          },
+          "kind": {
+            "default": "SINGLE",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/EntryKind"
+              }
+            ]
+          },
+          "installmentCount": {
+            "type": "number",
+            "minimum": 2,
+            "maximum": 120,
+            "description": "Obrigatório quando kind = INSTALLMENT"
+          },
+          "recurrence": {
+            "description": "Obrigatório quando kind = RECURRING",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/RecurrenceInputDto"
+              }
+            ]
+          },
+          "settleNow": {
+            "description": "Lançar já recebido (somente kind = SINGLE)",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/SettleNowDto"
+              }
+            ]
+          }
+        },
+        "required": [
+          "description",
+          "categoryId",
+          "amount",
+          "competence",
+          "dueDate"
+        ]
+      },
+      "CreateReceivableResultDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "description": "Obrigações criadas (1 avulsa, n parcelas ou as ocorrências já geradas da recorrência)",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReceivableDto"
+            }
+          },
+          "recurrenceRuleId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          }
+        },
+        "required": [
+          "items",
+          "recurrenceRuleId"
+        ]
+      },
+      "UpdateReceivableDto": {
+        "type": "object",
+        "properties": {
+          "description": {
+            "type": "string"
+          },
+          "categoryId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "amount": {
+            "type": "string",
+            "example": "1500.00",
+            "pattern": "^\\d{1,12}(\\.\\d{1,2})?$",
+            "description": "Não pode ficar abaixo do valor já recebido"
+          },
+          "competence": {
+            "type": "string",
+            "example": "2026-10",
+            "pattern": "^\\d{4}-(0[1-9]|1[0-2])$"
+          },
+          "dueDate": {
+            "type": "string",
+            "format": "date",
+            "example": "2026-10-15"
+          },
+          "vehicleId": {
+            "type": "object",
+            "format": "uuid",
+            "nullable": true
+          },
+          "notes": {
+            "type": "object",
+            "nullable": true
+          }
+        }
+      },
+      "ReceivableSettlementResultDto": {
+        "type": "object",
+        "properties": {
+          "settlement": {
+            "$ref": "#/components/schemas/SettlementDto"
+          },
+          "receivable": {
+            "$ref": "#/components/schemas/ReceivableDto"
+          }
+        },
+        "required": [
+          "settlement",
+          "receivable"
         ]
       }
     }
