@@ -26,4 +26,12 @@ export class PeriodLockService {
       throw conflict(`O mês ${label} está fechado. Reabra o fechamento para alterar lançamentos desse período.`, ErrorCode.PERIOD_CLOSED);
     }
   }
+
+  /** Meses fechados ("AAAA-MM") entre as datas informadas. */
+  async closedMonths(companyId: string, dates: Date[], tx?: Tx): Promise<Set<string>> {
+    const months = [...new Map(dates.map((d) => [formatMonth(d), { year: d.getUTCFullYear(), month: d.getUTCMonth() + 1 }])).values()];
+    if (months.length === 0) return new Set();
+    const rows = await (tx ?? this.prisma).monthlyClosing.findMany({ where: { companyId, status: 'CLOSED', OR: months }, select: { year: true, month: true } });
+    return new Set(rows.map((r) => `${r.year}-${String(r.month).padStart(2, '0')}`));
+  }
 }

@@ -65,6 +65,12 @@ export class CategoriesService {
     return category;
   }
 
+  /** Categoria padrão pela chave do sistema (cria as padrão que faltarem). */
+  async bySystemKey(tx: Tx, companyId: string, systemKey: string) {
+    await this.ensureDefaults(companyId, tx);
+    return tx.financialCategory.findFirstOrThrow({ where: { companyId, systemKey }, select: FIELDS });
+  }
+
   private async assertNameFree(tx: Tx, companyId: string, type: 'INCOME' | 'EXPENSE', name: string) {
     const existing = await tx.financialCategory.findFirst({ where: { companyId, type, name: { equals: name, mode: 'insensitive' } }, select: { id: true } });
     if (existing) throw conflict('Já existe uma categoria com este nome');

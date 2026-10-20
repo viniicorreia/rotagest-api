@@ -29,6 +29,8 @@ import { ReceivablesModule } from './modules/receivables/receivables.module';
 import { SettlementsModule } from './modules/settlements/settlements.module';
 import { TransactionsModule } from './modules/transactions/transactions.module';
 import { VehiclesModule } from './modules/vehicles/vehicles.module';
+import { FleetModule } from './modules/fleet/fleet.module';
+import { MileageModule } from './modules/mileage/mileage.module';
 import { PrismaModule } from './prisma/prisma.module';
 
 @Module({
@@ -84,6 +86,8 @@ import { PrismaModule } from './prisma/prisma.module';
     SettlementsModule,
     ObligationsModule,
     VehiclesModule,
+    FleetModule,
+    MileageModule,
     PayablesModule,
     ReceivablesModule,
     AttachmentsModule,

@@ -49,3 +49,30 @@ describe('placas', () => {
     expect(isValidPlate('AB1234')).toBe(false);
   });
 });
+
+import { formatRate, fromKmTenths, kmAmountCents, toKmTenths, toRateUnits } from './mileage';
+
+describe('km e valor por km', () => {
+  it('converte km e taxa sem float', () => {
+    expect(toKmTenths('123.4')).toBe(1234);
+    expect(toKmTenths('80')).toBe(800);
+    expect(fromKmTenths(1234)).toBe('123.4');
+    expect(toRateUnits('3.5')).toBe(35000);
+    expect(toRateUnits('2.8751')).toBe(28751);
+    expect(() => toKmTenths('1.25')).toThrow();
+  });
+
+  it('formata a taxa com no mínimo duas casas', () => {
+    expect(formatRate(35000)).toBe('3.50');
+    expect(formatRate(28750)).toBe('2.875');
+    expect(formatRate(28751)).toBe('2.8751');
+    expect(formatRate(30000)).toBe('3.00');
+  });
+
+  it('calcula o valor do dia arredondando ao centavo', () => {
+    expect(kmAmountCents(toKmTenths('120'), toRateUnits('3.5'))).toBe(42000); // 120 × 3,50 = 420,00
+    expect(kmAmountCents(toKmTenths('87.5'), toRateUnits('2.875'))).toBe(25156); // 251,5625 → 251,56
+    expect(kmAmountCents(toKmTenths('0.1'), toRateUnits('0.05'))).toBe(1); // 0,005 → 0,01 (meio para cima)
+    expect(kmAmountCents(0, toRateUnits('9'))).toBe(0);
+  });
+});

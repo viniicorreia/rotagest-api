@@ -266,6 +266,8 @@ export class ReceivablesService {
         if (toCents(p.receivedAmount) > 0) throw businessRule('Estorne os recebimentos antes de cancelar este lançamento');
         await this.periods.assertOpen(ctx.companyId, p.competence, tx);
         await tx.receivable.update({ where: { id: pid }, data: { status: 'CANCELED', canceledAt: new Date(), cancelReason: dto.reason } });
+        // Km faturados nesta conta voltam a ficar disponíveis para um novo faturamento.
+        await tx.vehicleDailyLog.updateMany({ where: { companyId: ctx.companyId, receivableId: pid }, data: { receivableId: null } });
       }
       await this.audit.log({ companyId: ctx.companyId, actorUserId: ctx.userId, action: 'receivable.canceled', entityType: 'Receivable', entityId: id, after: { ids }, reason: dto.reason, meta }, tx);
       const after = await tx.receivable.findUniqueOrThrow({ where: { id }, include: DETAIL_INCLUDE });
