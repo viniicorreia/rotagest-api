@@ -677,14 +677,14 @@ export class ReportsService {
     if (q.categoryId) filters.push(Prisma.sql`AND o."categoryId" = ${q.categoryId}::uuid`);
     if (side === 'receivables' && q.contractId) filters.push(Prisma.sql`AND o."contractId" = ${q.contractId}::uuid`);
     if (side === 'payables' && q.routeId) filters.push(Prisma.sql`AND o."routeId" = ${q.routeId}::uuid`);
-    if (!q.vehicleId) return { amount: Prisma.sql`o.amount`, settled: settledCol, join: Prisma.empty, filters: Prisma.join(filters, ' ') };
+    if (!q.vehicleId) return { amount: Prisma.sql`o.amount`, settled: settledCol, join: Prisma.empty, filters: filters.length ? Prisma.join(filters, ' ') : Prisma.empty };
     const table = side === 'payables' ? Prisma.sql`expense_allocations` : Prisma.sql`revenue_allocations`;
     const fk = side === 'payables' ? Prisma.sql`"payableId"` : Prisma.sql`"receivableId"`;
     return {
       amount: Prisma.sql`a.amount`,
       settled: Prisma.sql`ROUND(${settledCol} * a.amount / NULLIF(o.amount, 0), 2)`,
       join: Prisma.sql`JOIN ${table} a ON a.${fk} = o.id AND a."vehicleId" = ${q.vehicleId}::uuid`,
-      filters: Prisma.join(filters, ' '),
+      filters: filters.length ? Prisma.join(filters, ' ') : Prisma.empty,
     };
   }
 
