@@ -10880,9 +10880,10 @@
         "enum": [
           "EQUAL",
           "PERCENT",
-          "FIXED"
+          "FIXED",
+          "REVENUE_PROPORTIONAL"
         ],
-        "description": "Rateio entre veículos: EQUAL (partes iguais), PERCENT ou FIXED (valores)"
+        "description": "Rateio entre veículos: EQUAL (partes iguais), PERCENT, FIXED (valores) ou REVENUE_PROPORTIONAL (pela receita de cada veículo na competência; só despesas)"
       },
       "AllocationInputDto": {
         "type": "object",
@@ -10938,7 +10939,7 @@
         "type": "object",
         "properties": {
           "allocationMethod": {
-            "description": "Rateio entre veículos: EQUAL (partes iguais), PERCENT ou FIXED (valores)",
+            "description": "Rateio entre veículos: EQUAL (partes iguais), PERCENT, FIXED (valores) ou REVENUE_PROPORTIONAL (pela receita de cada veículo na competência; só despesas)",
             "allOf": [
               {
                 "$ref": "#/components/schemas/SplitMethod"
@@ -11058,7 +11059,7 @@
         "type": "object",
         "properties": {
           "allocationMethod": {
-            "description": "Rateio entre veículos: EQUAL (partes iguais), PERCENT ou FIXED (valores)",
+            "description": "Rateio entre veículos: EQUAL (partes iguais), PERCENT, FIXED (valores) ou REVENUE_PROPORTIONAL (pela receita de cada veículo na competência; só despesas)",
             "allOf": [
               {
                 "$ref": "#/components/schemas/SplitMethod"
@@ -12697,7 +12698,7 @@
         "type": "object",
         "properties": {
           "allocationMethod": {
-            "description": "Rateio entre veículos: EQUAL (partes iguais), PERCENT ou FIXED (valores)",
+            "description": "Rateio entre veículos: EQUAL (partes iguais), PERCENT, FIXED (valores) ou REVENUE_PROPORTIONAL (pela receita de cada veículo na competência; só despesas)",
             "allOf": [
               {
                 "$ref": "#/components/schemas/SplitMethod"
@@ -12812,7 +12813,7 @@
         "type": "object",
         "properties": {
           "allocationMethod": {
-            "description": "Rateio entre veículos: EQUAL (partes iguais), PERCENT ou FIXED (valores)",
+            "description": "Rateio entre veículos: EQUAL (partes iguais), PERCENT, FIXED (valores) ou REVENUE_PROPORTIONAL (pela receita de cada veículo na competência; só despesas)",
             "allOf": [
               {
                 "$ref": "#/components/schemas/SplitMethod"

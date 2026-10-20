@@ -27,6 +27,23 @@ describe('Rateio, contratos, manutenção, abastecimento e despesas do motorista
   };
 
   describe('rateio de despesas entre veículos', () => {
+    it('rateia proporcionalmente à receita de cada veículo na competência', async () => {
+      const month = dates.month(1);
+      const rec = await categoryId(t, owner, 'CONTRACT');
+      for (const [vehicleId, amount] of [[v1.id, '2000.00'], [v2.id, '1000.00']])
+        await t.http().post('/api/v1/receivables').set(bearer(owner)).send({ description: 'Contrato', categoryId: rec, amount, competence: month, dueDate: dates.today(), vehicleId }).expect(201);
+      const cat = await categoryId(t, owner, 'INSURANCE');
+      const body = { description: 'Seguro da frota', categoryId: cat, amount: '300.00', competence: month, dueDate: dates.today(), allocationMethod: 'REVENUE_PROPORTIONAL', allocations: [{ vehicleId: v1.id }, { vehicleId: v2.id }] };
+      const res = await t.http().post('/api/v1/payables').set(bearer(owner)).send(body).expect(201);
+      expect(await allocationsOf('payables', res.body.items[0].id)).toEqual([
+        { vehicleId: v1.id, method: 'REVENUE_PROPORTIONAL', amount: '200.00' },
+        { vehicleId: v2.id, method: 'REVENUE_PROPORTIONAL', amount: '100.00' },
+      ]);
+      // Mês sem receita nos veículos: não há base para ratear.
+      await t.http().post('/api/v1/payables').set(bearer(owner)).send({ ...body, competence: dates.month(2) }).expect(422);
+      await t.http().post('/api/v1/receivables').set(bearer(owner)).send({ ...body, categoryId: rec }).expect(400);
+    });
+
     it('divide por percentual sem perder centavos e reaplica ao mudar o valor', async () => {
       const cat = await categoryId(t, owner, 'TRACKER');
       const res = await t
