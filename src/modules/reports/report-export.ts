@@ -109,11 +109,17 @@ export function toPdf(r: Report, companyName: string): Promise<Buffer> {
       const weights = s.columns.map((c) => (c.type === 'text' ? 2.4 : 1));
       const totalW = weights.reduce((a, b) => a + b, 0);
       const widths = weights.map((w) => (w / totalW) * width);
-      const drawRow = (cells: string[], opts: { bold?: boolean; fill?: string }) => {
+      const header = s.columns.map((c) => c.label);
+      const drawRow = (cells: string[], opts: { bold?: boolean; fill?: string; header?: boolean }) => {
         doc.font(opts.bold ? 'Helvetica-Bold' : 'Helvetica').fontSize(8.5);
         const heights = cells.map((t, i) => doc.heightOfString(t, { width: widths[i] - 8 }));
         const h = Math.max(...heights) + 8;
-        if (doc.y + h > bottom()) doc.addPage();
+        if (doc.y + h > bottom()) {
+          doc.addPage();
+          // Repete o cabeçalho da tabela na nova página.
+          if (!opts.header) drawRow(header, { bold: true, fill: '#F1F5F9', header: true });
+          doc.font(opts.bold ? 'Helvetica-Bold' : 'Helvetica').fontSize(8.5);
+        }
         const y = doc.y;
         if (opts.fill) doc.rect(left, y, width, h).fill(opts.fill);
         let x = left;
@@ -131,7 +137,7 @@ export function toPdf(r: Report, companyName: string): Promise<Buffer> {
         doc.font('Helvetica-Bold').fontSize(11).fillColor('#0F172A').text(s.title, left, doc.y);
         doc.moveDown(0.3);
       }
-      drawRow(s.columns.map((c) => c.label), { bold: true, fill: '#F1F5F9' });
+      drawRow(header, { bold: true, fill: '#F1F5F9', header: true });
       if (s.rows.length === 0) {
         doc.font('Helvetica').fontSize(9).fillColor('#64748B').text('Sem dados no período.', left + 4, doc.y + 4);
         doc.moveDown(0.5);
