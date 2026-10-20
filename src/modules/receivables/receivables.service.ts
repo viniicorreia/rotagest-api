@@ -9,7 +9,9 @@ import { PrismaService, type Tx } from '../../prisma/prisma.service';
 import { AuditService } from '../audit/audit.service';
 import { CategoriesService } from '../categories/categories.service';
 import type { CancelObligationDto, SettleDto } from '../obligations/obligations.dto';
+import { ContractBillingService } from '../contracts/contract-billing.service';
 import { RecurrenceService, type RecurrenceTemplate } from '../obligations/recurrence.service';
+import { assertVehiclesUsable, currentSplit, splitFromInput, writeAllocations, type AllocationSplit } from '../obligations/allocation';
 import { installmentSchedule, isOverdue, monthDiff, type Occurrence } from '../obligations/schedule';
 import { attachmentDto } from '../attachments/attachment-dto';
 import { SettlementsService, SETTLEMENT_INCLUDE, statusFor } from '../settlements/settlements.service';
@@ -19,7 +21,7 @@ import type { CreateReceivableDto, ListReceivablesQueryDto, UpdateReceivableDto 
 const LIST_INCLUDE = {
   category: { select: { id: true, name: true, type: true, systemKey: true } },
   allocations: { where: { method: 'DIRECT' }, take: 1, select: { vehicle: { select: { id: true, name: true, plate: true } } } },
-  _count: { select: { attachments: { where: { deletedAt: null } } } },
+  _count: { select: { attachments: { where: { deletedAt: null } }, allocations: { where: { method: { not: 'DIRECT' } } } } },
 } satisfies Prisma.ReceivableInclude;
 type ReceivableRow = Prisma.ReceivableGetPayload<{ include: typeof LIST_INCLUDE }>;
 
@@ -49,12 +51,14 @@ export class ReceivablesService {
     private readonly audit: AuditService,
     private readonly categories: CategoriesService,
     private readonly recurrence: RecurrenceService,
+    private readonly contractBilling: ContractBillingService,
     private readonly settlements: SettlementsService,
     private readonly periods: PeriodLockService,
   ) {}
 
   async list(ctx: TenantContext, q: ListReceivablesQueryDto) {
     await this.recurrence.generateDue(ctx.companyId);
+    await this.contractBilling.generateDue(ctx.companyId, ctx.userId);
     const where = this.where(ctx, q);
     const now = today();
     const nonCanceled: Prisma.ReceivableWhereInput = { AND: [where, { status: { not: 'CANCELED' } }] };
@@ -118,9 +122,12 @@ export class ReceivablesService {
       }
     }
 
+    const split = this.splitOf(dto, totalCents);
+
     const result = await this.prisma.$transaction(async (tx) => {
       await this.categories.assertUsable(tx, ctx.companyId, dto.categoryId, 'INCOME');
       if (dto.vehicleId) await this.assertVehicle(tx, ctx.companyId, dto.vehicleId);
+      if (split) await assertVehiclesUsable(tx, ctx.companyId, split.items.map((i) => i.vehicleId));
 
       let occurrences: Occurrence[];
       let recurrenceRuleId: string | null = null;
@@ -140,6 +147,7 @@ export class ReceivablesService {
           categoryId: dto.categoryId,
           amount: fromCents(totalCents),
           vehicleId: dto.vehicleId ?? null,
+          split,
           supplierName: null,
           notes: dto.notes ?? null,
           dueDay: dueDate.getUTCDate(),
@@ -186,7 +194,7 @@ export class ReceivablesService {
           },
           select: { id: true },
         });
-        await this.syncDirectAllocation(tx, ctx.companyId, created.id, dto.vehicleId ?? null, o.amountCents);
+        await writeAllocations(tx, 'RECEIVABLE', ctx.companyId, created.id, dto.vehicleId ?? null, split, o.amountCents);
         ids.push(created.id);
       }
       if (dto.settleNow) {
@@ -214,7 +222,12 @@ export class ReceivablesService {
       const amountCents = dto.amount ? toCents(dto.amount) : toCents(before.amount);
       const paidCents = toCents(before.receivedAmount);
       if (amountCents < paidCents) throw businessRule(`O valor não pode ficar abaixo do já recebido (R$ ${fromCents(paidCents).replace('.', ',')})`);
-      const vehicleId = dto.vehicleId !== undefined ? dto.vehicleId : (before.allocations[0]?.vehicle?.id ?? null);
+      let split: AllocationSplit | null;
+      if (dto.allocations !== undefined) split = dto.allocations.length ? this.splitOf(dto, amountCents) : null;
+      else if (dto.vehicleId !== undefined) split = null;
+      else split = await currentSplit(tx, 'RECEIVABLE', ctx.companyId, id);
+      if (split && dto.allocations?.length) await assertVehiclesUsable(tx, ctx.companyId, split.items.map((i) => i.vehicleId));
+      const vehicleId = split ? null : dto.vehicleId !== undefined ? dto.vehicleId : (before.allocations[0]?.vehicle?.id ?? null);
 
       await tx.receivable.update({
         where: { id },
@@ -228,7 +241,7 @@ export class ReceivablesService {
           status: statusFor('RECEIVABLE', paidCents, amountCents) as 'PENDING' | 'PARTIALLY_RECEIVED' | 'RECEIVED',
         },
       });
-      await this.syncDirectAllocation(tx, ctx.companyId, id, vehicleId, amountCents);
+      await writeAllocations(tx, 'RECEIVABLE', ctx.companyId, id, vehicleId, split, amountCents);
       const after = await tx.receivable.findUniqueOrThrow({ where: { id }, include: DETAIL_INCLUDE });
       await this.audit.log(
         { companyId: ctx.companyId, actorUserId: ctx.userId, action: 'receivable.updated', entityType: 'Receivable', entityId: id, before: this.toDto({ ...before }), after: this.toDto(after), meta },
@@ -266,6 +279,8 @@ export class ReceivablesService {
         if (toCents(p.receivedAmount) > 0) throw businessRule('Estorne os recebimentos antes de cancelar este lançamento');
         await this.periods.assertOpen(ctx.companyId, p.competence, tx);
         await tx.receivable.update({ where: { id: pid }, data: { status: 'CANCELED', canceledAt: new Date(), cancelReason: dto.reason } });
+        // Km faturados nesta conta voltam a ficar disponíveis para um novo faturamento.
+        await tx.vehicleDailyLog.updateMany({ where: { companyId: ctx.companyId, receivableId: pid }, data: { receivableId: null } });
       }
       await this.audit.log({ companyId: ctx.companyId, actorUserId: ctx.userId, action: 'receivable.canceled', entityType: 'Receivable', entityId: id, after: { ids }, reason: dto.reason, meta }, tx);
       const after = await tx.receivable.findUniqueOrThrow({ where: { id }, include: DETAIL_INCLUDE });
@@ -319,15 +334,10 @@ export class ReceivablesService {
     if (v.archivedAt) throw businessRule('Este veículo está arquivado');
   }
 
-  /**
-   * Receita com veículo = 100% atribuída àquele veículo. Rateios entre
-   * veículos (EQUAL, PERCENT...) chegam na Fase 3; enquanto isso, só DIRECT.
-   */
-  private async syncDirectAllocation(tx: Tx, companyId: string, receivableId: string, vehicleId: string | null, amountCents: number) {
-    await tx.revenueAllocation.deleteMany({ where: { companyId, receivableId, method: 'DIRECT' } });
-    if (vehicleId) {
-      await tx.revenueAllocation.create({ data: { companyId, receivableId, vehicleId, method: 'DIRECT', percent: 100, amount: fromCents(amountCents) } });
-    }
+  private splitOf(dto: { vehicleId?: string | null; allocationMethod?: AllocationSplit['method']; allocations?: { vehicleId: string; percent?: string; amount?: string }[] }, totalCents: number): AllocationSplit | null {
+    if (!dto.allocations?.length) return null;
+    if (dto.vehicleId) throw badRequest('Escolha um veículo ou um rateio entre veículos, não os dois');
+    return splitFromInput(dto.allocationMethod ?? 'EQUAL', dto.allocations, totalCents);
   }
 
   toDto(p: ReceivableRow) {
@@ -349,11 +359,12 @@ export class ReceivablesService {
       installmentCount: p.installmentCount,
       installmentGroupId: p.installmentGroupId,
       recurrenceRuleId: p.recurrenceRuleId,
-      vehicle: p.allocations.find((a) => a.vehicle)?.vehicle ?? null,
+      vehicle: p.allocations.find((a) => a.vehicle && (!('method' in a) || a.method === 'DIRECT'))?.vehicle ?? null,
       notes: p.notes,
       canceledAt: p.canceledAt,
       cancelReason: p.cancelReason,
       attachmentsCount: p._count.attachments,
+      splitVehicles: p._count.allocations,
       createdAt: p.createdAt,
     };
   }
@@ -364,7 +375,7 @@ export class ReceivablesService {
       settlements: p.settlements.map((s) => this.settlements.toDto(s)),
       // Comprovantes do lançamento e dos seus recebimentos.
       attachments: [...p.attachments, ...p.settlements.flatMap((s) => s.attachments)].map(attachmentDto),
-      allocations: p.allocations.map((a) => ({ vehicle: a.vehicle, method: a.method, amount: money(a.amount) })),
+      allocations: p.allocations.map((a) => ({ vehicle: a.vehicle, method: a.method, percent: a.percent?.toFixed(6) ?? '100.000000', amount: money(a.amount) })),
     };
   }
 }

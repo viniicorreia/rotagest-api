@@ -1,6 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
-import { Transform } from 'class-transformer';
-import { IsEnum, IsIn, IsInt, IsOptional, IsString, IsUUID, Max, MaxLength, Min, MinLength } from 'class-validator';
+import { Transform, Type } from 'class-transformer';
+import { ArrayMaxSize, IsArray, IsEnum, IsIn, IsInt, IsOptional, IsString, IsUUID, Matches, Max, MaxLength, Min, MinLength, ValidateNested } from 'class-validator';
 import {
   IsDateOnly,
   IsMoney,
@@ -13,6 +13,7 @@ import {
   trimOrUndefined,
 } from '../../common/validation';
 import { CategoryTypeEnum } from '../categories/categories.dto';
+import { PERCENT_PATTERN, SPLIT_METHODS, type SplitMethod } from './allocation';
 
 export const PAYMENT_METHODS = ['PIX', 'CASH', 'TRANSFER', 'DEPOSIT', 'BOLETO', 'CARD', 'OTHER'] as const;
 export type PaymentMethodValue = (typeof PAYMENT_METHODS)[number];
@@ -192,7 +193,41 @@ export class AttachmentDto {
 export class AllocationDto {
   @ApiProperty({ type: VehicleRefDto, nullable: true }) vehicle: VehicleRefDto | null;
   @ApiProperty({ enum: ['DIRECT', 'EQUAL', 'PERCENT', 'FIXED', 'REVENUE_PROPORTIONAL'], enumName: 'AllocationMethod' }) method: string;
+  @ApiProperty({ example: '50.000000', description: 'Participação do veículo no valor' }) percent: string;
   @ApiProperty() amount: string;
+}
+
+export class AllocationInputDto {
+  @ApiProperty({ format: 'uuid' })
+  @IsUUID()
+  vehicleId: string;
+
+  @ApiPropertyOptional({ example: '33.3333', description: 'Obrigatório no rateio PERCENT (soma 100)' })
+  @IsOptional()
+  @IsString()
+  @Matches(PERCENT_PATTERN, { message: 'percent deve estar no formato 33.3333' })
+  percent?: string;
+
+  @OptionalMoneyProperty('Obrigatório no rateio FIXED (soma = valor total)')
+  @IsOptional()
+  @IsMoney()
+  amount?: string;
+}
+
+/** Campos de rateio aceitos na criação e edição de despesas e receitas. */
+export class SplitInputDto {
+  @ApiPropertyOptional({ enum: SPLIT_METHODS, enumName: 'SplitMethod', description: 'Rateio entre veículos: EQUAL (partes iguais), PERCENT ou FIXED (valores)' })
+  @IsOptional()
+  @IsIn(SPLIT_METHODS)
+  allocationMethod?: SplitMethod;
+
+  @ApiPropertyOptional({ type: [AllocationInputDto], description: 'Veículos do rateio (2 a 50). Substitui vehicleId. Envie [] na edição para desfazer o rateio.' })
+  @IsOptional()
+  @IsArray()
+  @ArrayMaxSize(50)
+  @ValidateNested({ each: true })
+  @Type(() => AllocationInputDto)
+  allocations?: AllocationInputDto[];
 }
 
 export class ObligationSummaryDto {

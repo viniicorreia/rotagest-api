@@ -12,3 +12,4 @@ export * from './money';
 export * from './calendar';
 export * from './plates';
 export * from './categories';
+export * from './mileage';

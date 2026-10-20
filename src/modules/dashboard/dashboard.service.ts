@@ -6,6 +6,7 @@ import { addDays } from '../../common/utils/dates';
 import { FUEL_CATEGORY_KEYS, MAINTENANCE_CATEGORY_KEYS, addMonths, firstOfMonth, formatMonth, fromCents, lastOfMonth, monthsBetween, parseMonth, toCents, today } from '../../domain';
 import { PrismaService } from '../../prisma/prisma.service';
 import { LedgerService } from '../transactions/ledger.service';
+import { ContractBillingService } from '../contracts/contract-billing.service';
 import { RecurrenceService } from '../obligations/recurrence.service';
 import type { DashboardQueryDto } from './dashboard.dto';
 import { ResultsService } from './results.service';
@@ -32,6 +33,7 @@ export class DashboardService {
     private readonly ledger: LedgerService,
     private readonly results: ResultsService,
     private readonly recurrence: RecurrenceService,
+    private readonly contractBilling: ContractBillingService,
   ) {}
 
   async get(ctx: TenantContext, q: DashboardQueryDto) {
@@ -49,6 +51,7 @@ export class DashboardService {
       throw notFound('Categoria não encontrada');
     }
     await this.recurrence.generateDue(ctx.companyId);
+    await this.contractBilling.generateDue(ctx.companyId, ctx.userId);
 
     const chartFrom = span >= 6 ? (span > 12 ? addMonths(to, -11, 1) : from) : addMonths(to, -5, 1);
     const periodEnd = lastOfMonth(to);

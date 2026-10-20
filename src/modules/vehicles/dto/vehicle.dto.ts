@@ -1,7 +1,7 @@
 import { ApiProperty, ApiPropertyOptional, PartialType } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
-import { IsEnum, IsInt, IsOptional, IsString, Max, MaxLength, Min, MinLength, Validate, ValidatorConstraint, type ValidatorConstraintInterface } from 'class-validator';
-import { isValidPlate, normalizePlate } from '../../../domain';
+import { IsBoolean, IsEnum, IsInt, IsOptional, IsString, Matches, Max, MaxLength, Min, MinLength, Validate, ValidatorConstraint, type ValidatorConstraintInterface } from 'class-validator';
+import { RATE_PATTERN, isValidPlate, normalizePlate } from '../../../domain';
 import { IsMonth, QueryBoolean, trimOrNull, trimOrUndefined } from '../../../common/validation';
 
 export const VEHICLE_STATUSES = ['ACTIVE', 'MAINTENANCE', 'INACTIVE'] as const;
@@ -64,6 +64,12 @@ export class CreateVehicleDto {
   @IsEnum(VEHICLE_STATUSES)
   status?: VehicleStatusValue;
 
+  @ApiPropertyOptional({ type: String, nullable: true, example: '3.50', description: 'Quanto o veículo fatura por km rodado (R$/km, até 4 casas)' })
+  @IsOptional()
+  @IsString()
+  @Matches(RATE_PATTERN, { message: 'ratePerKm deve estar no formato 3.50' })
+  ratePerKm?: string | null;
+
   @ApiPropertyOptional({ nullable: true })
   @Transform(trimOrNull)
   @IsOptional()
@@ -72,7 +78,12 @@ export class CreateVehicleDto {
   notes?: string | null;
 }
 
-export class UpdateVehicleDto extends PartialType(CreateVehicleDto) {}
+export class UpdateVehicleDto extends PartialType(CreateVehicleDto) {
+  @ApiPropertyOptional({ default: true, description: 'Ao mudar ratePerKm, recalcula também os registros diários ainda não faturados' })
+  @IsOptional()
+  @IsBoolean()
+  applyRateToUnbilled?: boolean;
+}
 
 export class ListVehiclesQueryDto {
   @ApiPropertyOptional(VehicleStatusEnum)
@@ -118,6 +129,7 @@ export class VehicleDto {
   @ApiProperty({ type: Number, nullable: true }) year: number | null;
   @ApiProperty() odometerKm: number;
   @ApiProperty(VehicleStatusEnum) status: VehicleStatusValue;
+  @ApiProperty({ type: String, nullable: true, example: '3.50', description: 'R$ por km rodado; null = não definido' }) ratePerKm: string | null;
   @ApiProperty({ type: String, nullable: true }) notes: string | null;
   @ApiProperty({ type: String, format: 'date-time', nullable: true }) archivedAt: Date | null;
   @ApiProperty({ type: String, format: 'date-time' }) createdAt: Date;

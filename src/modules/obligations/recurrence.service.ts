@@ -4,6 +4,7 @@ import { notFound } from '../../common/errors';
 import type { RequestMeta, TenantContext } from '../../common/tenant/tenant-context';
 import { formatMonth, fromCents, toCents } from '../../domain';
 import { PrismaService, type Tx } from '../../prisma/prisma.service';
+import { splitAmounts, type AllocationSplit } from './allocation';
 import { AuditService } from '../audit/audit.service';
 import type { UpdateRecurrenceDto } from './obligations.dto';
 import { defaultHorizon, recurrenceDueDate, recurrenceOccurrences, type RecurrenceSpec } from './schedule';
@@ -14,6 +15,8 @@ export interface RecurrenceTemplate {
   categoryId: string;
   amount: string;
   vehicleId: string | null;
+  /** Rateio entre veículos aplicado a cada ocorrência (ausente em regras antigas). */
+  split?: AllocationSplit | null;
   supplierName: string | null;
   notes: string | null;
   dueDay: number;
@@ -78,7 +81,11 @@ export class RecurrenceService {
           skipDuplicates: true,
           select: { id: true, amount: true },
         });
-        if (t.vehicleId) {
+        if (t.split) {
+          await client.expenseAllocation.createMany({
+            data: rows.flatMap((r) => splitAmounts(t.split!, toCents(r.amount)).map((p) => ({ companyId, payableId: r.id, vehicleId: p.vehicleId, method: t.split!.method, percent: p.percent, amount: fromCents(p.cents) }))),
+          });
+        } else if (t.vehicleId) {
           await client.expenseAllocation.createMany({
             data: rows.map((r) => ({ companyId, payableId: r.id, vehicleId: t.vehicleId, method: 'DIRECT' as const, percent: 100, amount: r.amount })),
           });
@@ -90,7 +97,11 @@ export class RecurrenceService {
           skipDuplicates: true,
           select: { id: true, amount: true },
         });
-        if (t.vehicleId) {
+        if (t.split) {
+          await client.revenueAllocation.createMany({
+            data: rows.flatMap((r) => splitAmounts(t.split!, toCents(r.amount)).map((p) => ({ companyId, receivableId: r.id, vehicleId: p.vehicleId, method: t.split!.method, percent: p.percent, amount: fromCents(p.cents) }))),
+          });
+        } else if (t.vehicleId) {
           await client.revenueAllocation.createMany({
             data: rows.map((r) => ({ companyId, receivableId: r.id, vehicleId: t.vehicleId, method: 'DIRECT' as const, percent: 100, amount: r.amount })),
           });
