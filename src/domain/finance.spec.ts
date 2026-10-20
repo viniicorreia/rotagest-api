@@ -50,7 +50,7 @@ describe('placas', () => {
   });
 });
 
-import { formatRate, fromKmTenths, kmAmountCents, toKmTenths, toRateUnits } from './mileage';
+import { costPerKm, formatRate, fromKmTenths, fuelAmountCents, kmAmountCents, kmPerLiter, toKmTenths, toMilliliters, toRateUnits } from './mileage';
 
 describe('km e valor por km', () => {
   it('converte km e taxa sem float', () => {
@@ -74,5 +74,17 @@ describe('km e valor por km', () => {
     expect(kmAmountCents(toKmTenths('87.5'), toRateUnits('2.875'))).toBe(25156); // 251,5625 → 251,56
     expect(kmAmountCents(toKmTenths('0.1'), toRateUnits('0.05'))).toBe(1); // 0,005 → 0,01 (meio para cima)
     expect(kmAmountCents(0, toRateUnits('9'))).toBe(0);
+  });
+});
+
+describe('combustível', () => {
+  it('calcula total, km/l e custo por km sem float', () => {
+    expect(fuelAmountCents(toMilliliters('45.32'), toRateUnits('6.099'))).toBe(27641); // 276,40668 → 276,41
+    expect(fuelAmountCents(toMilliliters('10'), toRateUnits('5.555'))).toBe(5555);
+    expect(fuelAmountCents(toMilliliters('0.001'), toRateUnits('5'))).toBe(1); // 0,005 → 0,01
+    expect(kmPerLiter(toKmTenths('400'), toMilliliters('47'))).toBe('8.51');
+    expect(kmPerLiter(100, 0)).toBeNull();
+    expect(costPerKm(42000, toKmTenths('120'))).toBe('3.5000');
+    expect(costPerKm(100, 0)).toBeNull();
   });
 });

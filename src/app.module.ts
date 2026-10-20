@@ -31,6 +31,8 @@ import { TransactionsModule } from './modules/transactions/transactions.module';
 import { VehiclesModule } from './modules/vehicles/vehicles.module';
 import { FleetModule } from './modules/fleet/fleet.module';
 import { MileageModule } from './modules/mileage/mileage.module';
+import { FleetCostsModule } from './modules/fleet-costs/fleet-costs.module';
+import { ContractsModule } from './modules/contracts/contracts.module';
 import { PrismaModule } from './prisma/prisma.module';
 
 @Module({
@@ -88,6 +90,8 @@ import { PrismaModule } from './prisma/prisma.module';
     VehiclesModule,
     FleetModule,
     MileageModule,
+    FleetCostsModule,
+    ContractsModule,
     PayablesModule,
     ReceivablesModule,
     AttachmentsModule,

@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { createHash, randomUUID } from 'node:crypto';
-import { badRequest, notFound } from '../../common/errors';
+import { badRequest, forbidden, notFound } from '../../common/errors';
 import type { RequestMeta, TenantContext } from '../../common/tenant/tenant-context';
 import { AppConfig } from '../../config/app-config.service';
 import { PrismaService } from '../../prisma/prisma.service';
@@ -40,7 +40,7 @@ export class AttachmentsService {
     const type = detectFileType(file.buffer);
     if (!type) throw badRequest('Formato não aceito. Envie PDF, JPG, PNG ou WEBP.');
 
-    await this.assertOwner(ctx.companyId, dto);
+    await this.assertOwner(ctx, dto);
     const id = randomUUID();
     const storageKey = `${ctx.companyId}/${id}.${type.ext}`;
     await this.storage.put(storageKey, file.buffer);
@@ -66,6 +66,8 @@ export class AttachmentsService {
   async open(ctx: TenantContext, id: string) {
     const a = await this.prisma.attachment.findFirst({ where: { id, companyId: ctx.companyId, deletedAt: null } });
     if (!a) throw notFound('Comprovante não encontrado');
+    // Sem acesso ao financeiro (motorista), só baixa o que ele mesmo enviou.
+    if (!ctx.permissions.includes('finance:read') && a.uploadedById !== ctx.userId) throw notFound('Comprovante não encontrado');
     return { stream: this.storage.read(a.storageKey), mimeType: a.mimeType, fileName: a.originalName, size: a.sizeBytes };
   }
 
@@ -77,8 +79,17 @@ export class AttachmentsService {
     await this.audit.log({ companyId: ctx.companyId, actorUserId: ctx.userId, action: 'attachment.deleted', entityType: 'Attachment', entityId: id, before: attachmentDto(a), meta });
   }
 
-  private async assertOwner(companyId: string, dto: UploadAttachmentDto) {
-    const where = { companyId };
+  private async assertOwner(ctx: TenantContext, dto: UploadAttachmentDto) {
+    const where = { companyId: ctx.companyId };
+    if (!ctx.permissions.includes('finance:manage')) {
+      // Motorista: só anexa à própria despesa enquanto ela aguarda aprovação.
+      const own = dto.payableId
+        ? await this.prisma.payable.findFirst({ where: { ...where, id: dto.payableId, createdById: ctx.userId }, select: { approvalStatus: true } })
+        : null;
+      if (!own) throw forbidden('Você só pode anexar comprovantes às suas próprias despesas');
+      if (own.approvalStatus !== 'PENDING_APPROVAL') throw forbidden('Esta despesa já foi analisada');
+      return;
+    }
     const found = dto.payableId
       ? await this.prisma.payable.findFirst({ where: { ...where, id: dto.payableId }, select: { id: true } })
       : dto.receivableId

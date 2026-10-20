@@ -12,6 +12,7 @@ import {
   RecurrenceInputDto,
   SettlementDto,
   SettleNowDto,
+  SplitInputDto,
   VehicleRefDto,
   type EntryKindValue,
 } from '../obligations/obligations.dto';
@@ -22,7 +23,7 @@ export const ReceivableStatusEnum = { enum: RECEIVABLE_STATUSES, enumName: 'Rece
 export const RECEIVABLE_FILTERS = [...RECEIVABLE_STATUSES, 'OPEN', 'OVERDUE'] as const;
 export const ReceivableFilterEnum = { enum: RECEIVABLE_FILTERS, enumName: 'ReceivableStatusFilter' } as const;
 
-export class CreateReceivableDto {
+export class CreateReceivableDto extends SplitInputDto {
   @ApiProperty({ example: 'Contrato Escola Municipal — outubro' })
   @Transform(trimOrUndefined)
   @IsString()
@@ -84,7 +85,7 @@ export class CreateReceivableDto {
   settleNow?: SettleNowDto;
 }
 
-export class UpdateReceivableDto {
+export class UpdateReceivableDto extends SplitInputDto {
   @ApiPropertyOptional()
   @Transform(trimOrUndefined)
   @IsOptional()
@@ -155,6 +156,7 @@ export class ReceivableDto {
   @ApiProperty({ type: String, format: 'date-time', nullable: true }) canceledAt: Date | null;
   @ApiProperty({ type: String, nullable: true }) cancelReason: string | null;
   @ApiProperty() attachmentsCount: number;
+  @ApiProperty({ description: 'Quantos veículos dividem o valor (0 = sem rateio)' }) splitVehicles: number;
   @ApiProperty({ type: String, format: 'date-time' }) createdAt: Date;
 }
 

@@ -46,3 +46,35 @@ export function kmAmountCents(kmTenths: number, rateUnits: number): number {
   if (!Number.isSafeInteger(raw)) throw new Error('Valor fora do limite');
   return Math.floor((raw + 500) / 1000);
 }
+
+/** Litros abastecidos: até 5 dígitos e 3 casas ("45.320"). */
+export const LITERS_PATTERN = /^\d{1,5}(\.\d{1,3})?$/;
+/** Preço por litro: até 3 dígitos e 4 casas ("6.0990"). */
+export const PRICE_PER_LITER_PATTERN = /^\d{1,3}(\.\d{1,4})?$/;
+
+/** "45.32" → 45320 (mililitros). */
+export const toMilliliters = (value: string | number | { toFixed(dp: number): string }) => toScaled(value, 3);
+export const fromMilliliters = (ml: number) => fromScaled(ml, 3);
+
+/** Total do abastecimento em centavos: litros × preço, arredondado ao centavo (meio para cima). */
+export function fuelAmountCents(milliliters: number, priceUnits: number): number {
+  // (ml/1000) × (preço/10000) × 100 centavos = ml × preço / 100000
+  const raw = BigInt(milliliters) * BigInt(priceUnits);
+  return Number((raw + 50_000n) / 100_000n);
+}
+
+/** km/l com 2 casas ("8.53"); null sem litros. */
+export function kmPerLiter(kmTenths: number, milliliters: number): string | null {
+  if (milliliters <= 0) return null;
+  // (km/10) / (ml/1000) = km×100/ml; ×100 para 2 casas, arredondado.
+  const hundredths = Math.floor((kmTenths * 10_000 + Math.floor(milliliters / 2)) / milliliters);
+  return fromScaled(hundredths, 2);
+}
+
+/** Custo por km em centavos de real com 4 casas ("1.2345" = R$ 1,2345/km); null sem km. */
+export function costPerKm(cents: number, kmTenths: number): string | null {
+  if (kmTenths <= 0) return null;
+  // (cents/100) / (km/10) = cents/(10×km); 4 casas → cents×1000/km
+  const units = Math.floor((cents * 1000 + Math.floor(kmTenths / 2)) / kmTenths);
+  return fromScaled(units, 4);
+}

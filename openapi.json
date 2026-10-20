@@ -2273,6 +2273,1712 @@
         ]
       }
     },
+    "/api/v1/drivers": {
+      "get": {
+        "operationId": "Drivers_list",
+        "parameters": [
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/RecordStatus"
+            }
+          },
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/DriverDto"
+                  }
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Erro (formato padrão)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "drivers"
+        ]
+      },
+      "post": {
+        "operationId": "Drivers_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateDriverDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DriverDto"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Erro (formato padrão)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "drivers"
+        ]
+      }
+    },
+    "/api/v1/drivers/{id}": {
+      "patch": {
+        "operationId": "Drivers_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateDriverDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DriverDto"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Erro (formato padrão)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "drivers"
+        ]
+      },
+      "delete": {
+        "operationId": "Drivers_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "default": {
+            "description": "Erro (formato padrão)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Exclui motorista sem histórico; com histórico, marque como inativo",
+        "tags": [
+          "drivers"
+        ]
+      }
+    },
+    "/api/v1/routes": {
+      "get": {
+        "operationId": "Routes_list",
+        "parameters": [
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/RecordStatus"
+            }
+          },
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/RouteDto"
+                  }
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Erro (formato padrão)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "routes"
+        ]
+      },
+      "post": {
+        "operationId": "Routes_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateRouteDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RouteDto"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Erro (formato padrão)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "routes"
+        ]
+      }
+    },
+    "/api/v1/routes/{id}": {
+      "patch": {
+        "operationId": "Routes_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateRouteDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RouteDto"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Erro (formato padrão)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "routes"
+        ]
+      },
+      "delete": {
+        "operationId": "Routes_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "default": {
+            "description": "Erro (formato padrão)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "routes"
+        ]
+      }
+    },
+    "/api/v1/assignments": {
+      "get": {
+        "operationId": "Assignments_list",
+        "parameters": [
+          {
+            "name": "routeId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "vehicleId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "driverId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "current",
+            "required": false,
+            "in": "query",
+            "description": "Só as vigentes hoje",
+            "schema": {
+              "default": false,
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/AssignmentDto"
+                  }
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Erro (formato padrão)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "assignments"
+        ]
+      },
+      "post": {
+        "operationId": "Assignments_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateAssignmentDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AssignmentDto"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Erro (formato padrão)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Atribui veículo e/ou motorista a uma rota a partir de uma data",
+        "tags": [
+          "assignments"
+        ]
+      }
+    },
+    "/api/v1/assignments/mine": {
+      "get": {
+        "operationId": "Assignments_mine",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MyAssignmentsDto"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Erro (formato padrão)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Portal do motorista: rotas e veículos de hoje do usuário logado",
+        "tags": [
+          "assignments"
+        ]
+      }
+    },
+    "/api/v1/assignments/{id}/end": {
+      "post": {
+        "operationId": "Assignments_end",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EndAssignmentDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AssignmentDto"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Erro (formato padrão)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Encerra a atribuição numa data (o histórico é mantido)",
+        "tags": [
+          "assignments"
+        ]
+      }
+    },
+    "/api/v1/daily-logs": {
+      "get": {
+        "operationId": "Mileage_list",
+        "parameters": [
+          {
+            "name": "from",
+            "required": false,
+            "in": "query",
+            "description": "Início (padrão: 1º dia do mês atual)",
+            "schema": {
+              "format": "date",
+              "example": "2026-10-15",
+              "type": "string"
+            }
+          },
+          {
+            "name": "to",
+            "required": false,
+            "in": "query",
+            "description": "Fim (padrão: hoje)",
+            "schema": {
+              "format": "date",
+              "example": "2026-10-15",
+              "type": "string"
+            }
+          },
+          {
+            "name": "vehicleId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "billed",
+            "required": false,
+            "in": "query",
+            "description": "true = só faturados; false = só a faturar",
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DailyLogListDto"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Erro (formato padrão)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Registros diários de km; motorista vê só os próprios; valores só com finance:read",
+        "tags": [
+          "daily-logs"
+        ]
+      },
+      "post": {
+        "operationId": "Mileage_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateDailyLogDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DailyLogDto"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Erro (formato padrão)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Registra os km rodados por um veículo num dia (um registro por veículo por dia)",
+        "tags": [
+          "daily-logs"
+        ]
+      }
+    },
+    "/api/v1/daily-logs/billing": {
+      "get": {
+        "operationId": "Mileage_preview",
+        "parameters": [
+          {
+            "name": "month",
+            "required": true,
+            "in": "query",
+            "description": "Mês dos km rodados (AAAA-MM)",
+            "schema": {
+              "pattern": "^\\d{4}-(0[1-9]|1[0-2])$",
+              "example": "2026-10",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BillingPreviewDto"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Erro (formato padrão)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Quanto há a faturar por veículo no mês (km × R$/km)",
+        "tags": [
+          "daily-logs"
+        ]
+      },
+      "post": {
+        "operationId": "Mileage_bill",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateBillingDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BillingResultDto"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Erro (formato padrão)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Gera contas a receber com os km ainda não faturados do mês (uma por veículo)",
+        "tags": [
+          "daily-logs"
+        ]
+      }
+    },
+    "/api/v1/daily-logs/{id}": {
+      "patch": {
+        "operationId": "Mileage_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateDailyLogDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DailyLogDto"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Erro (formato padrão)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "daily-logs"
+        ]
+      },
+      "delete": {
+        "operationId": "Mileage_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "default": {
+            "description": "Erro (formato padrão)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "daily-logs"
+        ]
+      }
+    },
+    "/api/v1/maintenances": {
+      "get": {
+        "operationId": "FleetCosts_listMaintenances",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "default": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "pageSize",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20,
+              "type": "number"
+            }
+          },
+          {
+            "name": "vehicleId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "month",
+            "required": false,
+            "in": "query",
+            "description": "Mês do serviço",
+            "schema": {
+              "pattern": "^\\d{4}-(0[1-9]|1[0-2])$",
+              "example": "2026-10",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MaintenanceListDto"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Erro (formato padrão)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "fleet-costs"
+        ]
+      },
+      "post": {
+        "operationId": "FleetCosts_createMaintenance",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateMaintenanceDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MaintenanceDto"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Erro (formato padrão)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Registra manutenção e gera a conta a pagar ligada ao veículo (opcionalmente já paga)",
+        "tags": [
+          "fleet-costs"
+        ]
+      }
+    },
+    "/api/v1/maintenances/{id}": {
+      "get": {
+        "operationId": "FleetCosts_getMaintenance",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MaintenanceDto"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Erro (formato padrão)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "fleet-costs"
+        ]
+      }
+    },
+    "/api/v1/maintenances/{id}/cancel": {
+      "post": {
+        "operationId": "FleetCosts_cancelMaintenance",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CancelCostDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MaintenanceDto"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Erro (formato padrão)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Cancela a conta da manutenção (estorne pagamentos antes)",
+        "tags": [
+          "fleet-costs"
+        ]
+      }
+    },
+    "/api/v1/fuelings": {
+      "get": {
+        "operationId": "FleetCosts_listFuelings",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "default": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "pageSize",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20,
+              "type": "number"
+            }
+          },
+          {
+            "name": "vehicleId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "month",
+            "required": false,
+            "in": "query",
+            "description": "Mês do abastecimento",
+            "schema": {
+              "pattern": "^\\d{4}-(0[1-9]|1[0-2])$",
+              "example": "2026-10",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FuelingListDto"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Erro (formato padrão)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "fleet-costs"
+        ]
+      },
+      "post": {
+        "operationId": "FleetCosts_createFueling",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateFuelingDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FuelingDto"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Erro (formato padrão)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Registra abastecimento (litros × preço) e gera a conta a pagar",
+        "tags": [
+          "fleet-costs"
+        ]
+      }
+    },
+    "/api/v1/fuelings/{id}/cancel": {
+      "post": {
+        "operationId": "FleetCosts_cancelFueling",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CancelCostDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FuelingDto"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Erro (formato padrão)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "fleet-costs"
+        ]
+      }
+    },
+    "/api/v1/fleet-costs/summary": {
+      "get": {
+        "operationId": "FleetCosts_summary",
+        "parameters": [
+          {
+            "name": "month",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "pattern": "^\\d{4}-(0[1-9]|1[0-2])$",
+              "example": "2026-10",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CostSummaryDto"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Erro (formato padrão)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Por veículo no mês: km, valor do km, combustível, manutenção, km/l e custo por km",
+        "tags": [
+          "fleet-costs"
+        ]
+      }
+    },
+    "/api/v1/my/expense-categories": {
+      "get": {
+        "operationId": "FleetCosts_myCategories",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExpenseCategoryListDto"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Erro (formato padrão)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "fleet-costs"
+        ]
+      }
+    },
+    "/api/v1/my/expenses": {
+      "get": {
+        "operationId": "FleetCosts_listMine",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "default": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "pageSize",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DriverExpenseListDto"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Erro (formato padrão)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "fleet-costs"
+        ]
+      },
+      "post": {
+        "operationId": "FleetCosts_createMine",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateDriverExpenseDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DriverExpenseDto"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Erro (formato padrão)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Motorista envia uma despesa; fica aguardando aprovação",
+        "tags": [
+          "fleet-costs"
+        ]
+      }
+    },
+    "/api/v1/my/expenses/{id}/withdraw": {
+      "post": {
+        "operationId": "FleetCosts_withdrawMine",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DriverExpenseDto"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Erro (formato padrão)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "fleet-costs"
+        ]
+      }
+    },
+    "/api/v1/expense-approvals": {
+      "get": {
+        "operationId": "FleetCosts_listApprovals",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "default": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "pageSize",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20,
+              "type": "number"
+            }
+          },
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/ApprovalStatus"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DriverExpenseListDto"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Erro (formato padrão)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "fleet-costs"
+        ]
+      }
+    },
+    "/api/v1/expense-approvals/{id}/approve": {
+      "post": {
+        "operationId": "FleetCosts_approve",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DriverExpenseDto"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Erro (formato padrão)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "fleet-costs"
+        ]
+      }
+    },
+    "/api/v1/expense-approvals/{id}/reject": {
+      "post": {
+        "operationId": "FleetCosts_reject",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RejectExpenseDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DriverExpenseDto"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Erro (formato padrão)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "fleet-costs"
+        ]
+      }
+    },
     "/api/v1/payables": {
       "get": {
         "operationId": "Payables_list",
@@ -2376,6 +4082,15 @@
             "description": "OPEN = pendente ou parcial; OVERDUE = em aberto e vencida",
             "schema": {
               "$ref": "#/components/schemas/PayableStatusFilter"
+            }
+          },
+          {
+            "name": "approval",
+            "required": false,
+            "in": "query",
+            "description": "Despesas enviadas por motoristas entram como PENDING_APPROVAL",
+            "schema": {
+              "$ref": "#/components/schemas/ApprovalFilter"
             }
           }
         ],
@@ -2664,6 +4379,437 @@
         "summary": "Registra pagamento total ou parcial (idempotente pela idempotencyKey)",
         "tags": [
           "payables"
+        ]
+      }
+    },
+    "/api/v1/contractors": {
+      "get": {
+        "operationId": "Contractors_list",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ContractorDto"
+                  }
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Erro (formato padrão)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "contractors"
+        ]
+      },
+      "post": {
+        "operationId": "Contractors_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateContractorDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ContractorDto"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Erro (formato padrão)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "contractors"
+        ]
+      }
+    },
+    "/api/v1/contractors/{id}": {
+      "patch": {
+        "operationId": "Contractors_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateContractorDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ContractorDto"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Erro (formato padrão)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "contractors"
+        ]
+      },
+      "delete": {
+        "operationId": "Contractors_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "default": {
+            "description": "Erro (formato padrão)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "contractors"
+        ]
+      }
+    },
+    "/api/v1/contracts": {
+      "get": {
+        "operationId": "Contracts_list",
+        "parameters": [
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/ContractStatus"
+            }
+          },
+          {
+            "name": "contractorId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ContractDto"
+                  }
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Erro (formato padrão)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "contracts"
+        ]
+      },
+      "post": {
+        "operationId": "Contracts_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateContractDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ContractDto"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Erro (formato padrão)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Cria o contrato como rascunho; ativar gera as contas a receber",
+        "tags": [
+          "contracts"
+        ]
+      }
+    },
+    "/api/v1/contracts/{id}": {
+      "get": {
+        "operationId": "Contracts_get",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ContractDetailDto"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Erro (formato padrão)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "contracts"
+        ]
+      },
+      "patch": {
+        "operationId": "Contracts_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateContractDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ContractDto"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Erro (formato padrão)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Altera o contrato; vale para as competências ainda não geradas",
+        "tags": [
+          "contracts"
+        ]
+      }
+    },
+    "/api/v1/contracts/{id}/status": {
+      "post": {
+        "operationId": "Contracts_status",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ContractStatusDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ContractDto"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Erro (formato padrão)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Ativa, suspende, encerra ou cancela; encerrar/cancelar cancela as contas futuras sem recebimento",
+        "tags": [
+          "contracts"
         ]
       }
     },
@@ -5277,6 +7423,12 @@
               }
             ]
           },
+          "ratePerKm": {
+            "type": "string",
+            "nullable": true,
+            "example": "3.50",
+            "description": "R$ por km rodado; null = não definido"
+          },
           "notes": {
             "type": "string",
             "nullable": true
@@ -5300,6 +7452,7 @@
           "year",
           "odometerKm",
           "status",
+          "ratePerKm",
           "notes",
           "archivedAt",
           "createdAt"
@@ -5458,6 +7611,12 @@
               }
             ]
           },
+          "ratePerKm": {
+            "type": "string",
+            "nullable": true,
+            "example": "3.50",
+            "description": "R$ por km rodado; null = não definido"
+          },
           "notes": {
             "type": "string",
             "nullable": true
@@ -5494,6 +7653,7 @@
           "year",
           "odometerKm",
           "status",
+          "ratePerKm",
           "notes",
           "archivedAt",
           "createdAt",
@@ -5539,6 +7699,12 @@
                 "$ref": "#/components/schemas/VehicleStatus"
               }
             ]
+          },
+          "ratePerKm": {
+            "type": "string",
+            "nullable": true,
+            "example": "3.50",
+            "description": "Quanto o veículo fatura por km rodado (R$/km, até 4 casas)"
           },
           "notes": {
             "type": "object",
@@ -5589,9 +7755,20 @@
               }
             ]
           },
+          "ratePerKm": {
+            "type": "string",
+            "nullable": true,
+            "example": "3.50",
+            "description": "Quanto o veículo fatura por km rodado (R$/km, até 4 casas)"
+          },
           "notes": {
             "type": "object",
             "nullable": true
+          },
+          "applyRateToUnbilled": {
+            "type": "boolean",
+            "default": true,
+            "description": "Ao mudar ratePerKm, recalcula também os registros diários ainda não faturados"
           }
         }
       },
@@ -5909,32 +8086,197 @@
           "expensesByCategory"
         ]
       },
-      "PayableStatusFilter": {
+      "EmploymentType": {
         "type": "string",
         "enum": [
-          "PENDING",
-          "PARTIALLY_PAID",
-          "PAID",
-          "CANCELED",
-          "OPEN",
-          "OVERDUE"
+          "EMPLOYEE",
+          "CONTRACTOR",
+          "PARTNER",
+          "OTHER"
         ]
       },
-      "PayableStatus": {
-        "type": "string",
-        "enum": [
-          "PENDING",
-          "PARTIALLY_PAID",
-          "PAID",
-          "CANCELED"
+      "RefDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name"
         ]
       },
-      "EntryKind": {
+      "DriverDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "document": {
+            "type": "string"
+          },
+          "phone": {
+            "type": "string",
+            "nullable": true
+          },
+          "hiredAt": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          },
+          "employmentType": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/EmploymentType"
+              }
+            ]
+          },
+          "status": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/RecordStatus"
+              }
+            ]
+          },
+          "member": {
+            "nullable": true,
+            "description": "Usuário vinculado (portal do motorista)",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/RefDto"
+              }
+            ]
+          },
+          "currentRoutes": {
+            "description": "Rotas em que está atribuído hoje",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "document",
+          "phone",
+          "hiredAt",
+          "employmentType",
+          "status",
+          "member",
+          "currentRoutes"
+        ]
+      },
+      "CreateDriverDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "José da Silva"
+          },
+          "document": {
+            "type": "string",
+            "example": "52998224725",
+            "description": "CPF; pontos e traço são aceitos"
+          },
+          "phone": {
+            "type": "string",
+            "nullable": true
+          },
+          "hiredAt": {
+            "type": "string",
+            "format": "date",
+            "example": "2026-10-15",
+            "description": "Data de admissão"
+          },
+          "employmentType": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/EmploymentType"
+              }
+            ]
+          },
+          "status": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/RecordStatus"
+              }
+            ]
+          },
+          "memberId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true,
+            "description": "Membro da empresa (usuário) que acessa o portal do motorista"
+          }
+        },
+        "required": [
+          "name",
+          "document"
+        ]
+      },
+      "UpdateDriverDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "José da Silva"
+          },
+          "document": {
+            "type": "string",
+            "example": "52998224725",
+            "description": "CPF; pontos e traço são aceitos"
+          },
+          "phone": {
+            "type": "string",
+            "nullable": true
+          },
+          "hiredAt": {
+            "type": "string",
+            "format": "date",
+            "example": "2026-10-15",
+            "description": "Data de admissão"
+          },
+          "employmentType": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/EmploymentType"
+              }
+            ]
+          },
+          "status": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/RecordStatus"
+              }
+            ]
+          },
+          "memberId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true,
+            "description": "Membro da empresa (usuário) que acessa o portal do motorista"
+          }
+        }
+      },
+      "TransportType": {
         "type": "string",
         "enum": [
-          "SINGLE",
-          "RECURRING",
-          "INSTALLMENT"
+          "SCHOOL",
+          "MUNICIPAL",
+          "CORPORATE",
+          "CHARTER",
+          "INTERCITY",
+          "OTHER"
         ]
       },
       "VehicleRefDto": {
@@ -5957,12 +8299,1522 @@
           "plate"
         ]
       },
+      "AssignmentSummaryDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "vehicle": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/VehicleRefDto"
+              }
+            ]
+          },
+          "driver": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/RefDto"
+              }
+            ]
+          },
+          "startDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "endDate": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "vehicle",
+          "driver",
+          "startDate",
+          "endDate"
+        ]
+      },
+      "RouteDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "transportType": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/TransportType"
+              }
+            ]
+          },
+          "region": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/RecordStatus"
+              }
+            ]
+          },
+          "current": {
+            "description": "Atribuições vigentes hoje",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AssignmentSummaryDto"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "description",
+          "transportType",
+          "region",
+          "status",
+          "current"
+        ]
+      },
+      "CreateRouteDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Escola Municipal Centro — manhã"
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "transportType": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/TransportType"
+              }
+            ]
+          },
+          "region": {
+            "type": "string",
+            "nullable": true,
+            "example": "Zona Norte"
+          },
+          "status": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/RecordStatus"
+              }
+            ]
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
+      "UpdateRouteDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Escola Municipal Centro — manhã"
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "transportType": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/TransportType"
+              }
+            ]
+          },
+          "region": {
+            "type": "string",
+            "nullable": true,
+            "example": "Zona Norte"
+          },
+          "status": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/RecordStatus"
+              }
+            ]
+          }
+        }
+      },
+      "AssignmentDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "vehicle": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/VehicleRefDto"
+              }
+            ]
+          },
+          "driver": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/RefDto"
+              }
+            ]
+          },
+          "startDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "endDate": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          },
+          "route": {
+            "$ref": "#/components/schemas/RefDto"
+          },
+          "notes": {
+            "type": "string",
+            "nullable": true
+          },
+          "active": {
+            "type": "boolean",
+            "description": "Vigente hoje"
+          }
+        },
+        "required": [
+          "id",
+          "vehicle",
+          "driver",
+          "startDate",
+          "endDate",
+          "route",
+          "notes",
+          "active"
+        ]
+      },
+      "MyAssignmentsDto": {
+        "type": "object",
+        "properties": {
+          "driver": {
+            "nullable": true,
+            "description": "Cadastro de motorista ligado ao seu usuário; null se não houver",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/RefDto"
+              }
+            ]
+          },
+          "assignments": {
+            "description": "Atribuições vigentes hoje",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AssignmentDto"
+            }
+          },
+          "vehicles": {
+            "description": "Veículos em que você pode registrar km hoje",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/VehicleRefDto"
+            }
+          }
+        },
+        "required": [
+          "driver",
+          "assignments",
+          "vehicles"
+        ]
+      },
+      "CreateAssignmentDto": {
+        "type": "object",
+        "properties": {
+          "routeId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "vehicleId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "driverId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "startDate": {
+            "type": "string",
+            "format": "date",
+            "example": "2026-10-01"
+          },
+          "endDate": {
+            "type": "string",
+            "format": "date",
+            "example": "2026-10-15",
+            "description": "Último dia (vazio = sem data para terminar)"
+          },
+          "notes": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "routeId",
+          "startDate"
+        ]
+      },
+      "EndAssignmentDto": {
+        "type": "object",
+        "properties": {
+          "endDate": {
+            "type": "string",
+            "format": "date",
+            "description": "Último dia da atribuição"
+          }
+        },
+        "required": [
+          "endDate"
+        ]
+      },
+      "DailyLogDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "vehicle": {
+            "$ref": "#/components/schemas/VehicleRefDto"
+          },
+          "date": {
+            "type": "string",
+            "format": "date"
+          },
+          "kmDriven": {
+            "type": "string",
+            "example": "120.5"
+          },
+          "odometerStart": {
+            "type": "number",
+            "nullable": true
+          },
+          "odometerEnd": {
+            "type": "number",
+            "nullable": true
+          },
+          "route": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/RefDto"
+              }
+            ]
+          },
+          "driver": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/RefDto"
+              }
+            ]
+          },
+          "ratePerKm": {
+            "type": "string",
+            "nullable": true,
+            "description": "R$/km aplicado; null sem finance:read ou sem taxa no veículo"
+          },
+          "amount": {
+            "type": "string",
+            "nullable": true,
+            "description": "km × taxa; null sem finance:read ou sem taxa"
+          },
+          "billed": {
+            "type": "boolean",
+            "description": "Já virou conta a receber (não pode mais ser alterado)"
+          },
+          "receivableId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "notes": {
+            "type": "string",
+            "nullable": true
+          },
+          "editable": {
+            "type": "boolean",
+            "description": "O usuário logado pode editar ou excluir"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "vehicle",
+          "date",
+          "kmDriven",
+          "odometerStart",
+          "odometerEnd",
+          "route",
+          "driver",
+          "ratePerKm",
+          "amount",
+          "billed",
+          "receivableId",
+          "notes",
+          "editable",
+          "createdAt"
+        ]
+      },
+      "DailyLogSummaryDto": {
+        "type": "object",
+        "properties": {
+          "days": {
+            "type": "number"
+          },
+          "km": {
+            "type": "string",
+            "example": "2450.5"
+          },
+          "amount": {
+            "type": "string",
+            "nullable": true,
+            "description": "null sem finance:read"
+          },
+          "unbilledAmount": {
+            "type": "string",
+            "nullable": true
+          },
+          "missingRateDays": {
+            "type": "number",
+            "description": "Dias sem taxa definida no veículo (não entram no valor)"
+          }
+        },
+        "required": [
+          "days",
+          "km",
+          "amount",
+          "unbilledAmount",
+          "missingRateDays"
+        ]
+      },
+      "DailyLogListDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DailyLogDto"
+            }
+          },
+          "summary": {
+            "$ref": "#/components/schemas/DailyLogSummaryDto"
+          }
+        },
+        "required": [
+          "items",
+          "summary"
+        ]
+      },
+      "CreateDailyLogDto": {
+        "type": "object",
+        "properties": {
+          "vehicleId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "date": {
+            "type": "string",
+            "format": "date",
+            "example": "2026-10-20"
+          },
+          "kmDriven": {
+            "type": "string",
+            "example": "120.5",
+            "description": "km rodados no dia (1 casa). Pode ser omitido se informar os hodômetros."
+          },
+          "odometerStart": {
+            "type": "number",
+            "nullable": true,
+            "description": "Hodômetro na saída"
+          },
+          "odometerEnd": {
+            "type": "number",
+            "nullable": true,
+            "description": "Hodômetro na chegada"
+          },
+          "routeId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "driverId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true,
+            "description": "Ignorado para motoristas (vale o cadastro deles)"
+          },
+          "notes": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "vehicleId",
+          "date"
+        ]
+      },
+      "BillingPreviewRowDto": {
+        "type": "object",
+        "properties": {
+          "vehicle": {
+            "$ref": "#/components/schemas/VehicleRefDto"
+          },
+          "ratePerKm": {
+            "type": "string",
+            "nullable": true,
+            "description": "Taxa atual do veículo"
+          },
+          "days": {
+            "type": "number",
+            "description": "Dias a faturar"
+          },
+          "km": {
+            "type": "string"
+          },
+          "amount": {
+            "type": "string",
+            "description": "Valor a faturar (dias sem taxa ficam de fora)"
+          },
+          "missingRateDays": {
+            "type": "number"
+          },
+          "billedAmount": {
+            "type": "string",
+            "description": "Valor já faturado no mês"
+          },
+          "billedDays": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "vehicle",
+          "ratePerKm",
+          "days",
+          "km",
+          "amount",
+          "missingRateDays",
+          "billedAmount",
+          "billedDays"
+        ]
+      },
+      "BillingPreviewDto": {
+        "type": "object",
+        "properties": {
+          "month": {
+            "type": "string",
+            "example": "2026-10"
+          },
+          "vehicles": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BillingPreviewRowDto"
+            }
+          },
+          "totalAmount": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "month",
+          "vehicles",
+          "totalAmount"
+        ]
+      },
+      "CreateBillingDto": {
+        "type": "object",
+        "properties": {
+          "month": {
+            "type": "string",
+            "example": "2026-10",
+            "pattern": "^\\d{4}-(0[1-9]|1[0-2])$",
+            "description": "Mês dos km rodados; vira a competência da conta a receber"
+          },
+          "dueDate": {
+            "type": "string",
+            "format": "date",
+            "example": "2026-11-05"
+          },
+          "vehicleIds": {
+            "description": "Veículos a faturar (uma conta a receber por veículo)",
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          "categoryId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Categoria de receita (padrão: Contratos)"
+          }
+        },
+        "required": [
+          "month",
+          "dueDate",
+          "vehicleIds"
+        ]
+      },
+      "BillingResultItemDto": {
+        "type": "object",
+        "properties": {
+          "vehicle": {
+            "$ref": "#/components/schemas/VehicleRefDto"
+          },
+          "receivableId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "description": {
+            "type": "string"
+          },
+          "days": {
+            "type": "number"
+          },
+          "km": {
+            "type": "string"
+          },
+          "amount": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "vehicle",
+          "receivableId",
+          "description",
+          "days",
+          "km",
+          "amount"
+        ]
+      },
+      "BillingResultDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/BillingResultItemDto"
+            }
+          }
+        },
+        "required": [
+          "items"
+        ]
+      },
+      "UpdateDailyLogDto": {
+        "type": "object",
+        "properties": {
+          "kmDriven": {
+            "type": "string",
+            "example": "120.5"
+          },
+          "odometerStart": {
+            "type": "number",
+            "nullable": true
+          },
+          "odometerEnd": {
+            "type": "number",
+            "nullable": true
+          },
+          "routeId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "driverId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "notes": {
+            "type": "string",
+            "nullable": true
+          }
+        }
+      },
+      "MaintenanceType": {
+        "type": "string",
+        "enum": [
+          "PREVENTIVE",
+          "CORRECTIVE",
+          "OIL_CHANGE",
+          "TIRES",
+          "MECHANICAL",
+          "ELECTRICAL",
+          "OTHER"
+        ]
+      },
+      "PayableStatus": {
+        "type": "string",
+        "enum": [
+          "PENDING",
+          "PARTIALLY_PAID",
+          "PAID",
+          "CANCELED"
+        ]
+      },
       "ApprovalStatus": {
         "type": "string",
         "enum": [
           "APPROVED",
           "PENDING_APPROVAL",
           "REJECTED"
+        ]
+      },
+      "CostPayableRefDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PayableStatus"
+              }
+            ]
+          },
+          "approvalStatus": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ApprovalStatus"
+              }
+            ]
+          },
+          "paidAmount": {
+            "type": "string"
+          },
+          "dueDate": {
+            "type": "string",
+            "format": "date"
+          }
+        },
+        "required": [
+          "id",
+          "status",
+          "approvalStatus",
+          "paidAmount",
+          "dueDate"
+        ]
+      },
+      "MaintenanceDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "vehicle": {
+            "$ref": "#/components/schemas/VehicleRefDto"
+          },
+          "type": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/MaintenanceType"
+              }
+            ]
+          },
+          "description": {
+            "type": "string"
+          },
+          "date": {
+            "type": "string",
+            "format": "date"
+          },
+          "amount": {
+            "type": "string"
+          },
+          "odometerKm": {
+            "type": "number",
+            "nullable": true
+          },
+          "supplierName": {
+            "type": "string",
+            "nullable": true
+          },
+          "notes": {
+            "type": "string",
+            "nullable": true
+          },
+          "payable": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/CostPayableRefDto"
+              }
+            ]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        },
+        "required": [
+          "id",
+          "vehicle",
+          "type",
+          "description",
+          "date",
+          "amount",
+          "odometerKm",
+          "supplierName",
+          "notes",
+          "payable",
+          "createdAt"
+        ]
+      },
+      "MaintenanceListDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/MaintenanceDto"
+            }
+          },
+          "total": {
+            "type": "number"
+          },
+          "page": {
+            "type": "number"
+          },
+          "pageSize": {
+            "type": "number"
+          },
+          "amount": {
+            "type": "string",
+            "description": "Soma dos não cancelados no filtro"
+          }
+        },
+        "required": [
+          "items",
+          "total",
+          "page",
+          "pageSize",
+          "amount"
+        ]
+      },
+      "SettleNowDto": {
+        "type": "object",
+        "properties": {
+          "accountId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "settledAt": {
+            "type": "string",
+            "format": "date",
+            "example": "2026-10-15",
+            "description": "Data efetiva (padrão: hoje; não pode ser futura)"
+          },
+          "method": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PaymentMethod"
+              }
+            ]
+          },
+          "idempotencyKey": {
+            "type": "string",
+            "description": "Chave gerada pelo cliente por tentativa"
+          }
+        },
+        "required": [
+          "accountId",
+          "method",
+          "idempotencyKey"
+        ]
+      },
+      "CreateMaintenanceDto": {
+        "type": "object",
+        "properties": {
+          "vehicleId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "type": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/MaintenanceType"
+              }
+            ]
+          },
+          "description": {
+            "type": "string",
+            "example": "Troca de óleo e filtros"
+          },
+          "date": {
+            "type": "string",
+            "format": "date",
+            "example": "2026-10-15"
+          },
+          "amount": {
+            "type": "string",
+            "example": "850.00",
+            "pattern": "^\\d{1,12}(\\.\\d{1,2})?$",
+            "description": "Valor do serviço (gera a conta a pagar)"
+          },
+          "dueDate": {
+            "type": "string",
+            "format": "date",
+            "example": "2026-10-15",
+            "description": "Vencimento da conta (padrão: a data do serviço)"
+          },
+          "categoryId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Categoria de despesa (padrão: Manutenção; Pneus para o tipo TIRES)"
+          },
+          "odometerKm": {
+            "type": "number",
+            "nullable": true
+          },
+          "supplierName": {
+            "type": "string",
+            "nullable": true,
+            "example": "Oficina do João"
+          },
+          "notes": {
+            "type": "string",
+            "nullable": true
+          },
+          "settleNow": {
+            "description": "Informe para lançar já pago",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/SettleNowDto"
+              }
+            ]
+          }
+        },
+        "required": [
+          "vehicleId",
+          "type",
+          "description",
+          "date",
+          "amount"
+        ]
+      },
+      "CancelCostDto": {
+        "type": "object",
+        "properties": {
+          "reason": {
+            "type": "string",
+            "minLength": 3,
+            "example": "Lançado em duplicidade"
+          }
+        },
+        "required": [
+          "reason"
+        ]
+      },
+      "FuelType": {
+        "type": "string",
+        "enum": [
+          "DIESEL",
+          "DIESEL_S10",
+          "GASOLINE",
+          "ETHANOL",
+          "CNG",
+          "OTHER"
+        ]
+      },
+      "FuelingDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "vehicle": {
+            "$ref": "#/components/schemas/VehicleRefDto"
+          },
+          "driver": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/RefDto"
+              }
+            ]
+          },
+          "fuelType": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/FuelType"
+              }
+            ]
+          },
+          "date": {
+            "type": "string",
+            "format": "date"
+          },
+          "liters": {
+            "type": "string"
+          },
+          "pricePerLiter": {
+            "type": "string"
+          },
+          "amount": {
+            "type": "string"
+          },
+          "odometerKm": {
+            "type": "number",
+            "nullable": true
+          },
+          "station": {
+            "type": "string",
+            "nullable": true
+          },
+          "payable": {
+            "$ref": "#/components/schemas/CostPayableRefDto"
+          }
+        },
+        "required": [
+          "id",
+          "vehicle",
+          "driver",
+          "fuelType",
+          "date",
+          "liters",
+          "pricePerLiter",
+          "amount",
+          "odometerKm",
+          "station",
+          "payable"
+        ]
+      },
+      "FuelingListDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FuelingDto"
+            }
+          },
+          "total": {
+            "type": "number"
+          },
+          "page": {
+            "type": "number"
+          },
+          "pageSize": {
+            "type": "number"
+          },
+          "liters": {
+            "type": "string"
+          },
+          "amount": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "items",
+          "total",
+          "page",
+          "pageSize",
+          "liters",
+          "amount"
+        ]
+      },
+      "CreateFuelingDto": {
+        "type": "object",
+        "properties": {
+          "fuelType": {
+            "default": "DIESEL",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/FuelType"
+              }
+            ]
+          },
+          "liters": {
+            "type": "string",
+            "example": "45.320",
+            "description": "Litros (até 3 casas)"
+          },
+          "pricePerLiter": {
+            "type": "string",
+            "example": "6.099",
+            "description": "Preço por litro (até 4 casas)"
+          },
+          "odometerKm": {
+            "type": "number",
+            "nullable": true
+          },
+          "station": {
+            "type": "string",
+            "nullable": true,
+            "example": "Posto Central"
+          },
+          "vehicleId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "date": {
+            "type": "string",
+            "format": "date",
+            "example": "2026-10-15"
+          },
+          "amount": {
+            "type": "string",
+            "example": "276.41",
+            "pattern": "^\\d{1,12}(\\.\\d{1,2})?$",
+            "description": "Total da nota, quando difere de litros × preço por arredondamento da bomba"
+          },
+          "dueDate": {
+            "type": "string",
+            "format": "date",
+            "example": "2026-10-15",
+            "description": "Vencimento da conta (padrão: a data do abastecimento)"
+          },
+          "driverId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "notes": {
+            "type": "string",
+            "nullable": true
+          },
+          "settleNow": {
+            "description": "Informe para lançar já pago",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/SettleNowDto"
+              }
+            ]
+          }
+        },
+        "required": [
+          "fuelType",
+          "liters",
+          "pricePerLiter",
+          "vehicleId",
+          "date"
+        ]
+      },
+      "VehicleCostRowDto": {
+        "type": "object",
+        "properties": {
+          "vehicle": {
+            "$ref": "#/components/schemas/VehicleRefDto"
+          },
+          "km": {
+            "type": "string",
+            "description": "km rodados (registro diário)"
+          },
+          "kmRevenue": {
+            "type": "string",
+            "description": "Valor do km rodado (km × R$/km)"
+          },
+          "liters": {
+            "type": "string"
+          },
+          "fuelCost": {
+            "type": "string"
+          },
+          "maintenanceCost": {
+            "type": "string"
+          },
+          "kmPerLiter": {
+            "type": "string",
+            "nullable": true,
+            "description": "km por litro no mês"
+          },
+          "costPerKm": {
+            "type": "string",
+            "nullable": true,
+            "description": "Custo (combustível + manutenção) por km, 4 casas"
+          }
+        },
+        "required": [
+          "vehicle",
+          "km",
+          "kmRevenue",
+          "liters",
+          "fuelCost",
+          "maintenanceCost",
+          "kmPerLiter",
+          "costPerKm"
+        ]
+      },
+      "CostSummaryDto": {
+        "type": "object",
+        "properties": {
+          "month": {
+            "type": "string",
+            "example": "2026-10"
+          },
+          "vehicles": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/VehicleCostRowDto"
+            }
+          }
+        },
+        "required": [
+          "month",
+          "vehicles"
+        ]
+      },
+      "ExpenseCategoryListDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/CategoryRefDto"
+            }
+          }
+        },
+        "required": [
+          "items"
+        ]
+      },
+      "EntryKind": {
+        "type": "string",
+        "enum": [
+          "SINGLE",
+          "RECURRING",
+          "INSTALLMENT"
+        ]
+      },
+      "DriverExpenseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "description": {
+            "type": "string"
+          },
+          "category": {
+            "$ref": "#/components/schemas/CategoryRefDto"
+          },
+          "amount": {
+            "type": "string"
+          },
+          "paidAmount": {
+            "type": "string"
+          },
+          "openAmount": {
+            "type": "string",
+            "description": "Saldo em aberto = valor − pago"
+          },
+          "competence": {
+            "type": "string",
+            "example": "2026-10"
+          },
+          "dueDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "status": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PayableStatus"
+              }
+            ]
+          },
+          "overdue": {
+            "type": "boolean",
+            "description": "Derivado: em aberto e vencimento antes de hoje"
+          },
+          "kind": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/EntryKind"
+              }
+            ]
+          },
+          "installmentNumber": {
+            "type": "number",
+            "nullable": true
+          },
+          "installmentCount": {
+            "type": "number",
+            "nullable": true
+          },
+          "installmentGroupId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "recurrenceRuleId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "vehicle": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/VehicleRefDto"
+              }
+            ]
+          },
+          "supplierName": {
+            "type": "string",
+            "nullable": true
+          },
+          "notes": {
+            "type": "string",
+            "nullable": true
+          },
+          "approvalStatus": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ApprovalStatus"
+              }
+            ]
+          },
+          "canceledAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "cancelReason": {
+            "type": "string",
+            "nullable": true
+          },
+          "attachmentsCount": {
+            "type": "number"
+          },
+          "splitVehicles": {
+            "type": "number",
+            "description": "Quantos veículos dividem o valor (0 = sem rateio)"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "driver": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/RefDto"
+              }
+            ]
+          },
+          "fuel": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/FuelingDto"
+              }
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "description",
+          "category",
+          "amount",
+          "paidAmount",
+          "openAmount",
+          "competence",
+          "dueDate",
+          "status",
+          "overdue",
+          "kind",
+          "installmentNumber",
+          "installmentCount",
+          "installmentGroupId",
+          "recurrenceRuleId",
+          "vehicle",
+          "supplierName",
+          "notes",
+          "approvalStatus",
+          "canceledAt",
+          "cancelReason",
+          "attachmentsCount",
+          "splitVehicles",
+          "createdAt",
+          "driver",
+          "fuel"
+        ]
+      },
+      "DriverExpenseListDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/DriverExpenseDto"
+            }
+          },
+          "total": {
+            "type": "number"
+          },
+          "page": {
+            "type": "number"
+          },
+          "pageSize": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "items",
+          "total",
+          "page",
+          "pageSize"
+        ]
+      },
+      "FuelInputDto": {
+        "type": "object",
+        "properties": {
+          "fuelType": {
+            "default": "DIESEL",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/FuelType"
+              }
+            ]
+          },
+          "liters": {
+            "type": "string",
+            "example": "45.320",
+            "description": "Litros (até 3 casas)"
+          },
+          "pricePerLiter": {
+            "type": "string",
+            "example": "6.099",
+            "description": "Preço por litro (até 4 casas)"
+          },
+          "odometerKm": {
+            "type": "number",
+            "nullable": true
+          },
+          "station": {
+            "type": "string",
+            "nullable": true,
+            "example": "Posto Central"
+          }
+        },
+        "required": [
+          "fuelType",
+          "liters",
+          "pricePerLiter"
+        ]
+      },
+      "CreateDriverExpenseDto": {
+        "type": "object",
+        "properties": {
+          "date": {
+            "type": "string",
+            "format": "date",
+            "example": "2026-10-15"
+          },
+          "categoryId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "Categoria de despesa"
+          },
+          "amount": {
+            "type": "string",
+            "example": "120.00",
+            "pattern": "^\\d{1,12}(\\.\\d{1,2})?$"
+          },
+          "description": {
+            "type": "string",
+            "example": "Borracharia na rota"
+          },
+          "vehicleId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true,
+            "description": "Veículo em que o motorista está escalado na data"
+          },
+          "supplierName": {
+            "type": "string",
+            "nullable": true
+          },
+          "notes": {
+            "type": "string",
+            "nullable": true
+          },
+          "fuel": {
+            "description": "Detalhe de abastecimento (exige veículo)",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/FuelInputDto"
+              }
+            ]
+          }
+        },
+        "required": [
+          "date",
+          "categoryId",
+          "amount",
+          "description"
+        ]
+      },
+      "RejectExpenseDto": {
+        "type": "object",
+        "properties": {
+          "reason": {
+            "type": "string",
+            "minLength": 3,
+            "example": "Sem comprovante legível"
+          }
+        },
+        "required": [
+          "reason"
+        ]
+      },
+      "PayableStatusFilter": {
+        "type": "string",
+        "enum": [
+          "PENDING",
+          "PARTIALLY_PAID",
+          "PAID",
+          "CANCELED",
+          "OPEN",
+          "OVERDUE"
+        ]
+      },
+      "ApprovalFilter": {
+        "type": "string",
+        "enum": [
+          "APPROVED",
+          "PENDING_APPROVAL",
+          "REJECTED",
+          "ALL"
         ]
       },
       "PayableDto": {
@@ -6067,6 +9919,10 @@
           "attachmentsCount": {
             "type": "number"
           },
+          "splitVehicles": {
+            "type": "number",
+            "description": "Quantos veículos dividem o valor (0 = sem rateio)"
+          },
           "createdAt": {
             "type": "string",
             "format": "date-time"
@@ -6095,6 +9951,7 @@
           "canceledAt",
           "cancelReason",
           "attachmentsCount",
+          "splitVehicles",
           "createdAt"
         ]
       },
@@ -6227,6 +10084,11 @@
               }
             ]
           },
+          "percent": {
+            "type": "string",
+            "example": "50.000000",
+            "description": "Participação do veículo no valor"
+          },
           "amount": {
             "type": "string"
           }
@@ -6234,6 +10096,7 @@
         "required": [
           "vehicle",
           "method",
+          "percent",
           "amount"
         ]
       },
@@ -6339,6 +10202,10 @@
           "attachmentsCount": {
             "type": "number"
           },
+          "splitVehicles": {
+            "type": "number",
+            "description": "Quantos veículos dividem o valor (0 = sem rateio)"
+          },
           "createdAt": {
             "type": "string",
             "format": "date-time"
@@ -6385,10 +10252,43 @@
           "canceledAt",
           "cancelReason",
           "attachmentsCount",
+          "splitVehicles",
           "createdAt",
           "settlements",
           "attachments",
           "allocations"
+        ]
+      },
+      "SplitMethod": {
+        "type": "string",
+        "enum": [
+          "EQUAL",
+          "PERCENT",
+          "FIXED"
+        ],
+        "description": "Rateio entre veículos: EQUAL (partes iguais), PERCENT ou FIXED (valores)"
+      },
+      "AllocationInputDto": {
+        "type": "object",
+        "properties": {
+          "vehicleId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "percent": {
+            "type": "string",
+            "example": "33.3333",
+            "description": "Obrigatório no rateio PERCENT (soma 100)"
+          },
+          "amount": {
+            "type": "string",
+            "example": "1500.00",
+            "pattern": "^\\d{1,12}(\\.\\d{1,2})?$",
+            "description": "Obrigatório no rateio FIXED (soma = valor total)"
+          }
+        },
+        "required": [
+          "vehicleId"
         ]
       },
       "RecurrenceInputDto": {
@@ -6418,40 +10318,24 @@
           "frequency"
         ]
       },
-      "SettleNowDto": {
-        "type": "object",
-        "properties": {
-          "accountId": {
-            "type": "string",
-            "format": "uuid"
-          },
-          "settledAt": {
-            "type": "string",
-            "format": "date",
-            "example": "2026-10-15",
-            "description": "Data efetiva (padrão: hoje; não pode ser futura)"
-          },
-          "method": {
-            "allOf": [
-              {
-                "$ref": "#/components/schemas/PaymentMethod"
-              }
-            ]
-          },
-          "idempotencyKey": {
-            "type": "string",
-            "description": "Chave gerada pelo cliente por tentativa"
-          }
-        },
-        "required": [
-          "accountId",
-          "method",
-          "idempotencyKey"
-        ]
-      },
       "CreatePayableDto": {
         "type": "object",
         "properties": {
+          "allocationMethod": {
+            "description": "Rateio entre veículos: EQUAL (partes iguais), PERCENT ou FIXED (valores)",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/SplitMethod"
+              }
+            ]
+          },
+          "allocations": {
+            "description": "Veículos do rateio (2 a 50). Substitui vehicleId. Envie [] na edição para desfazer o rateio.",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AllocationInputDto"
+            }
+          },
           "description": {
             "type": "string",
             "example": "Seguro da Van 01"
@@ -6557,6 +10441,21 @@
       "UpdatePayableDto": {
         "type": "object",
         "properties": {
+          "allocationMethod": {
+            "description": "Rateio entre veículos: EQUAL (partes iguais), PERCENT ou FIXED (valores)",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/SplitMethod"
+              }
+            ]
+          },
+          "allocations": {
+            "description": "Veículos do rateio (2 a 50). Substitui vehicleId. Envie [] na edição para desfazer o rateio.",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AllocationInputDto"
+            }
+          },
           "description": {
             "type": "string"
           },
@@ -6681,6 +10580,607 @@
           "payable"
         ]
       },
+      "ContractorKind": {
+        "type": "string",
+        "enum": [
+          "SCHOOL",
+          "CITY_HALL",
+          "PRIVATE_COMPANY",
+          "INDIVIDUAL",
+          "OTHER"
+        ]
+      },
+      "ContractorDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          },
+          "kind": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ContractorKind"
+              }
+            ]
+          },
+          "document": {
+            "type": "string",
+            "nullable": true
+          },
+          "email": {
+            "type": "string",
+            "nullable": true
+          },
+          "phone": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/RecordStatus"
+              }
+            ]
+          },
+          "activeContracts": {
+            "type": "number",
+            "description": "Contratos ativos"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "kind",
+          "document",
+          "email",
+          "phone",
+          "status",
+          "activeContracts"
+        ]
+      },
+      "CreateContractorDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Prefeitura de Campinas"
+          },
+          "kind": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ContractorKind"
+              }
+            ]
+          },
+          "document": {
+            "type": "string",
+            "nullable": true,
+            "description": "CPF ou CNPJ (opcional)"
+          },
+          "email": {
+            "type": "string",
+            "nullable": true
+          },
+          "phone": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/RecordStatus"
+              }
+            ]
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
+      "UpdateContractorDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Prefeitura de Campinas"
+          },
+          "kind": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ContractorKind"
+              }
+            ]
+          },
+          "document": {
+            "type": "string",
+            "nullable": true,
+            "description": "CPF ou CNPJ (opcional)"
+          },
+          "email": {
+            "type": "string",
+            "nullable": true
+          },
+          "phone": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/RecordStatus"
+              }
+            ]
+          }
+        }
+      },
+      "ContractStatus": {
+        "type": "string",
+        "enum": [
+          "DRAFT",
+          "ACTIVE",
+          "SUSPENDED",
+          "ENDED",
+          "CANCELED"
+        ]
+      },
+      "ContractBillingType": {
+        "type": "string",
+        "enum": [
+          "MONTHLY",
+          "FIXED_PERIOD",
+          "VARIABLE"
+        ]
+      },
+      "ContractVehicleDto": {
+        "type": "object",
+        "properties": {
+          "vehicle": {
+            "$ref": "#/components/schemas/VehicleRefDto"
+          },
+          "sharePercent": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "vehicle",
+          "sharePercent"
+        ]
+      },
+      "ContractDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "contractor": {
+            "$ref": "#/components/schemas/RefDto"
+          },
+          "number": {
+            "type": "string",
+            "nullable": true
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "billingType": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ContractBillingType"
+              }
+            ]
+          },
+          "amount": {
+            "type": "string"
+          },
+          "startDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "endDate": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          },
+          "dueDay": {
+            "type": "number",
+            "nullable": true
+          },
+          "dueMonthOffset": {
+            "type": "number"
+          },
+          "revenueCategory": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/RefDto"
+              }
+            ]
+          },
+          "status": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ContractStatus"
+              }
+            ]
+          },
+          "vehicles": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ContractVehicleDto"
+            }
+          },
+          "routes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RefDto"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "contractor",
+          "number",
+          "description",
+          "billingType",
+          "amount",
+          "startDate",
+          "endDate",
+          "dueDay",
+          "dueMonthOffset",
+          "revenueCategory",
+          "status",
+          "vehicles",
+          "routes"
+        ]
+      },
+      "ContractReceivableDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "competence": {
+            "type": "string"
+          },
+          "dueDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "amount": {
+            "type": "string"
+          },
+          "receivedAmount": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "competence",
+          "dueDate",
+          "amount",
+          "receivedAmount",
+          "status"
+        ]
+      },
+      "ContractDetailDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "contractor": {
+            "$ref": "#/components/schemas/RefDto"
+          },
+          "number": {
+            "type": "string",
+            "nullable": true
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "billingType": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ContractBillingType"
+              }
+            ]
+          },
+          "amount": {
+            "type": "string"
+          },
+          "startDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "endDate": {
+            "type": "string",
+            "format": "date",
+            "nullable": true
+          },
+          "dueDay": {
+            "type": "number",
+            "nullable": true
+          },
+          "dueMonthOffset": {
+            "type": "number"
+          },
+          "revenueCategory": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/RefDto"
+              }
+            ]
+          },
+          "status": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ContractStatus"
+              }
+            ]
+          },
+          "vehicles": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ContractVehicleDto"
+            }
+          },
+          "routes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/RefDto"
+            }
+          },
+          "receivables": {
+            "description": "Contas a receber geradas (mais recentes primeiro)",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ContractReceivableDto"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "contractor",
+          "number",
+          "description",
+          "billingType",
+          "amount",
+          "startDate",
+          "endDate",
+          "dueDay",
+          "dueMonthOffset",
+          "revenueCategory",
+          "status",
+          "vehicles",
+          "routes",
+          "receivables"
+        ]
+      },
+      "ContractVehicleInputDto": {
+        "type": "object",
+        "properties": {
+          "vehicleId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "sharePercent": {
+            "type": "string",
+            "nullable": true,
+            "example": "50",
+            "description": "Participação do veículo na receita (soma 100). Vazio em todos = partes iguais."
+          }
+        },
+        "required": [
+          "vehicleId"
+        ]
+      },
+      "CreateContractDto": {
+        "type": "object",
+        "properties": {
+          "contractorId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "number": {
+            "type": "string",
+            "nullable": true,
+            "example": "012/2026"
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "billingType": {
+            "default": "MONTHLY",
+            "description": "MONTHLY e FIXED_PERIOD geram uma conta a receber por mês; VARIABLE é faturado por km ou manualmente",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ContractBillingType"
+              }
+            ]
+          },
+          "amount": {
+            "type": "string",
+            "example": "1500.00",
+            "pattern": "^\\d{1,12}(\\.\\d{1,2})?$",
+            "description": "Valor mensal (em VARIABLE, valor de referência)"
+          },
+          "startDate": {
+            "type": "string",
+            "format": "date",
+            "example": "2026-02-01"
+          },
+          "endDate": {
+            "type": "string",
+            "format": "date",
+            "example": "2026-10-15",
+            "description": "Fim (obrigatório em FIXED_PERIOD)"
+          },
+          "dueDay": {
+            "type": "number",
+            "minimum": 1,
+            "maximum": 31,
+            "default": 10,
+            "description": "Dia do vencimento"
+          },
+          "dueMonthOffset": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 3,
+            "default": 1,
+            "description": "Meses depois da competência para vencer (out → vence em nov = 1)"
+          },
+          "revenueCategoryId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true,
+            "description": "Categoria de receita (padrão: Contratos)"
+          },
+          "vehicles": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ContractVehicleInputDto"
+            }
+          },
+          "routeIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        },
+        "required": [
+          "contractorId",
+          "amount",
+          "startDate"
+        ]
+      },
+      "UpdateContractDto": {
+        "type": "object",
+        "properties": {
+          "contractorId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "number": {
+            "type": "string",
+            "nullable": true,
+            "example": "012/2026"
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "billingType": {
+            "default": "MONTHLY",
+            "description": "MONTHLY e FIXED_PERIOD geram uma conta a receber por mês; VARIABLE é faturado por km ou manualmente",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ContractBillingType"
+              }
+            ]
+          },
+          "amount": {
+            "type": "string",
+            "example": "1500.00",
+            "pattern": "^\\d{1,12}(\\.\\d{1,2})?$",
+            "description": "Valor mensal (em VARIABLE, valor de referência)"
+          },
+          "startDate": {
+            "type": "string",
+            "format": "date",
+            "example": "2026-02-01"
+          },
+          "endDate": {
+            "type": "string",
+            "format": "date",
+            "example": "2026-10-15",
+            "description": "Fim (obrigatório em FIXED_PERIOD)"
+          },
+          "dueDay": {
+            "type": "number",
+            "minimum": 1,
+            "maximum": 31,
+            "default": 10,
+            "description": "Dia do vencimento"
+          },
+          "dueMonthOffset": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 3,
+            "default": 1,
+            "description": "Meses depois da competência para vencer (out → vence em nov = 1)"
+          },
+          "revenueCategoryId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true,
+            "description": "Categoria de receita (padrão: Contratos)"
+          },
+          "vehicles": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ContractVehicleInputDto"
+            }
+          },
+          "routeIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        }
+      },
+      "ContractStatusChange": {
+        "type": "string",
+        "enum": [
+          "ACTIVE",
+          "SUSPENDED",
+          "ENDED",
+          "CANCELED"
+        ]
+      },
+      "ContractStatusDto": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ContractStatusChange"
+              }
+            ]
+          },
+          "endDate": {
+            "type": "string",
+            "format": "date",
+            "example": "2026-10-15",
+            "description": "Último dia, ao encerrar (padrão: hoje)"
+          },
+          "reason": {
+            "type": "string",
+            "description": "Motivo (cancelamento das contas futuras em aberto)"
+          }
+        },
+        "required": [
+          "status"
+        ]
+      },
       "ReceivableStatusFilter": {
         "type": "string",
         "enum": [
@@ -6792,6 +11292,10 @@
           "attachmentsCount": {
             "type": "number"
           },
+          "splitVehicles": {
+            "type": "number",
+            "description": "Quantos veículos dividem o valor (0 = sem rateio)"
+          },
           "createdAt": {
             "type": "string",
             "format": "date-time"
@@ -6818,6 +11322,7 @@
           "canceledAt",
           "cancelReason",
           "attachmentsCount",
+          "splitVehicles",
           "createdAt"
         ]
       },
@@ -6947,6 +11452,10 @@
           "attachmentsCount": {
             "type": "number"
           },
+          "splitVehicles": {
+            "type": "number",
+            "description": "Quantos veículos dividem o valor (0 = sem rateio)"
+          },
           "createdAt": {
             "type": "string",
             "format": "date-time"
@@ -6991,6 +11500,7 @@
           "canceledAt",
           "cancelReason",
           "attachmentsCount",
+          "splitVehicles",
           "createdAt",
           "settlements",
           "attachments",
@@ -7000,6 +11510,21 @@
       "CreateReceivableDto": {
         "type": "object",
         "properties": {
+          "allocationMethod": {
+            "description": "Rateio entre veículos: EQUAL (partes iguais), PERCENT ou FIXED (valores)",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/SplitMethod"
+              }
+            ]
+          },
+          "allocations": {
+            "description": "Veículos do rateio (2 a 50). Substitui vehicleId. Envie [] na edição para desfazer o rateio.",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AllocationInputDto"
+            }
+          },
           "description": {
             "type": "string",
             "example": "Contrato Escola Municipal — outubro"
@@ -7100,6 +11625,21 @@
       "UpdateReceivableDto": {
         "type": "object",
         "properties": {
+          "allocationMethod": {
+            "description": "Rateio entre veículos: EQUAL (partes iguais), PERCENT ou FIXED (valores)",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/SplitMethod"
+              }
+            ]
+          },
+          "allocations": {
+            "description": "Veículos do rateio (2 a 50). Substitui vehicleId. Envie [] na edição para desfazer o rateio.",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AllocationInputDto"
+            }
+          },
           "description": {
             "type": "string"
           },

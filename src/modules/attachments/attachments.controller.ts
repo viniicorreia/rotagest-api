@@ -2,7 +2,7 @@ import { Body, Controller, Delete, Get, HttpCode, Param, ParseUUIDPipe, Post, Re
 import { FileInterceptor } from '@nestjs/platform-express';
 import { ApiBearerAuth, ApiBody, ApiConsumes, ApiCreatedResponse, ApiDefaultResponse, ApiNoContentResponse, ApiOkResponse, ApiOperation, ApiProduces, ApiTags } from '@nestjs/swagger';
 import type { Response } from 'express';
-import { ReqMeta, RequirePermissions, Tenant } from '../../common/decorators';
+import { ReqMeta, RequireAnyPermission, RequirePermissions, Tenant } from '../../common/decorators';
 import { ApiErrorDto } from '../../common/dto/error.dto';
 import type { RequestMeta, TenantContext } from '../../common/tenant/tenant-context';
 import { AttachmentDto } from '../obligations/obligations.dto';
@@ -20,7 +20,7 @@ export class AttachmentsController {
   constructor(private readonly attachments: AttachmentsService) {}
 
   @Post()
-  @RequirePermissions('finance:manage')
+  @RequireAnyPermission('finance:manage', 'expenses:own')
   @UseInterceptors(FileInterceptor('file', { limits: { fileSize: MULTER_HARD_LIMIT, files: 1 } }))
   @ApiConsumes('multipart/form-data')
   @ApiBody({
@@ -42,7 +42,7 @@ export class AttachmentsController {
   }
 
   @Get(':id/download')
-  @RequirePermissions('finance:read')
+  @RequireAnyPermission('finance:read', 'expenses:own')
   @ApiProduces('application/pdf', 'image/png', 'image/jpeg', 'image/webp')
   @ApiOkResponse({ schema: { type: 'string', format: 'binary' } })
   @ApiOperation({ summary: 'Baixa o comprovante (somente da empresa ativa)' })
