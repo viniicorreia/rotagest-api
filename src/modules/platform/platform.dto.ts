@@ -19,7 +19,7 @@ import {
   ValidateNested,
 } from 'class-validator';
 import { CompanyStatusEnum, SubscriptionStatusEnum } from '../../common/dto/enums';
-import { IsDateOnly, IsMoney, MoneyProperty, OptionalDateProperty, OptionalMoneyProperty, PageQueryDto, QueryBoolean, trimOrNull, trimOrUndefined } from '../../common/validation';
+import { IsDateOnly, IsMoney, MoneyProperty, OptionalMoneyProperty, PageQueryDto, QueryBoolean, trimOrNull, trimOrUndefined } from '../../common/validation';
 import { PLAN_FEATURE_KEYS } from '../../domain';
 
 const COMPANY_STATUSES = ['ACTIVE', 'SUSPENDED', 'CANCELED'] as const;
@@ -339,13 +339,13 @@ export class UpdateSubscriptionDto extends ReasonDto {
   @IsIn(SUBSCRIPTION_STATUSES)
   status?: SubscriptionStatus;
 
-  @OptionalDateProperty('Fim do período de teste')
+  @ApiPropertyOptional({ type: String, format: 'date', nullable: true, example: '2026-11-15', description: 'Fim do período de teste; null limpa' })
   @IsOptional()
   @ValidateIf((_, v) => v !== null)
   @IsDateOnly()
   trialEndsAt?: string | null;
 
-  @OptionalDateProperty('Fim do período pago atual')
+  @ApiPropertyOptional({ type: String, format: 'date', nullable: true, example: '2026-11-15', description: 'Fim do período pago atual; null limpa' })
   @IsOptional()
   @ValidateIf((_, v) => v !== null)
   @IsDateOnly()

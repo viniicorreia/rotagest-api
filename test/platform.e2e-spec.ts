@@ -120,7 +120,7 @@ describe('Painel da plataforma (e2e)', () => {
       const res = await as(admin)
         .patch(`/platform/subscriptions/${subscriptionId}`, { planId: small.id, status: 'ACTIVE', reason: 'Cliente contratou o plano Mini' })
         .expect(200);
-      expect(res.body).toMatchObject({ status: 'ACTIVE', plan: { id: small.id }, usage: { vehicles: 2, maxVehicles: 1 } });
+      expect(res.body).toMatchObject({ status: 'ACTIVE', trialEndsAt: null, plan: { id: small.id }, usage: { vehicles: 2, maxVehicles: 1 } });
       expect(res.body.warnings).toHaveLength(1);
       const limit = await as(owner).post('/vehicles', { name: 'Van 03', plate: 'QWE1R23' }).expect(409);
       expect(limit.body.code).toBe('PLAN_LIMIT_REACHED');
@@ -137,6 +137,8 @@ describe('Painel da plataforma (e2e)', () => {
     it('assinatura suspensa bloqueia o acesso; plano arquivado não aceita novas assinaturas', async () => {
       await as(admin).patch(`/platform/subscriptions/${subscriptionId}`, { status: 'SUSPENDED', reason: 'Suspensa a pedido do financeiro' }).expect(200);
       expect((await as(owner).get('/dashboard').expect(403)).body.code).toBe('COMPANY_SUSPENDED');
+      const me = await as(owner).get('/auth/me').expect(200);
+      expect(me.body).toMatchObject({ activeCompany: null, companies: [expect.objectContaining({ id: company.id, status: 'SUSPENDED' })] });
       await as(admin).patch(`/platform/subscriptions/${subscriptionId}`, { status: 'PAST_DUE', reason: 'Volta com pagamento em atraso' }).expect(200);
       await as(owner).get('/subscription').expect(200);
 

@@ -8160,14 +8160,16 @@
           "trialEndsAt": {
             "type": "string",
             "format": "date",
-            "example": "2026-10-15",
-            "description": "Fim do período de teste"
+            "nullable": true,
+            "example": "2026-11-15",
+            "description": "Fim do período de teste; null limpa"
           },
           "currentPeriodEnd": {
             "type": "string",
             "format": "date",
-            "example": "2026-10-15",
-            "description": "Fim do período pago atual"
+            "nullable": true,
+            "example": "2026-11-15",
+            "description": "Fim do período pago atual; null limpa"
           },
           "overrideMaxVehicles": {
             "type": "number",

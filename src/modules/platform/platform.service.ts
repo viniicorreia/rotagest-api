@@ -309,8 +309,11 @@ export class PlatformService {
       if (dto.status !== undefined && dto.status !== before.status) {
         data.status = dto.status;
         data.canceledAt = dto.status === 'CANCELED' ? new Date() : null;
-        // Ativar manualmente abre um novo período a partir de hoje.
-        if (dto.status === 'ACTIVE') data.currentPeriodStart = new Date();
+        // Ativar manualmente abre um novo período a partir de hoje e encerra o teste.
+        if (dto.status === 'ACTIVE') {
+          data.currentPeriodStart = new Date();
+          data.trialEndsAt = null;
+        }
       }
       if (dto.trialEndsAt !== undefined) data.trialEndsAt = dto.trialEndsAt === null ? null : parseDate(dto.trialEndsAt);
       if (dto.currentPeriodEnd !== undefined) data.currentPeriodEnd = dto.currentPeriodEnd === null ? null : parseDate(dto.currentPeriodEnd);

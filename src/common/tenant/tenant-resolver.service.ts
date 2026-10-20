@@ -27,10 +27,7 @@ export class TenantResolver {
       select: { id: true, role: true, permissions: true, status: true, company: { select: { status: true, subscription: { select: { status: true } } } } },
     });
     if (!member || member.status !== 'ACTIVE') return null;
-    if (member.company.status !== 'ACTIVE') return 'SUSPENDED';
-    // Assinatura suspensa ou cancelada pela plataforma também bloqueia o acesso; em atraso (PAST_DUE) não.
-    const sub = member.company.subscription?.status;
-    if (sub === 'SUSPENDED' || sub === 'CANCELED') return 'SUSPENDED';
+    if (effectiveCompanyStatus(member.company) !== 'ACTIVE') return 'SUSPENDED';
     return {
       companyId,
       userId,
@@ -44,4 +41,17 @@ export class TenantResolver {
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 export function isUuid(value: unknown): value is string {
   return typeof value === 'string' && UUID_RE.test(value);
+}
+
+/** Assinatura bloqueada pela plataforma (suspensa ou cancelada). Em atraso (PAST_DUE) não bloqueia. */
+export const BLOCKED_SUBSCRIPTION = ['SUSPENDED', 'CANCELED'] as const;
+
+/** Situação de acesso: a da empresa, ou suspensa quando a assinatura está bloqueada. */
+export function effectiveCompanyStatus(company: {
+  status: 'ACTIVE' | 'SUSPENDED' | 'CANCELED';
+  subscription?: { status: string } | null;
+}): 'ACTIVE' | 'SUSPENDED' | 'CANCELED' {
+  if (company.status !== 'ACTIVE') return company.status;
+  const sub = company.subscription?.status;
+  return sub && (BLOCKED_SUBSCRIPTION as readonly string[]).includes(sub) ? 'SUSPENDED' : 'ACTIVE';
 }
