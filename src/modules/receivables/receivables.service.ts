@@ -337,6 +337,7 @@ export class ReceivablesService {
   private splitOf(dto: { vehicleId?: string | null; allocationMethod?: AllocationSplit['method']; allocations?: { vehicleId: string; percent?: string; amount?: string }[] }, totalCents: number): AllocationSplit | null {
     if (!dto.allocations?.length) return null;
     if (dto.vehicleId) throw badRequest('Escolha um veículo ou um rateio entre veículos, não os dois');
+    if (dto.allocationMethod === 'REVENUE_PROPORTIONAL') throw badRequest('Rateio proporcional à receita vale só para despesas');
     return splitFromInput(dto.allocationMethod ?? 'EQUAL', dto.allocations, totalCents);
   }
 

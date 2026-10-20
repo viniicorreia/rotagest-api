@@ -7,7 +7,7 @@ import type { Tx } from '../../prisma/prisma.service';
  * partes é sempre exatamente o valor da obrigação (método do maior resto).
  * Sem rateio, uma obrigação com veículo é 100% DIRECT daquele veículo.
  */
-export const SPLIT_METHODS = ['EQUAL', 'PERCENT', 'FIXED'] as const;
+export const SPLIT_METHODS = ['EQUAL', 'PERCENT', 'FIXED', 'REVENUE_PROPORTIONAL'] as const;
 export type SplitMethod = (typeof SPLIT_METHODS)[number];
 
 /** Percentual com até 4 casas ("33.3333"). */
@@ -32,6 +32,8 @@ export function splitFromInput(method: SplitMethod, items: AllocationInput[], to
   if (items.length < 2) throw badRequest('Para ratear, escolha pelo menos dois veículos');
   if (new Set(items.map((i) => i.vehicleId)).size !== items.length) throw badRequest('Cada veículo só pode aparecer uma vez no rateio');
   if (method === 'EQUAL') return { method, items: items.map((i) => ({ vehicleId: i.vehicleId, weight: 1 })) };
+  // Pesos definidos depois, pela receita de cada veículo na competência (resolveRevenueWeights).
+  if (method === 'REVENUE_PROPORTIONAL') return { method, items: items.map((i) => ({ vehicleId: i.vehicleId, weight: 0 })) };
   if (method === 'PERCENT') {
     const weights = items.map((i) => {
       if (!i.percent || !PERCENT_PATTERN.test(i.percent)) throw badRequest('Informe o percentual de cada veículo (ex.: 33.3333)');
@@ -49,6 +51,24 @@ export function splitFromInput(method: SplitMethod, items: AllocationInput[], to
   if (cents.some((c) => c <= 0)) throw badRequest('Cada valor do rateio deve ser maior que zero');
   if (cents.reduce((a, b) => a + b, 0) !== totalCents) throw badRequest('Os valores do rateio devem somar o valor total');
   return { method, items: items.map((i, k) => ({ vehicleId: i.vehicleId, weight: cents[k] })) };
+}
+
+/**
+ * Rateio proporcional à receita: o peso de cada veículo é a receita atribuída a
+ * ele (contas a receber não canceladas) na competência. Os pesos ficam gravados
+ * no lançamento; veículos sem receita no mês ficam fora do rateio.
+ */
+export async function resolveRevenueWeights(tx: Tx, companyId: string, split: AllocationSplit, competence: Date): Promise<AllocationSplit> {
+  if (split.method !== 'REVENUE_PROPORTIONAL' || split.items.some((i) => i.weight > 0)) return split;
+  const rows = await tx.revenueAllocation.groupBy({
+    by: ['vehicleId'],
+    where: { companyId, vehicleId: { in: split.items.map((i) => i.vehicleId) }, receivable: { status: { not: 'CANCELED' }, competence } },
+    _sum: { amount: true },
+  });
+  const byVehicle = new Map(rows.map((r) => [r.vehicleId, toCents(r._sum.amount ?? '0')]));
+  const items = split.items.map((i) => ({ vehicleId: i.vehicleId, weight: byVehicle.get(i.vehicleId) ?? 0 })).filter((i) => i.weight > 0);
+  if (items.length === 0) throw businessRule('Nenhum dos veículos escolhidos tem receita nesta competência para ratear proporcionalmente');
+  return { method: split.method, items };
 }
 
 /** Parte de cada veículo em centavos para um valor (uma parcela, uma ocorrência...). */
@@ -98,6 +118,6 @@ export async function currentSplit(tx: Tx, target: Target, companyId: string, ow
   // Percentual e igual mantêm os pesos originais; no valor fixo, o valor atual de
   // cada parte vira o peso. Assim mudar o total preserva as proporções.
   const weight = (a: (typeof split)[number]) =>
-    method === 'PERCENT' ? Math.round(Number(a.percent?.toFixed(6) ?? '0') * 10_000) : method === 'EQUAL' ? 1 : Math.max(1, toCents(a.amount));
+    method === 'PERCENT' || method === 'REVENUE_PROPORTIONAL' ? Math.round(Number(a.percent?.toFixed(6) ?? '0') * 10_000) : method === 'EQUAL' ? 1 : Math.max(1, toCents(a.amount));
   return { method, items: split.map((a) => ({ vehicleId: a.vehicleId!, weight: weight(a) })) };
 }

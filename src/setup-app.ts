@@ -22,6 +22,8 @@ export function setupApp(app: INestApplication): void {
     credentials: true,
     methods: ['GET', 'POST', 'PATCH', 'PUT', 'DELETE'],
     allowedHeaders: ['Content-Type', 'Authorization', 'Idempotency-Key', 'X-Request-Id'],
+    // Sem isto o navegador esconde o nome do arquivo nos downloads (relatórios, comprovantes).
+    exposedHeaders: ['Content-Disposition'],
   });
   app.useGlobalPipes(
     new ValidationPipe({

@@ -4382,6 +4382,615 @@
         ]
       }
     },
+    "/api/v1/reports": {
+      "get": {
+        "operationId": "Reports_catalog",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReportCatalogDto"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Erro (formato padrão)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "reports"
+        ]
+      }
+    },
+    "/api/v1/reports/{key}": {
+      "get": {
+        "operationId": "Reports_get",
+        "parameters": [
+          {
+            "name": "key",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "$ref": "#/components/schemas/ReportKey"
+            }
+          },
+          {
+            "name": "from",
+            "required": false,
+            "in": "query",
+            "description": "Mês inicial (padrão: mês atual)",
+            "schema": {
+              "pattern": "^\\d{4}-(0[1-9]|1[0-2])$",
+              "example": "2026-10",
+              "type": "string"
+            }
+          },
+          {
+            "name": "to",
+            "required": false,
+            "in": "query",
+            "description": "Mês final (padrão: o inicial; até 24 meses)",
+            "schema": {
+              "pattern": "^\\d{4}-(0[1-9]|1[0-2])$",
+              "example": "2026-10",
+              "type": "string"
+            }
+          },
+          {
+            "name": "vehicleId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "routeId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "contractId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "categoryId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "accountId",
+            "required": false,
+            "in": "query",
+            "description": "Fluxo de caixa de uma conta",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "description": "Contas a pagar/receber",
+            "schema": {
+              "$ref": "#/components/schemas/ReportStatusFilter"
+            }
+          },
+          {
+            "name": "compare",
+            "required": false,
+            "in": "query",
+            "description": "Inclui os totais do período anterior de mesmo tamanho",
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReportDto"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Erro (formato padrão)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Relatório da empresa ativa com filtros e comparativo opcional",
+        "tags": [
+          "reports"
+        ]
+      }
+    },
+    "/api/v1/reports/{key}/export": {
+      "get": {
+        "operationId": "Reports_export",
+        "parameters": [
+          {
+            "name": "key",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "$ref": "#/components/schemas/ReportKey"
+            }
+          },
+          {
+            "name": "from",
+            "required": false,
+            "in": "query",
+            "description": "Mês inicial (padrão: mês atual)",
+            "schema": {
+              "pattern": "^\\d{4}-(0[1-9]|1[0-2])$",
+              "example": "2026-10",
+              "type": "string"
+            }
+          },
+          {
+            "name": "to",
+            "required": false,
+            "in": "query",
+            "description": "Mês final (padrão: o inicial; até 24 meses)",
+            "schema": {
+              "pattern": "^\\d{4}-(0[1-9]|1[0-2])$",
+              "example": "2026-10",
+              "type": "string"
+            }
+          },
+          {
+            "name": "vehicleId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "routeId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "contractId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "categoryId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "accountId",
+            "required": false,
+            "in": "query",
+            "description": "Fluxo de caixa de uma conta",
+            "schema": {
+              "format": "uuid",
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "description": "Contas a pagar/receber",
+            "schema": {
+              "$ref": "#/components/schemas/ReportStatusFilter"
+            }
+          },
+          {
+            "name": "compare",
+            "required": false,
+            "in": "query",
+            "description": "Inclui os totais do período anterior de mesmo tamanho",
+            "schema": {
+              "type": "boolean"
+            }
+          },
+          {
+            "name": "format",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "pdf",
+                "xlsx"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Arquivo PDF ou Excel com os mesmos números do relatório"
+          },
+          "default": {
+            "description": "Erro (formato padrão)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "reports"
+        ]
+      }
+    },
+    "/api/v1/closings": {
+      "get": {
+        "operationId": "Closings_list",
+        "parameters": [
+          {
+            "name": "year",
+            "required": false,
+            "in": "query",
+            "description": "Ano (padrão: o atual)",
+            "schema": {
+              "minimum": 2000,
+              "maximum": 2100,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClosingListDto"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Erro (formato padrão)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Situação do fechamento dos 12 meses do ano",
+        "tags": [
+          "closings"
+        ]
+      }
+    },
+    "/api/v1/closings/{month}": {
+      "get": {
+        "operationId": "Closings_get",
+        "parameters": [
+          {
+            "name": "month",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "example": "2026-09",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClosingDetailDto"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Erro (formato padrão)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "closings"
+        ]
+      },
+      "post": {
+        "operationId": "Closings_close",
+        "parameters": [
+          {
+            "name": "month",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "example": "2026-09",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConfirmClosingDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClosingDetailDto"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Erro (formato padrão)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Confirma o fechamento: grava o snapshot e bloqueia lançamentos do mês",
+        "tags": [
+          "closings"
+        ]
+      }
+    },
+    "/api/v1/closings/{month}/preview": {
+      "get": {
+        "operationId": "Closings_preview",
+        "parameters": [
+          {
+            "name": "month",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "example": "2026-09",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClosingSnapshotDto"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Erro (formato padrão)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Prévia do fechamento (não grava nada)",
+        "tags": [
+          "closings"
+        ]
+      }
+    },
+    "/api/v1/closings/{month}/reopen": {
+      "post": {
+        "operationId": "Closings_reopen",
+        "parameters": [
+          {
+            "name": "month",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "example": "2026-09",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReopenClosingDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ClosingDetailDto"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Erro (formato padrão)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Reabre o mês com justificativa (auditado com o snapshot anterior)",
+        "tags": [
+          "closings"
+        ]
+      }
+    },
+    "/api/v1/closings/{month}/export": {
+      "get": {
+        "operationId": "Closings_export",
+        "parameters": [
+          {
+            "name": "month",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "example": "2026-09",
+              "type": "string"
+            }
+          },
+          {
+            "name": "format",
+            "required": true,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "pdf",
+                "xlsx"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Fechamento (ou prévia) em PDF ou Excel"
+          },
+          "default": {
+            "description": "Erro (formato padrão)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "closings"
+        ]
+      }
+    },
     "/api/v1/contractors": {
       "get": {
         "operationId": "Contractors_list",
@@ -10271,9 +10880,10 @@
         "enum": [
           "EQUAL",
           "PERCENT",
-          "FIXED"
+          "FIXED",
+          "REVENUE_PROPORTIONAL"
         ],
-        "description": "Rateio entre veículos: EQUAL (partes iguais), PERCENT ou FIXED (valores)"
+        "description": "Rateio entre veículos: EQUAL (partes iguais), PERCENT, FIXED (valores) ou REVENUE_PROPORTIONAL (pela receita de cada veículo na competência; só despesas)"
       },
       "AllocationInputDto": {
         "type": "object",
@@ -10329,7 +10939,7 @@
         "type": "object",
         "properties": {
           "allocationMethod": {
-            "description": "Rateio entre veículos: EQUAL (partes iguais), PERCENT ou FIXED (valores)",
+            "description": "Rateio entre veículos: EQUAL (partes iguais), PERCENT, FIXED (valores) ou REVENUE_PROPORTIONAL (pela receita de cada veículo na competência; só despesas)",
             "allOf": [
               {
                 "$ref": "#/components/schemas/SplitMethod"
@@ -10449,7 +11059,7 @@
         "type": "object",
         "properties": {
           "allocationMethod": {
-            "description": "Rateio entre veículos: EQUAL (partes iguais), PERCENT ou FIXED (valores)",
+            "description": "Rateio entre veículos: EQUAL (partes iguais), PERCENT, FIXED (valores) ou REVENUE_PROPORTIONAL (pela receita de cada veículo na competência; só despesas)",
             "allOf": [
               {
                 "$ref": "#/components/schemas/SplitMethod"
@@ -10585,6 +11195,576 @@
         "required": [
           "settlement",
           "payable"
+        ]
+      },
+      "ReportKey": {
+        "type": "string",
+        "enum": [
+          "cash-flow",
+          "revenue-by-contract",
+          "expenses-by-category",
+          "result-by-vehicle",
+          "result-by-route",
+          "result-by-period",
+          "payables",
+          "receivables",
+          "fuel",
+          "maintenance"
+        ]
+      },
+      "ReportCatalogItemDto": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ReportKey"
+              }
+            ]
+          },
+          "title": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "key",
+          "title"
+        ]
+      },
+      "ReportCatalogDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReportCatalogItemDto"
+            }
+          }
+        },
+        "required": [
+          "items"
+        ]
+      },
+      "ReportStatusFilter": {
+        "type": "string",
+        "enum": [
+          "OPEN",
+          "OVERDUE",
+          "SETTLED"
+        ]
+      },
+      "ReportRegime": {
+        "type": "string",
+        "enum": [
+          "CASH",
+          "ACCRUAL",
+          "DUE",
+          "OPERATIONAL"
+        ]
+      },
+      "ReportColumnType": {
+        "type": "string",
+        "enum": [
+          "text",
+          "money",
+          "number",
+          "percent",
+          "date",
+          "month"
+        ]
+      },
+      "ReportColumnDto": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "type": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ReportColumnType"
+              }
+            ]
+          },
+          "sum": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "key",
+          "label",
+          "type"
+        ]
+      },
+      "ReportSectionDto": {
+        "type": "object",
+        "properties": {
+          "title": {
+            "type": "string"
+          },
+          "columns": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReportColumnDto"
+            }
+          },
+          "rows": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": {
+                "oneOf": [
+                  {
+                    "type": "string"
+                  },
+                  {
+                    "type": "number"
+                  }
+                ],
+                "nullable": true
+              }
+            },
+            "description": "Valores por coluna: dinheiro em string \"1234.56\", datas \"AAAA-MM-DD\", meses \"AAAA-MM\", percentuais \"12.34\""
+          },
+          "totals": {
+            "type": "object",
+            "additionalProperties": {
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "number"
+                }
+              ],
+              "nullable": true
+            },
+            "nullable": true
+          }
+        },
+        "required": [
+          "title",
+          "columns",
+          "rows",
+          "totals"
+        ]
+      },
+      "ReportComparisonDto": {
+        "type": "object",
+        "properties": {
+          "from": {
+            "type": "string"
+          },
+          "to": {
+            "type": "string"
+          },
+          "totals": {
+            "type": "object",
+            "additionalProperties": {
+              "oneOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "number"
+                }
+              ],
+              "nullable": true
+            }
+          }
+        },
+        "required": [
+          "from",
+          "to",
+          "totals"
+        ]
+      },
+      "ReportDto": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ReportKey"
+              }
+            ]
+          },
+          "title": {
+            "type": "string"
+          },
+          "regime": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ReportRegime"
+              }
+            ]
+          },
+          "from": {
+            "type": "string",
+            "example": "2026-10"
+          },
+          "to": {
+            "type": "string",
+            "example": "2026-10"
+          },
+          "filters": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "sections": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReportSectionDto"
+            }
+          },
+          "notes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "comparison": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ReportComparisonDto"
+              }
+            ]
+          }
+        },
+        "required": [
+          "key",
+          "title",
+          "regime",
+          "from",
+          "to",
+          "filters",
+          "sections",
+          "notes",
+          "comparison"
+        ]
+      },
+      "ClosingState": {
+        "type": "string",
+        "enum": [
+          "OPEN",
+          "CLOSED",
+          "REOPENED"
+        ]
+      },
+      "UserRefDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name"
+        ]
+      },
+      "ClosingDto": {
+        "type": "object",
+        "properties": {
+          "month": {
+            "type": "string",
+            "example": "2026-09"
+          },
+          "status": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ClosingState"
+              }
+            ]
+          },
+          "version": {
+            "type": "number",
+            "description": "0 = nunca fechado"
+          },
+          "closedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "closedBy": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/UserRefDto"
+              }
+            ]
+          },
+          "reopenedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "reopenedBy": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/UserRefDto"
+              }
+            ]
+          },
+          "reopenReason": {
+            "type": "string",
+            "nullable": true
+          },
+          "closable": {
+            "type": "boolean",
+            "description": "O mês já terminou e pode ser fechado"
+          }
+        },
+        "required": [
+          "month",
+          "status",
+          "version",
+          "closedAt",
+          "closedBy",
+          "reopenedAt",
+          "reopenedBy",
+          "reopenReason",
+          "closable"
+        ]
+      },
+      "ClosingListDto": {
+        "type": "object",
+        "properties": {
+          "year": {
+            "type": "number"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ClosingDto"
+            }
+          }
+        },
+        "required": [
+          "year",
+          "items"
+        ]
+      },
+      "ClosingTotalsDto": {
+        "type": "object",
+        "properties": {
+          "revenue": {
+            "type": "string"
+          },
+          "expense": {
+            "type": "string"
+          },
+          "result": {
+            "type": "string",
+            "description": "Resultado gerencial (competência)"
+          },
+          "received": {
+            "type": "string"
+          },
+          "paid": {
+            "type": "string"
+          },
+          "cashResult": {
+            "type": "string",
+            "description": "Resultado de caixa"
+          },
+          "balance": {
+            "type": "string",
+            "description": "Saldo das contas no último dia do mês"
+          }
+        },
+        "required": [
+          "revenue",
+          "expense",
+          "result",
+          "received",
+          "paid",
+          "cashResult",
+          "balance"
+        ]
+      },
+      "ClosingPendingDto": {
+        "type": "object",
+        "properties": {
+          "payablesOpenCount": {
+            "type": "number"
+          },
+          "payablesOpen": {
+            "type": "string"
+          },
+          "receivablesOpenCount": {
+            "type": "number"
+          },
+          "receivablesOpen": {
+            "type": "string"
+          },
+          "pendingApprovals": {
+            "type": "number",
+            "description": "Despesas de motorista do mês aguardando aprovação"
+          },
+          "unbilledKmDays": {
+            "type": "number",
+            "description": "Dias de km do mês com valor ainda não faturados"
+          },
+          "unbilledKmAmount": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "payablesOpenCount",
+          "payablesOpen",
+          "receivablesOpenCount",
+          "receivablesOpen",
+          "pendingApprovals",
+          "unbilledKmDays",
+          "unbilledKmAmount"
+        ]
+      },
+      "ClosingSnapshotDto": {
+        "type": "object",
+        "properties": {
+          "month": {
+            "type": "string",
+            "example": "2026-09"
+          },
+          "generatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "totals": {
+            "$ref": "#/components/schemas/ClosingTotalsDto"
+          },
+          "pending": {
+            "$ref": "#/components/schemas/ClosingPendingDto"
+          },
+          "sections": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ReportSectionDto"
+            }
+          },
+          "warnings": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "month",
+          "generatedAt",
+          "totals",
+          "pending",
+          "sections",
+          "warnings"
+        ]
+      },
+      "ClosingDetailDto": {
+        "type": "object",
+        "properties": {
+          "month": {
+            "type": "string",
+            "example": "2026-09"
+          },
+          "status": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ClosingState"
+              }
+            ]
+          },
+          "version": {
+            "type": "number",
+            "description": "0 = nunca fechado"
+          },
+          "closedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "closedBy": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/UserRefDto"
+              }
+            ]
+          },
+          "reopenedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "reopenedBy": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/UserRefDto"
+              }
+            ]
+          },
+          "reopenReason": {
+            "type": "string",
+            "nullable": true
+          },
+          "closable": {
+            "type": "boolean",
+            "description": "O mês já terminou e pode ser fechado"
+          },
+          "snapshot": {
+            "nullable": true,
+            "description": "Valores gravados no fechamento",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ClosingSnapshotDto"
+              }
+            ]
+          }
+        },
+        "required": [
+          "month",
+          "status",
+          "version",
+          "closedAt",
+          "closedBy",
+          "reopenedAt",
+          "reopenedBy",
+          "reopenReason",
+          "closable",
+          "snapshot"
+        ]
+      },
+      "ConfirmClosingDto": {
+        "type": "object",
+        "properties": {
+          "expectedVersion": {
+            "type": "number",
+            "description": "Versão vista na prévia; se outra pessoa fechar antes, a confirmação falha (409)"
+          }
+        }
+      },
+      "ReopenClosingDto": {
+        "type": "object",
+        "properties": {
+          "reason": {
+            "type": "string",
+            "minLength": 10,
+            "example": "Nota fiscal de outubro lançada com valor errado"
+          }
+        },
+        "required": [
+          "reason"
         ]
       },
       "ContractorKind": {
@@ -11518,7 +12698,7 @@
         "type": "object",
         "properties": {
           "allocationMethod": {
-            "description": "Rateio entre veículos: EQUAL (partes iguais), PERCENT ou FIXED (valores)",
+            "description": "Rateio entre veículos: EQUAL (partes iguais), PERCENT, FIXED (valores) ou REVENUE_PROPORTIONAL (pela receita de cada veículo na competência; só despesas)",
             "allOf": [
               {
                 "$ref": "#/components/schemas/SplitMethod"
@@ -11633,7 +12813,7 @@
         "type": "object",
         "properties": {
           "allocationMethod": {
-            "description": "Rateio entre veículos: EQUAL (partes iguais), PERCENT ou FIXED (valores)",
+            "description": "Rateio entre veículos: EQUAL (partes iguais), PERCENT, FIXED (valores) ou REVENUE_PROPORTIONAL (pela receita de cada veículo na competência; só despesas)",
             "allOf": [
               {
                 "$ref": "#/components/schemas/SplitMethod"
