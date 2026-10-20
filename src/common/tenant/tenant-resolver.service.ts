@@ -15,7 +15,7 @@ export class TenantResolver {
   /** Retorna o contexto ou lança 403 se o vínculo/empresa não estiver ativo. */
   async resolve(userId: string, companyId: string): Promise<TenantContext> {
     const ctx = await this.tryResolve(userId, companyId);
-    if (ctx === 'SUSPENDED') throw forbidden('Esta empresa está suspensa', ErrorCode.COMPANY_SUSPENDED);
+    if (ctx === 'SUSPENDED') throw forbidden('O acesso a esta empresa está suspenso. Fale com o suporte da plataforma.', ErrorCode.COMPANY_SUSPENDED);
     if (!ctx) throw forbidden('Você não tem acesso a esta empresa', ErrorCode.COMPANY_ACCESS_DENIED);
     return ctx;
   }
@@ -24,10 +24,13 @@ export class TenantResolver {
     if (!isUuid(companyId)) return null;
     const member = await this.prisma.companyMember.findUnique({
       where: { companyId_userId: { companyId, userId } },
-      select: { id: true, role: true, permissions: true, status: true, company: { select: { status: true } } },
+      select: { id: true, role: true, permissions: true, status: true, company: { select: { status: true, subscription: { select: { status: true } } } } },
     });
     if (!member || member.status !== 'ACTIVE') return null;
     if (member.company.status !== 'ACTIVE') return 'SUSPENDED';
+    // Assinatura suspensa ou cancelada pela plataforma também bloqueia o acesso; em atraso (PAST_DUE) não.
+    const sub = member.company.subscription?.status;
+    if (sub === 'SUSPENDED' || sub === 'CANCELED') return 'SUSPENDED';
     return {
       companyId,
       userId,

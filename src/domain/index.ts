@@ -13,3 +13,4 @@ export * from './calendar';
 export * from './plates';
 export * from './categories';
 export * from './mileage';
+export * from './plan-features';

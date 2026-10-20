@@ -19,6 +19,8 @@ import { MetaController } from './modules/meta/meta.controller';
 import { MailModule } from './modules/mail/mail.module';
 import { MembershipsModule } from './modules/memberships/memberships.module';
 import { SubscriptionsModule } from './modules/subscriptions/subscriptions.module';
+import { BillingModule } from './modules/billing/billing.module';
+import { PlatformModule } from './modules/platform/platform.module';
 import { FinancialAccountsModule } from './modules/accounts/accounts.module';
 import { AttachmentsModule } from './modules/attachments/attachments.module';
 import { CategoriesModule } from './modules/categories/categories.module';
@@ -81,6 +83,8 @@ import { PrismaModule } from './prisma/prisma.module';
     MailModule,
     AuthModule,
     SubscriptionsModule,
+    BillingModule,
+    PlatformModule,
     CompaniesModule,
     MembershipsModule,
     // Fase 2 — Financeiro MVP

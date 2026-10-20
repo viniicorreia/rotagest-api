@@ -5,7 +5,7 @@ import { AppConfig } from './config/app-config.service';
 import { setupApp } from './setup-app';
 
 async function bootstrap(): Promise<void> {
-  const app = await NestFactory.create(AppModule, { bufferLogs: true });
+  const app = await NestFactory.create(AppModule, { bufferLogs: true, rawBody: true });
   app.useLogger(app.get(Logger));
   setupApp(app);
   const port = app.get(AppConfig).get('PORT');

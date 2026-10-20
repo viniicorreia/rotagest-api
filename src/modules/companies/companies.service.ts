@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import type { Company } from '@prisma/client';
 import { MEMBER_ROLE_LABELS } from '../../domain';
-import { notFound } from '../../common/errors';
+import { ErrorCode, forbidden, notFound } from '../../common/errors';
 import type { AuthUser, RequestMeta, TenantContext } from '../../common/tenant/tenant-context';
 import { addDays } from '../../common/utils/dates';
 import { AppConfig } from '../../config/app-config.service';
@@ -9,6 +9,7 @@ import { PrismaService } from '../../prisma/prisma.service';
 import { AuditService } from '../audit/audit.service';
 import { AuthService } from '../auth/auth.service';
 import { CategoriesService } from '../categories/categories.service';
+import { PlatformSettingsService } from '../subscriptions/platform-settings.service';
 import { SessionService } from '../auth/session.service';
 import type { CreateCompanyDto, UpdateCompanyDto } from './dto/company.dto';
 
@@ -37,6 +38,7 @@ export class CompaniesService {
     private readonly sessions: SessionService,
     private readonly config: AppConfig,
     private readonly categories: CategoriesService,
+    private readonly platformSettings: PlatformSettingsService,
   ) {}
 
   /**
@@ -45,14 +47,14 @@ export class CompaniesService {
    */
   async create(user: AuthUser, dto: CreateCompanyDto, meta: RequestMeta) {
     const company = await this.prisma.$transaction(async (tx) => {
-      const plan = await tx.plan.findUnique({ where: { code: this.config.get('DEFAULT_PLAN_CODE') } });
-      if (!plan || plan.status !== 'ACTIVE') {
-        throw new Error(`Plano padrão "${this.config.get('DEFAULT_PLAN_CODE')}" não encontrado. Rode o seed.`);
-      }
+      const settings = await this.platformSettings.get(tx);
+      if (!settings.allowNewCompanies) throw forbidden('A criação de novas empresas está pausada. Fale com o suporte.', ErrorCode.SIGNUPS_CLOSED);
+      const plan = settings.defaultPlan;
+      if (!plan) throw new Error(`Plano padrão "${this.config.get('DEFAULT_PLAN_CODE')}" não encontrado ou arquivado. Rode o seed ou defina o plano padrão no painel.`);
       const created = await tx.company.create({ data: { ...dto, status: 'ACTIVE' }, select: PUBLIC_FIELDS });
       await tx.companyMember.create({ data: { companyId: created.id, userId: user.userId, role: 'OWNER' } });
       await this.categories.ensureDefaults(created.id, tx);
-      const trialDays = this.config.get('TRIAL_DAYS');
+      const trialDays = settings.trialDays;
       await tx.subscription.create({
         data: {
           companyId: created.id,
