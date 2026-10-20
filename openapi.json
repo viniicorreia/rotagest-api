@@ -393,6 +393,608 @@
         ]
       }
     },
+    "/api/v1/plans": {
+      "get": {
+        "operationId": "Plans_list",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PublicPlanListDto"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Erro (formato padrão)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Planos ativos e públicos, para comparação e upgrade",
+        "tags": [
+          "subscription"
+        ]
+      }
+    },
+    "/api/v1/platform/overview": {
+      "get": {
+        "operationId": "Platform_overview",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlatformOverviewDto"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Erro (formato padrão)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Indicadores comerciais da plataforma",
+        "tags": [
+          "platform"
+        ]
+      }
+    },
+    "/api/v1/platform/companies": {
+      "get": {
+        "operationId": "Platform_companies",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "default": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "pageSize",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20,
+              "type": "number"
+            }
+          },
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "description": "Nome, razão social, documento ou e-mail",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/CompanyStatus"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlatformCompanyListDto"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Erro (formato padrão)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Empresas (dados cadastrais, assinatura e uso; sem dados financeiros)",
+        "tags": [
+          "platform"
+        ]
+      }
+    },
+    "/api/v1/platform/companies/{id}": {
+      "get": {
+        "operationId": "Platform_company",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlatformCompanyDetailDto"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Erro (formato padrão)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "platform"
+        ]
+      }
+    },
+    "/api/v1/platform/companies/{id}/status": {
+      "post": {
+        "operationId": "Platform_setCompanyStatus",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SetCompanyStatusDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlatformCompanyDetailDto"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Erro (formato padrão)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Ativa, suspende ou cancela a empresa (com justificativa auditada)",
+        "tags": [
+          "platform"
+        ]
+      }
+    },
+    "/api/v1/platform/plans": {
+      "get": {
+        "operationId": "Platform_plans",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlatformPlanListDto"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Erro (formato padrão)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "platform"
+        ]
+      },
+      "post": {
+        "operationId": "Platform_createPlan",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreatePlanDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlatformPlanDto"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Erro (formato padrão)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Cria um plano",
+        "tags": [
+          "platform"
+        ]
+      }
+    },
+    "/api/v1/platform/plans/{id}": {
+      "patch": {
+        "operationId": "Platform_updatePlan",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdatePlanDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlatformPlanDto"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Erro (formato padrão)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Altera preço, limites, recursos ou arquiva o plano",
+        "tags": [
+          "platform"
+        ]
+      }
+    },
+    "/api/v1/platform/subscriptions": {
+      "get": {
+        "operationId": "Platform_subscriptions",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "default": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "pageSize",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20,
+              "type": "number"
+            }
+          },
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "$ref": "#/components/schemas/SubscriptionStatus"
+            }
+          },
+          {
+            "name": "planId",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "trialEnding",
+            "required": false,
+            "in": "query",
+            "description": "Só testes que terminam nos próximos 7 dias ou já terminaram",
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlatformSubscriptionListDto"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Erro (formato padrão)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "platform"
+        ]
+      }
+    },
+    "/api/v1/platform/subscriptions/{id}": {
+      "patch": {
+        "operationId": "Platform_updateSubscription",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateSubscriptionDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlatformSubscriptionDto"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Erro (formato padrão)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Ativação administrativa: plano, status, datas e limites negociados (com justificativa)",
+        "tags": [
+          "platform"
+        ]
+      }
+    },
+    "/api/v1/platform/settings": {
+      "get": {
+        "operationId": "Platform_settings",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlatformSettingsDto"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Erro (formato padrão)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "platform"
+        ]
+      },
+      "patch": {
+        "operationId": "Platform_updateSettings",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdatePlatformSettingsDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlatformSettingsDto"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Erro (formato padrão)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "platform"
+        ]
+      }
+    },
     "/api/v1/companies": {
       "post": {
         "operationId": "Companies_create",
@@ -6500,6 +7102,23 @@
           "vehicles"
         ]
       },
+      "SubscriptionBillingDto": {
+        "type": "object",
+        "properties": {
+          "configured": {
+            "type": "boolean",
+            "description": "Há gateway de pagamento integrado; sem ele, a mudança de plano é feita pela plataforma"
+          },
+          "provider": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "configured",
+          "provider"
+        ]
+      },
       "SubscriptionDto": {
         "type": "object",
         "properties": {
@@ -6532,6 +7151,14 @@
           },
           "usage": {
             "$ref": "#/components/schemas/PlanUsageDto"
+          },
+          "supportEmail": {
+            "type": "string",
+            "nullable": true,
+            "description": "Contato da plataforma para mudar de plano"
+          },
+          "billing": {
+            "$ref": "#/components/schemas/SubscriptionBillingDto"
           }
         },
         "required": [
@@ -6541,8 +7168,1088 @@
           "currentPeriodEnd",
           "plan",
           "limits",
+          "usage",
+          "supportEmail",
+          "billing"
+        ]
+      },
+      "PublicPlanFeatureDto": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "key",
+          "label"
+        ]
+      },
+      "PublicPlanDto": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "price": {
+            "type": "string",
+            "example": "149.90"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "interval": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/BillingInterval"
+              }
+            ]
+          },
+          "maxVehicles": {
+            "type": "number",
+            "nullable": true,
+            "description": "null = ilimitado"
+          },
+          "maxUsers": {
+            "type": "number",
+            "nullable": true,
+            "description": "null = ilimitado"
+          },
+          "features": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PublicPlanFeatureDto"
+            }
+          }
+        },
+        "required": [
+          "code",
+          "name",
+          "description",
+          "price",
+          "currency",
+          "interval",
+          "maxVehicles",
+          "maxUsers",
+          "features"
+        ]
+      },
+      "PublicPlanListDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PublicPlanDto"
+            }
+          }
+        },
+        "required": [
+          "items"
+        ]
+      },
+      "StatusCountDto": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          },
+          "count": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "status",
+          "count"
+        ]
+      },
+      "PlanCountDto": {
+        "type": "object",
+        "properties": {
+          "planId": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "count": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "planId",
+          "name",
+          "count"
+        ]
+      },
+      "BillingStatusDto": {
+        "type": "object",
+        "properties": {
+          "configured": {
+            "type": "boolean",
+            "description": "Há gateway de pagamento integrado e ativo"
+          },
+          "provider": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "required": [
+          "configured",
+          "provider"
+        ]
+      },
+      "PlatformOverviewDto": {
+        "type": "object",
+        "properties": {
+          "companies": {
+            "type": "number"
+          },
+          "companiesByStatus": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/StatusCountDto"
+            }
+          },
+          "subscriptionsByStatus": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/StatusCountDto"
+            }
+          },
+          "subscriptionsByPlan": {
+            "description": "Assinaturas não canceladas por plano",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PlanCountDto"
+            }
+          },
+          "mrr": {
+            "type": "string",
+            "example": "1500.00",
+            "pattern": "^\\d{1,12}(\\.\\d{1,2})?$",
+            "description": "Receita recorrente mensal contratada (assinaturas ativas; anuais divididas por 12)"
+          },
+          "newCompanies30d": {
+            "type": "number",
+            "description": "Empresas criadas nos últimos 30 dias"
+          },
+          "trialsEnding7d": {
+            "type": "number",
+            "description": "Testes que terminam nos próximos 7 dias"
+          },
+          "pastDue": {
+            "type": "number",
+            "description": "Assinaturas com pagamento em atraso"
+          },
+          "vehicles": {
+            "type": "number",
+            "description": "Veículos ativos em todas as empresas"
+          },
+          "members": {
+            "type": "number",
+            "description": "Membros ativos em todas as empresas"
+          },
+          "billing": {
+            "$ref": "#/components/schemas/BillingStatusDto"
+          }
+        },
+        "required": [
+          "companies",
+          "companiesByStatus",
+          "subscriptionsByStatus",
+          "subscriptionsByPlan",
+          "mrr",
+          "newCompanies30d",
+          "trialsEnding7d",
+          "pastDue",
+          "vehicles",
+          "members",
+          "billing"
+        ]
+      },
+      "PlatformPlanRefDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "code",
+          "name"
+        ]
+      },
+      "PlatformSubscriptionSummaryDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "status": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/SubscriptionStatus"
+              }
+            ]
+          },
+          "plan": {
+            "$ref": "#/components/schemas/PlatformPlanRefDto"
+          },
+          "trialEndsAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "currentPeriodEnd": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "status",
+          "plan",
+          "trialEndsAt",
+          "currentPeriodEnd"
+        ]
+      },
+      "PlatformUsageDto": {
+        "type": "object",
+        "properties": {
+          "users": {
+            "type": "number",
+            "description": "Membros ativos + convites pendentes"
+          },
+          "vehicles": {
+            "type": "number",
+            "description": "Veículos não arquivados"
+          },
+          "maxUsers": {
+            "type": "number",
+            "nullable": true
+          },
+          "maxVehicles": {
+            "type": "number",
+            "nullable": true
+          }
+        },
+        "required": [
+          "users",
+          "vehicles",
+          "maxUsers",
+          "maxVehicles"
+        ]
+      },
+      "PlatformCompanyDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "tradeName": {
+            "type": "string"
+          },
+          "legalName": {
+            "type": "string",
+            "nullable": true
+          },
+          "document": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string",
+            "nullable": true
+          },
+          "phone": {
+            "type": "string",
+            "nullable": true
+          },
+          "city": {
+            "type": "string",
+            "nullable": true
+          },
+          "state": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/CompanyStatus"
+              }
+            ]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "subscription": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PlatformSubscriptionSummaryDto"
+              }
+            ]
+          },
+          "usage": {
+            "$ref": "#/components/schemas/PlatformUsageDto"
+          }
+        },
+        "required": [
+          "id",
+          "tradeName",
+          "legalName",
+          "document",
+          "email",
+          "phone",
+          "city",
+          "state",
+          "status",
+          "createdAt",
+          "subscription",
           "usage"
         ]
+      },
+      "PlatformCompanyListDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PlatformCompanyDto"
+            }
+          },
+          "total": {
+            "type": "number"
+          },
+          "page": {
+            "type": "number"
+          },
+          "pageSize": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "items",
+          "total",
+          "page",
+          "pageSize"
+        ]
+      },
+      "PlatformPersonDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "email"
+        ]
+      },
+      "PlatformAuditEntryDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "action": {
+            "type": "string"
+          },
+          "reason": {
+            "type": "string",
+            "nullable": true
+          },
+          "actor": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PlatformPersonDto"
+              }
+            ]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "before": {
+            "type": "object",
+            "additionalProperties": true,
+            "nullable": true
+          },
+          "after": {
+            "type": "object",
+            "additionalProperties": true,
+            "nullable": true
+          }
+        },
+        "required": [
+          "id",
+          "action",
+          "reason",
+          "actor",
+          "createdAt",
+          "before",
+          "after"
+        ]
+      },
+      "PlatformCompanyDetailDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "tradeName": {
+            "type": "string"
+          },
+          "legalName": {
+            "type": "string",
+            "nullable": true
+          },
+          "document": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string",
+            "nullable": true
+          },
+          "phone": {
+            "type": "string",
+            "nullable": true
+          },
+          "city": {
+            "type": "string",
+            "nullable": true
+          },
+          "state": {
+            "type": "string",
+            "nullable": true
+          },
+          "status": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/CompanyStatus"
+              }
+            ]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "subscription": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PlatformSubscriptionSummaryDto"
+              }
+            ]
+          },
+          "usage": {
+            "$ref": "#/components/schemas/PlatformUsageDto"
+          },
+          "owners": {
+            "description": "Proprietários (OWNER) ativos",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PlatformPersonDto"
+            }
+          },
+          "history": {
+            "description": "Ações da plataforma e do gateway sobre esta empresa",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PlatformAuditEntryDto"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "tradeName",
+          "legalName",
+          "document",
+          "email",
+          "phone",
+          "city",
+          "state",
+          "status",
+          "createdAt",
+          "subscription",
+          "usage",
+          "owners",
+          "history"
+        ]
+      },
+      "SetCompanyStatusDto": {
+        "type": "object",
+        "properties": {
+          "reason": {
+            "type": "string",
+            "minLength": 10,
+            "maxLength": 500,
+            "example": "Pagamento não identificado após três avisos"
+          },
+          "status": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/CompanyStatus"
+              }
+            ]
+          }
+        },
+        "required": [
+          "reason",
+          "status"
+        ]
+      },
+      "PlanStatus": {
+        "type": "string",
+        "enum": [
+          "ACTIVE",
+          "ARCHIVED"
+        ]
+      },
+      "PlatformPlanFeatureDto": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "label": {
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "key",
+          "label",
+          "enabled"
+        ]
+      },
+      "PlatformPlanDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "code": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "price": {
+            "type": "string",
+            "example": "1500.00",
+            "pattern": "^\\d{1,12}(\\.\\d{1,2})?$"
+          },
+          "currency": {
+            "type": "string"
+          },
+          "interval": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/BillingInterval"
+              }
+            ]
+          },
+          "maxVehicles": {
+            "type": "number",
+            "nullable": true
+          },
+          "maxUsers": {
+            "type": "number",
+            "nullable": true
+          },
+          "status": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PlanStatus"
+              }
+            ]
+          },
+          "isPublic": {
+            "type": "boolean"
+          },
+          "sortOrder": {
+            "type": "number"
+          },
+          "features": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PlatformPlanFeatureDto"
+            }
+          },
+          "subscriptions": {
+            "type": "number",
+            "description": "Assinaturas que usam o plano (exceto canceladas)"
+          },
+          "isDefault": {
+            "type": "boolean",
+            "description": "Plano padrão para novas empresas"
+          }
+        },
+        "required": [
+          "id",
+          "code",
+          "name",
+          "description",
+          "price",
+          "currency",
+          "interval",
+          "maxVehicles",
+          "maxUsers",
+          "status",
+          "isPublic",
+          "sortOrder",
+          "features",
+          "subscriptions",
+          "isDefault"
+        ]
+      },
+      "PlatformPlanListDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PlatformPlanDto"
+            }
+          },
+          "catalog": {
+            "description": "Catálogo de recursos disponíveis",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PlatformPlanFeatureDto"
+            }
+          }
+        },
+        "required": [
+          "items",
+          "catalog"
+        ]
+      },
+      "PlanFeatureKey": {
+        "type": "string",
+        "enum": [
+          "reports.basic",
+          "reports.export",
+          "allocations",
+          "support.priority"
+        ]
+      },
+      "PlanFeatureInputDto": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PlanFeatureKey"
+              }
+            ]
+          },
+          "enabled": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "key",
+          "enabled"
+        ]
+      },
+      "CreatePlanDto": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string",
+            "example": "frota-50",
+            "description": "Identificador único (minúsculas, números e hífen)"
+          },
+          "name": {
+            "type": "string",
+            "example": "Frota 50"
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "price": {
+            "type": "string",
+            "example": "149.90",
+            "pattern": "^\\d{1,12}(\\.\\d{1,2})?$",
+            "description": "Preço por período"
+          },
+          "interval": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/BillingInterval"
+              }
+            ]
+          },
+          "maxVehicles": {
+            "type": "number",
+            "nullable": true,
+            "minimum": 1,
+            "description": "Limite de veículos ativos; null = ilimitado"
+          },
+          "maxUsers": {
+            "type": "number",
+            "nullable": true,
+            "minimum": 1,
+            "description": "Limite de usuários (membros + convites); null = ilimitado"
+          },
+          "isPublic": {
+            "type": "boolean",
+            "default": true,
+            "description": "Aparece na lista de planos para as empresas"
+          },
+          "sortOrder": {
+            "type": "number",
+            "default": 0
+          },
+          "features": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PlanFeatureInputDto"
+            }
+          }
+        },
+        "required": [
+          "code",
+          "name",
+          "price",
+          "interval"
+        ]
+      },
+      "UpdatePlanDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string",
+            "nullable": true
+          },
+          "price": {
+            "type": "string",
+            "example": "149.90",
+            "pattern": "^\\d{1,12}(\\.\\d{1,2})?$",
+            "description": "Preço por período"
+          },
+          "interval": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/BillingInterval"
+              }
+            ]
+          },
+          "maxVehicles": {
+            "type": "number",
+            "nullable": true,
+            "minimum": 1,
+            "description": "Limite de veículos ativos; null = ilimitado"
+          },
+          "maxUsers": {
+            "type": "number",
+            "nullable": true,
+            "minimum": 1,
+            "description": "Limite de usuários; null = ilimitado"
+          },
+          "isPublic": {
+            "type": "boolean"
+          },
+          "sortOrder": {
+            "type": "number"
+          },
+          "status": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PlanStatus"
+              }
+            ]
+          },
+          "features": {
+            "description": "Substitui a lista de recursos",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PlanFeatureInputDto"
+            }
+          }
+        }
+      },
+      "PlatformCompanyRefDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "tradeName": {
+            "type": "string"
+          },
+          "status": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/CompanyStatus"
+              }
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "tradeName",
+          "status"
+        ]
+      },
+      "PlatformSubscriptionDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "company": {
+            "$ref": "#/components/schemas/PlatformCompanyRefDto"
+          },
+          "plan": {
+            "$ref": "#/components/schemas/PlatformPlanRefDto"
+          },
+          "status": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/SubscriptionStatus"
+              }
+            ]
+          },
+          "trialEndsAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "currentPeriodStart": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "currentPeriodEnd": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "canceledAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "overrideMaxVehicles": {
+            "type": "number",
+            "nullable": true
+          },
+          "overrideMaxUsers": {
+            "type": "number",
+            "nullable": true
+          },
+          "externalProvider": {
+            "type": "string",
+            "nullable": true,
+            "description": "Gateway que cobra esta assinatura, quando integrado"
+          },
+          "usage": {
+            "$ref": "#/components/schemas/PlatformUsageDto"
+          },
+          "warnings": {
+            "description": "Avisos, como uso acima dos limites após troca de plano",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "company",
+          "plan",
+          "status",
+          "trialEndsAt",
+          "currentPeriodStart",
+          "currentPeriodEnd",
+          "canceledAt",
+          "overrideMaxVehicles",
+          "overrideMaxUsers",
+          "externalProvider",
+          "usage",
+          "warnings"
+        ]
+      },
+      "PlatformSubscriptionListDto": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PlatformSubscriptionDto"
+            }
+          },
+          "total": {
+            "type": "number"
+          },
+          "page": {
+            "type": "number"
+          },
+          "pageSize": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "items",
+          "total",
+          "page",
+          "pageSize"
+        ]
+      },
+      "UpdateSubscriptionDto": {
+        "type": "object",
+        "properties": {
+          "reason": {
+            "type": "string",
+            "minLength": 10,
+            "maxLength": 500,
+            "example": "Pagamento não identificado após três avisos"
+          },
+          "planId": {
+            "type": "string",
+            "description": "Troca de plano (só planos ativos)"
+          },
+          "status": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/SubscriptionStatus"
+              }
+            ]
+          },
+          "trialEndsAt": {
+            "type": "string",
+            "format": "date",
+            "nullable": true,
+            "example": "2026-11-15",
+            "description": "Fim do período de teste; null limpa"
+          },
+          "currentPeriodEnd": {
+            "type": "string",
+            "format": "date",
+            "nullable": true,
+            "example": "2026-11-15",
+            "description": "Fim do período pago atual; null limpa"
+          },
+          "overrideMaxVehicles": {
+            "type": "number",
+            "nullable": true,
+            "minimum": 1,
+            "description": "Exceção negociada de veículos; null = vale o do plano"
+          },
+          "overrideMaxUsers": {
+            "type": "number",
+            "nullable": true,
+            "minimum": 1,
+            "description": "Exceção negociada de usuários; null = vale o do plano"
+          }
+        },
+        "required": [
+          "reason"
+        ]
+      },
+      "PlatformSettingsDto": {
+        "type": "object",
+        "properties": {
+          "allowNewCompanies": {
+            "type": "boolean"
+          },
+          "defaultPlan": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PlatformPlanRefDto"
+              }
+            ]
+          },
+          "trialDays": {
+            "type": "number"
+          },
+          "supportEmail": {
+            "type": "string",
+            "nullable": true
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "billing": {
+            "$ref": "#/components/schemas/BillingStatusDto"
+          }
+        },
+        "required": [
+          "allowNewCompanies",
+          "defaultPlan",
+          "trialDays",
+          "supportEmail",
+          "updatedAt",
+          "billing"
+        ]
+      },
+      "UpdatePlatformSettingsDto": {
+        "type": "object",
+        "properties": {
+          "allowNewCompanies": {
+            "type": "boolean",
+            "description": "Permite que novos usuários criem empresas (onboarding)"
+          },
+          "defaultPlanId": {
+            "type": "string",
+            "description": "Plano das novas empresas (precisa estar ativo)"
+          },
+          "trialDays": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 90,
+            "description": "Dias de teste; 0 = começa ativa"
+          },
+          "supportEmail": {
+            "type": "string",
+            "nullable": true,
+            "description": "Contato mostrado às empresas para mudar de plano"
+          }
+        }
       },
       "CreateCompanyDto": {
         "type": "object",

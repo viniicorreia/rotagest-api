@@ -84,7 +84,7 @@ mesmo usuário pode ser OWNER na empresa A e DRIVER na empresa B.
 | Empresa ativa | Claim `cid` no access token, revalidada no banco a cada requisição. | O frontend nunca escolhe o tenant sozinho; trocar de empresa emite um token novo. |
 | Gasto do motorista | Cria `Payable` com `approvalStatus = PENDING_APPROVAL`. | O motorista registra; o financeiro aprova antes de entrar nos relatórios. |
 | Fornecedor | Campo texto (`supplierName`) na v1. | O pedido não lista entidade Supplier; vira entidade quando houver demanda. |
-| Row-Level Security | Projetada (§5.6), aplicada na Fase 6 após testes de conexão/pool. | O pedido condiciona RLS a integração correta e testada com o Prisma. |
+| Row-Level Security | Projetada (§5.7), aplicada na Fase 6 após testes de conexão/pool. | O pedido condiciona RLS a integração correta e testada com o Prisma. |
 | E-mail | Interface `MailService`; em desenvolvimento registra o link no log. SMTP real é configuração da Fase 6. | Não fingir envio de e-mail sem provedor configurado. |
 
 ### 1.6 Riscos
@@ -375,7 +375,7 @@ empresa com papel e status. Um usuário pode ter várias empresas.
 | 7 | Erros | Filtro global converte erros do Prisma em mensagens genéricas, sem nomes de constraint, ids ou dados de outro tenant. |
 | 8 | Arquivos | Download de comprovante só via API, após checar tenant e permissão; chave de storage aleatória e prefixada por empresa. |
 | 9 | Testes | Suítes e2e de acesso cruzado: usuário da A tentando ler/alterar recursos da B por id, forjando `companyId` no corpo e trocando para empresa da qual não é membro. |
-| 10 | RLS (Fase 6) | Ver §5.6. |
+| 10 | RLS (Fase 6) | Ver §5.7. |
 
 ### 5.3 Troca de empresa
 
@@ -400,7 +400,23 @@ cria o recurso (convite/membro; veículo na Fase 2), contando registros ativos +
 convites pendentes, para não ultrapassar o limite em requisições simultâneas.
 Os limites ficam no banco (seed), nunca no código.
 
-### 5.6 Row-Level Security (desenho para a Fase 6)
+### 5.6 Configurações da plataforma e gateway de pagamento
+
+`platform_settings` (linha única) guarda se novas empresas podem ser criadas,
+o plano padrão, os dias de teste e o e-mail de suporte; sem a linha, valem
+`DEFAULT_PLAN_CODE` e `TRIAL_DAYS`. A assinatura com status `SUSPENDED` ou
+`CANCELED` bloqueia o acesso da empresa como a suspensão da própria empresa;
+`PAST_DUE` só sinaliza.
+
+O gateway entra pela interface `PaymentGateway` (`src/modules/billing`):
+criar cliente, criar e cancelar assinatura e validar webhooks. Nenhum
+adaptador vem registrado; sem `BILLING_PROVIDER` o webhook responde 404 e a
+mudança de plano é administrativa. Eventos recebidos ficam em
+`billing_events` (único por provedor + id externo, para não aplicar duas
+vezes) e as mudanças de status são auditadas. A cobrança SaaS nunca gera
+lançamentos no financeiro das empresas.
+
+### 5.7 Row-Level Security (desenho para a Fase 6)
 
 1. Criar a role `rotagest_app` (sem `BYPASSRLS`, não dona das tabelas); as
    migrations continuam com a role dona.

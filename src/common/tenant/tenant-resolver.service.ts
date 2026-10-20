@@ -15,7 +15,7 @@ export class TenantResolver {
   /** Retorna o contexto ou lança 403 se o vínculo/empresa não estiver ativo. */
   async resolve(userId: string, companyId: string): Promise<TenantContext> {
     const ctx = await this.tryResolve(userId, companyId);
-    if (ctx === 'SUSPENDED') throw forbidden('Esta empresa está suspensa', ErrorCode.COMPANY_SUSPENDED);
+    if (ctx === 'SUSPENDED') throw forbidden('O acesso a esta empresa está suspenso. Fale com o suporte da plataforma.', ErrorCode.COMPANY_SUSPENDED);
     if (!ctx) throw forbidden('Você não tem acesso a esta empresa', ErrorCode.COMPANY_ACCESS_DENIED);
     return ctx;
   }
@@ -24,10 +24,10 @@ export class TenantResolver {
     if (!isUuid(companyId)) return null;
     const member = await this.prisma.companyMember.findUnique({
       where: { companyId_userId: { companyId, userId } },
-      select: { id: true, role: true, permissions: true, status: true, company: { select: { status: true } } },
+      select: { id: true, role: true, permissions: true, status: true, company: { select: { status: true, subscription: { select: { status: true } } } } },
     });
     if (!member || member.status !== 'ACTIVE') return null;
-    if (member.company.status !== 'ACTIVE') return 'SUSPENDED';
+    if (effectiveCompanyStatus(member.company) !== 'ACTIVE') return 'SUSPENDED';
     return {
       companyId,
       userId,
@@ -41,4 +41,17 @@ export class TenantResolver {
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 export function isUuid(value: unknown): value is string {
   return typeof value === 'string' && UUID_RE.test(value);
+}
+
+/** Assinatura bloqueada pela plataforma (suspensa ou cancelada). Em atraso (PAST_DUE) não bloqueia. */
+export const BLOCKED_SUBSCRIPTION = ['SUSPENDED', 'CANCELED'] as const;
+
+/** Situação de acesso: a da empresa, ou suspensa quando a assinatura está bloqueada. */
+export function effectiveCompanyStatus(company: {
+  status: 'ACTIVE' | 'SUSPENDED' | 'CANCELED';
+  subscription?: { status: string } | null;
+}): 'ACTIVE' | 'SUSPENDED' | 'CANCELED' {
+  if (company.status !== 'ACTIVE') return company.status;
+  const sub = company.subscription?.status;
+  return sub && (BLOCKED_SUBSCRIPTION as readonly string[]).includes(sub) ? 'SUSPENDED' : 'ACTIVE';
 }

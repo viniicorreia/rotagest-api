@@ -15,6 +15,7 @@ export const ErrorCode = {
   NOT_FOUND: 'NOT_FOUND',
   CONFLICT: 'CONFLICT',
   PLAN_LIMIT_REACHED: 'PLAN_LIMIT_REACHED',
+  SIGNUPS_CLOSED: 'SIGNUPS_CLOSED',
   VALIDATION_ERROR: 'VALIDATION_ERROR',
   /** Data/competência em mês com fechamento confirmado. */
   PERIOD_CLOSED: 'PERIOD_CLOSED',
