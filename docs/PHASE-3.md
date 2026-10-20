@@ -49,7 +49,7 @@ src/features/vehicles/    valor por km · src/features/finance/ rateio no formul
 
 ## Testes
 
-- API: **119** (domínio + e2e com PostgreSQL real), incluindo km × taxa, hodômetro, recálculo da taxa, permissões do motorista, faturamento e cancelamento, isolamento entre empresas, período fechado, rateio (percentual, igual, validações), contratos, manutenção, abastecimento, resumo e o fluxo de aprovação.
+- API: **120** (domínio + e2e com PostgreSQL real), incluindo km × taxa, hodômetro, recálculo da taxa, permissões do motorista, faturamento e cancelamento, isolamento entre empresas, período fechado, rateio (percentual, igual, validações), contratos, manutenção, abastecimento, resumo e o fluxo de aprovação.
 - Web: **20** testes, `tsc` e `vite build` ok.
 
 ## Comandos
