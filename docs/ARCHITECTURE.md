@@ -84,8 +84,8 @@ mesmo usuário pode ser OWNER na empresa A e DRIVER na empresa B.
 | Empresa ativa | Claim `cid` no access token, revalidada no banco a cada requisição. | O frontend nunca escolhe o tenant sozinho; trocar de empresa emite um token novo. |
 | Gasto do motorista | Cria `Payable` com `approvalStatus = PENDING_APPROVAL`. | O motorista registra; o financeiro aprova antes de entrar nos relatórios. |
 | Fornecedor | Campo texto (`supplierName`) na v1. | O pedido não lista entidade Supplier; vira entidade quando houver demanda. |
-| Row-Level Security | Projetada (§5.7), aplicada na Fase 6 após testes de conexão/pool. | O pedido condiciona RLS a integração correta e testada com o Prisma. |
-| E-mail | Interface `MailService`; em desenvolvimento registra o link no log. SMTP real é configuração da Fase 6. | Não fingir envio de e-mail sem provedor configurado. |
+| Row-Level Security | Aplicada na Fase 6 (§5.7), com o papel `rotagest_app` e testes próprios. | O pedido condiciona RLS a integração correta e testada com o Prisma. |
+| E-mail | Interface `MailService`; com `SMTP_URL` envia por SMTP, sem ela registra no log (e avisa na subida em produção). | Não fingir envio de e-mail sem provedor configurado. |
 
 ### 1.6 Riscos
 
@@ -375,7 +375,7 @@ empresa com papel e status. Um usuário pode ter várias empresas.
 | 7 | Erros | Filtro global converte erros do Prisma em mensagens genéricas, sem nomes de constraint, ids ou dados de outro tenant. |
 | 8 | Arquivos | Download de comprovante só via API, após checar tenant e permissão; chave de storage aleatória e prefixada por empresa. |
 | 9 | Testes | Suítes e2e de acesso cruzado: usuário da A tentando ler/alterar recursos da B por id, forjando `companyId` no corpo e trocando para empresa da qual não é membro. |
-| 10 | RLS (Fase 6) | Ver §5.7. |
+| 10 | RLS no PostgreSQL | Ver §5.7. |
 
 ### 5.3 Troca de empresa
 
@@ -388,9 +388,18 @@ de uma empresa apareçam na tela da outra.
 
 Rotas `/platform/*` exigem `platformRole = SUPER_ADMIN` e **não** passam por
 `TenantGuard`. Os serviços da plataforma só leem dados cadastrais e comerciais
-(empresa, plano, assinatura, contagens). Acesso de suporte a dados financeiros
-de uma empresa (Fase 6) exigirá concessão explícita do OWNER, com prazo,
-escopo e registro em `AuditLog`.
+(empresa, plano, assinatura, contagens).
+
+**Acesso de suporte.** O SUPER_ADMIN só vê dados de uma empresa quando o dono
+autoriza (`support_grants`: motivo, até 72 h, revogável a qualquer momento).
+Com a autorização vigente, `POST /platform/companies/:id/support-session`
+emite um token com `cid` daquela empresa; o `TenantResolver` aceita esse
+usuário sem vínculo, com papel `MANAGER` e só permissões de leitura
+(`SUPPORT_PERMISSIONS`). O `TenantGuard` recusa qualquer método que não seja
+GET/HEAD (`403 SUPPORT_READ_ONLY`) e grava cada leitura em `AuditLog`
+(`support.request`), que o dono consulta em `GET /support-access/:id/log`. A
+autorização é revalidada a cada requisição: revogada ou vencida, o acesso
+cai na hora.
 
 ### 5.5 Limites do plano
 
@@ -416,20 +425,53 @@ mudança de plano é administrativa. Eventos recebidos ficam em
 vezes) e as mudanças de status são auditadas. A cobrança SaaS nunca gera
 lançamentos no financeiro das empresas.
 
-### 5.7 Row-Level Security (desenho para a Fase 6)
+### 5.7 Row-Level Security
 
-1. Criar a role `rotagest_app` (sem `BYPASSRLS`, não dona das tabelas); as
-   migrations continuam com a role dona.
-2. `ALTER TABLE … ENABLE/FORCE ROW LEVEL SECURITY` nas tabelas de negócio e
-   política `USING ("companyId" = current_setting('app.company_id')::uuid)`.
-3. No Prisma, uma *client extension* executa cada operação do tenant dentro de
-   `$transaction([SELECT set_config('app.company_id', $1, true), operação])`,
-   de modo que o valor é `LOCAL` à transação e não vaza entre conexões do pool.
-4. Testes: consulta sem contexto retorna zero linhas; contexto da A não lê B
-   mesmo com SQL cru.
+Segunda barreira do isolamento, no próprio PostgreSQL. Um filtro por
+`companyId` esquecido num serviço não expõe dados de outra empresa.
 
-Fica para a Fase 6 porque dobra o número de round-trips por operação e precisa
-de medição; as camadas 1–9 já garantem o isolamento.
+1. **Dois papéis.** As migrations rodam como dono (`DIRECT_DATABASE_URL`, o
+   `directUrl` do Prisma). A API conecta como `rotagest_app`
+   (`DATABASE_URL`): sem `BYPASSRLS`, não dono das tabelas e sem `TRUNCATE`.
+   A migration cria o papel sem login; `npm run db:app-role` (ou
+   `db:deploy`) define a senha. `audit_logs` é só inserção para esse papel.
+2. **Políticas.** Todas as tabelas com `companyId` (e `companies` pelo `id`)
+   têm `ENABLE` + `FORCE ROW LEVEL SECURITY` e a política `tenant_isolation`:
+   `app.bypass = 'on' OR "companyId" = app.company_id`, em `USING` e
+   `WITH CHECK`. Sem contexto informado, nenhuma linha é lida ou gravada.
+3. **Contexto por requisição.** Um middleware abre um `AsyncLocalStorage`
+   (`src/common/tenant/db-context.ts`) com `{companyId: null, bypass: false}`.
+   O `TenantGuard` preenche `companyId` com a empresa do token antes de
+   validar o vínculo. Rotas `@Public()`/`@NoTenant()` (login, onboarding,
+   painel da plataforma, webhooks, LGPD do próprio usuário) ligam `bypass`,
+   porque não operam dentro de uma empresa e filtram explicitamente. Fora de
+   uma requisição (seed, scripts, testes) não há contexto e o acesso é livre.
+4. **Prisma.** O `PrismaService` devolve um Proxy:
+   - operações de modelo passam por uma *client extension* que executa
+     `$transaction([set_config('app.company_id', …, true), set_config('app.bypass', …, true), operação])`;
+   - `$queryRaw`/`$executeRaw` rodam numa transação curta com o mesmo `set_config`;
+   - `$transaction(fn)` grava o contexto uma vez, no início, e entrega a `fn`
+     o cliente da transação.
+   O valor é `LOCAL` à transação e não vaza entre conexões do pool. A forma
+   em lista de `$transaction([...])` é recusada.
+5. **Testes** (`test/rls.e2e-spec.ts`):
+   - o papel não é superusuário nem tem `BYPASSRLS`;
+   - sem contexto, nenhuma linha aparece e nenhuma é gravada;
+   - com o contexto da A, uma consulta sem filtro só traz a A e não grava na B;
+   - modelos, SQL avulso e transações respeitam o contexto;
+   - requisições concorrentes de empresas diferentes não se misturam;
+   - a auditoria não aceita `UPDATE`/`DELETE`.
+   Toda a suíte e2e roda conectada como `rotagest_app`.
+
+**Custo:** cada operação fora de `$transaction` vira uma transação curta
+(BEGIN, `set_config`, operação, COMMIT). Isso é aceitável para o volume de uma
+transportadora. Telas pesadas já usam `$transaction(fn)`, que paga o
+`set_config` uma vez só.
+
+**Limite conhecido:** o RLS protege contra erro de programação, não contra
+injeção de SQL. Um SQL injetado poderia ligar `app.bypass` na própria
+transação. A defesa contra injeção continua sendo o Prisma parametrizado,
+sem SQL montado com texto do usuário.
 
 ---
 

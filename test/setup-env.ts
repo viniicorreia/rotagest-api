@@ -19,3 +19,4 @@ process.env.DEFAULT_PLAN_CODE = 'starter';
 process.env.TRIAL_DAYS = '14';
 process.env.CORS_ORIGINS = "http://localhost:5173";
 process.env.STORAGE_DIR = join(tmpdir(), 'rotagest-test-storage');
+process.env.JOBS_ENABLED = 'false';

@@ -1,3 +1,4 @@
+import { PrismaClient } from '@prisma/client';
 import { addMember, bearer, categoryId, createAccount, createTestApp, createVehicle, dates, key, ownerWithCompany, resetDb, type Session, type TestApp } from './helpers';
 
 const prev = dates.month(-1);
@@ -162,6 +163,31 @@ describe('Relatórios e fechamento mensal (e2e)', () => {
       const again = await t.http().post(`/api/v1/closings/${prev}`).set(bearer(fin)).send({ expectedVersion: 1 }).expect(200);
       expect(again.body).toMatchObject({ status: 'CLOSED', version: 2 });
       expect(again.body.snapshot.totals.result).toBe('2000.00');
+    });
+
+    it('o fechamento espera os lançamentos do mês em andamento', async () => {
+      await t.http().post(`/api/v1/closings/${prev}/reopen`).set(bearer(owner)).send({ reason: 'Conferência de concorrência' }).expect(200);
+      const me = await get(owner, '/auth/me').expect(200);
+      const admin = new PrismaClient({ datasourceUrl: process.env.DIRECT_DATABASE_URL });
+      let release!: () => void;
+      const held = new Promise<void>((resolve) => (release = resolve));
+      let locked!: () => void;
+      const isLocked = new Promise<void>((resolve) => (locked = resolve));
+      // Simula um lançamento do mês ainda aberto: segura o lock compartilhado que assertOpen pega.
+      const posting = admin.$transaction(async (tx) => {
+        await tx.$executeRaw`SELECT pg_advisory_xact_lock_shared(hashtext(${`closing:${me.body.activeCompany.id}:${prev}`}))`;
+        locked();
+        await held;
+      }, { timeout: 20_000 });
+      await isLocked;
+      let done = false;
+      const closing = t.http().post(`/api/v1/closings/${prev}`).set(bearer(owner)).send({}).then((r) => ((done = true), r));
+      await new Promise((r) => setTimeout(r, 700));
+      expect(done).toBe(false);
+      release();
+      await posting;
+      expect((await closing).status).toBe(200);
+      await admin.$disconnect();
     });
 
     it('outra empresa não vê nem fecha o mês desta', async () => {

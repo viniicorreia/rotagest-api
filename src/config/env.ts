@@ -29,6 +29,8 @@ export const envSchema = z.object({
   PASSWORD_RESET_TTL_MINUTES: z.coerce.number().int().min(5).max(1440).default(60),
   DEFAULT_PLAN_CODE: z.string().default('starter'),
   TRIAL_DAYS: z.coerce.number().int().min(0).max(90).default(14),
+  // Rotinas periódicas (fim do período de teste). Desligue em réplicas extras se quiser; há lock no banco.
+  JOBS_ENABLED: z.enum(['true', 'false']).default('true').transform((v) => v === 'true'),
   RATE_LIMIT_DEFAULT: z.coerce.number().int().positive().default(120),
   RATE_LIMIT_AUTH: z.coerce.number().int().positive().default(10),
   // Gateway de pagamento da assinatura SaaS. Vazio = sem cobrança automática (ativação administrativa).

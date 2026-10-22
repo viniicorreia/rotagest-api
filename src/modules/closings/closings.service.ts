@@ -72,10 +72,13 @@ export class ClosingsService {
   async close(ctx: TenantContext, month: string, dto: ConfirmClosingDto, meta: RequestMeta) {
     const start = parseMonth(month);
     if (!this.closable(start)) throw businessRule('Só é possível fechar um mês que já terminou');
-    const snapshot = await this.snapshot(ctx, start);
     await this.prisma.$transaction(async (tx) => {
-      // Lock da linha (ou da ausência dela) pela chave única: fechamentos simultâneos do mesmo mês esperam um ao outro.
+      // Lock exclusivo do mês: fechamentos simultâneos esperam um ao outro, e os
+      // lançamentos do mês (lock compartilhado em PeriodLockService.assertOpen)
+      // em andamento terminam antes; os novos esperam o fechamento e são recusados.
       await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${`closing:${ctx.companyId}:${month}`}))`;
+      // O retrato é calculado depois do lock, já com tudo o que foi confirmado no mês.
+      const snapshot = await this.snapshot(ctx, start);
       const current = await tx.monthlyClosing.findUnique({ where: { companyId_year_month: { companyId: ctx.companyId, year: start.getUTCFullYear(), month: start.getUTCMonth() + 1 } } });
       if (current?.status === 'CLOSED') throw conflict(`O mês ${label(month)} já está fechado`, ErrorCode.CONFLICT);
       const version = current?.version ?? 0;
@@ -88,7 +91,7 @@ export class ClosingsService {
         { companyId: ctx.companyId, actorUserId: ctx.userId, action: 'closing.closed', entityType: 'MonthlyClosing', entityId: saved.id, after: { month, version: saved.version, totals: snapshot.totals }, meta },
         tx,
       );
-    });
+    }, { timeout: 30_000 });
     return this.get(ctx, month);
   }
 
