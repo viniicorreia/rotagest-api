@@ -18,9 +18,12 @@ generator client {
   provider = "prisma-client-js"
 }
 
+// DATABASE_URL: papel da aplicação (rotagest_app), sujeito ao RLS.
+// DIRECT_DATABASE_URL: dono do banco, usado pelo Prisma CLI (migrations).
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_DATABASE_URL")
 }
 
 // -----------------------------------------------------------------------------

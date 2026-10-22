@@ -16,7 +16,7 @@ export interface MailTransport {
 export const MAIL_TRANSPORT = Symbol('MAIL_TRANSPORT');
 
 /**
- * Transporte padrão enquanto não há SMTP configurado (Fase 6): registra o
+ * Transporte usado quando SMTP_URL não está configurado: registra o
  * envio no log. O link só é registrado fora de produção, para não vazar tokens.
  */
 @Injectable()

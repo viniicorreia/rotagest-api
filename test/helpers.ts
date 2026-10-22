@@ -1,6 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import { INestApplication } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
+import { PrismaClient } from '@prisma/client';
 import request from 'supertest';
 import { AppModule } from '../src/app.module';
 import { AppConfig } from '../src/config/app-config.service';
@@ -56,12 +57,18 @@ export async function createTestApp(envOverrides: Partial<Env> = {}, gateways: P
 }
 
 /** Limpa os dados entre suítes, preservando os planos do seed. */
-export async function resetDb(prisma: PrismaService): Promise<void> {
-  const tables = await prisma.$queryRaw<{ tablename: string }[]>`
-    SELECT tablename FROM pg_tables
-    WHERE schemaname = 'public' AND tablename NOT IN ('_prisma_migrations', 'plans', 'plan_features')`;
-  const list = tables.map((t) => `"${t.tablename}"`).join(', ');
-  await prisma.$executeRawUnsafe(`TRUNCATE ${list} RESTART IDENTITY CASCADE`);
+export async function resetDb(_prisma?: PrismaService): Promise<void> {
+  // TRUNCATE exige o dono do banco: o papel da aplicação não tem essa permissão.
+  const admin = new PrismaClient({ datasourceUrl: process.env.DIRECT_DATABASE_URL });
+  try {
+    const tables = await admin.$queryRaw<{ tablename: string }[]>`
+      SELECT tablename FROM pg_tables
+      WHERE schemaname = 'public' AND tablename NOT IN ('_prisma_migrations', 'plans', 'plan_features')`;
+    const list = tables.map((t) => `"${t.tablename}"`).join(', ');
+    await admin.$executeRawUnsafe(`TRUNCATE ${list} RESTART IDENTITY CASCADE`);
+  } finally {
+    await admin.$disconnect();
+  }
 }
 
 // ---------------------------------------------------------------------------

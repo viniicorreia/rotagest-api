@@ -37,6 +37,7 @@ import { FleetCostsModule } from './modules/fleet-costs/fleet-costs.module';
 import { ReportsModule } from './modules/reports/reports.module';
 import { ClosingsModule } from './modules/closings/closings.module';
 import { ContractsModule } from './modules/contracts/contracts.module';
+import { MetricsModule } from './modules/metrics/metrics.module';
 import { PrismaModule } from './prisma/prisma.module';
 
 @Module({
@@ -53,11 +54,14 @@ import { PrismaModule } from './prisma/prisma.module';
             res.setHeader('x-request-id', id);
             return id;
           },
+          // Toda linha registrada durante a requisição leva o requestId (o mesmo do header x-request-id e das respostas de erro).
+          customProps: (req) => ({ requestId: req.id }),
           redact: {
             paths: ['req.headers.authorization', 'req.headers.cookie', 'res.headers["set-cookie"]', '*.password', '*.token', '*.refreshToken'],
             censor: '[redacted]',
           },
-          autoLogging: { ignore: (req) => req.url === '/api/v1/health' },
+          // Sondas de saúde e scrape de métricas são frequentes: não poluem o log de acesso.
+          autoLogging: { ignore: (req) => /^\/api\/v1\/(health(\/(live|ready))?|metrics)(\?|$)/.test(req.url ?? '') },
           transport: config.get('NODE_ENV') === 'development' ? { target: 'pino-pretty', options: { singleLine: true } } : undefined,
         },
       }),
@@ -104,6 +108,8 @@ import { PrismaModule } from './prisma/prisma.module';
     ReceivablesModule,
     AttachmentsModule,
     DashboardModule,
+    // Fase 6 — produção
+    MetricsModule,
   ],
   controllers: [HealthController, MetaController],
   providers: [

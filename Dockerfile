@@ -13,8 +13,13 @@ WORKDIR /app
 COPY --from=build /app/node_modules ./node_modules
 COPY --from=build /app/dist ./dist
 COPY --from=build /app/prisma ./prisma
+COPY --from=build /app/scripts ./scripts
 COPY package.json ./
+# Diretório dos anexos com STORAGE_DRIVER=local (monte um volume aqui).
+RUN mkdir -p /app/storage && chown node:node /app/storage
 USER node
 EXPOSE 3000
-# Aplica migrations pendentes (não destrutivo) e sobe a API.
-CMD ["sh", "-c", "node node_modules/prisma/build/index.js migrate deploy && node dist/main.js"]
+# Só a API, com DATABASE_URL do papel rotagest_app. As migrations rodam antes,
+# num job à parte com as credenciais do dono (docs/DEPLOY.md):
+#   docker run --rm -e DIRECT_DATABASE_URL=... -e DATABASE_URL=... -e APP_DB_PASSWORD=... <imagem> npm run db:deploy
+CMD ["node", "dist/main.js"]

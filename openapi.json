@@ -10,6 +10,37 @@
             "description": ""
           }
         },
+        "summary": "Saúde geral (inclui o banco); mantido por compatibilidade",
+        "tags": [
+          "health"
+        ]
+      }
+    },
+    "/api/v1/health/live": {
+      "get": {
+        "operationId": "Health_live",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Liveness: o processo está de pé (não consulta o banco)",
+        "tags": [
+          "health"
+        ]
+      }
+    },
+    "/api/v1/health/ready": {
+      "get": {
+        "operationId": "Health_ready",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Readiness: banco respondendo; 503 quando indisponível",
         "tags": [
           "health"
         ]
