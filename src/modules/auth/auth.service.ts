@@ -68,8 +68,9 @@ export class AuthService {
     if (!refreshToken) throw unauthorized('Sessão expirada', ErrorCode.SESSION_EXPIRED);
     const session = await this.sessions.rotate(refreshToken, meta);
     // A empresa ativa gravada na sessão é revalidada: vínculo removido → sem empresa.
+    // Uma sessão de suporte continua só enquanto a autorização do dono valer.
     if (session.activeCompanyId) {
-      const ctx = await this.tenants.tryResolve(session.userId, session.activeCompanyId);
+      const ctx = await this.tenants.tryResolve(session.userId, session.activeCompanyId, { allowSupport: true });
       if (!ctx || ctx === 'SUSPENDED') {
         await this.sessions.setActiveCompany(session.sessionId, null);
         session.activeCompanyId = null;
@@ -132,8 +133,24 @@ export class AuthService {
             tradeName: active.company.tradeName,
             role: active.role,
             permissions: resolvePermissions(active.role, active.permissions),
+            support: null,
           }
-        : null,
+        : await this.supportCompany(user),
+    };
+  }
+
+  /** Empresa aberta pelo suporte da plataforma com autorização vigente do dono. */
+  private async supportCompany(user: AuthUser) {
+    if (user.platformRole !== 'SUPER_ADMIN' || !user.claimedCompanyId) return null;
+    const ctx = await this.tenants.tryResolve(user.userId, user.claimedCompanyId, { allowSupport: true });
+    if (!ctx || ctx === 'SUSPENDED' || !ctx.support) return null;
+    const company = await this.prisma.company.findUniqueOrThrow({ where: { id: ctx.companyId }, select: { tradeName: true } });
+    return {
+      id: ctx.companyId,
+      tradeName: company.tradeName,
+      role: ctx.role,
+      permissions: [...ctx.permissions],
+      support: { expiresAt: ctx.support.expiresAt },
     };
   }
 

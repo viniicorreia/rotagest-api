@@ -152,12 +152,21 @@ export class PlatformService {
     });
     if (!company) throw notFound('Empresa não encontrada');
     const { subscription, members, ...rest } = company;
-    const [usage, history] = await Promise.all([this.usageOf([id]), this.historyOf(id)]);
+    const [usage, history, supportAccess] = await Promise.all([
+      this.usageOf([id]),
+      this.historyOf(id),
+      this.prisma.supportGrant.findFirst({
+        where: { companyId: id, revokedAt: null, expiresAt: { gt: new Date() } },
+        orderBy: { expiresAt: 'desc' },
+        select: { expiresAt: true, reason: true },
+      }),
+    ]);
     return {
       ...rest,
       subscription: subscription ? subscriptionSummary(subscription) : null,
       usage: usageFor(usage, id, subscription),
       owners: members.map((m) => m.user),
+      supportAccess,
       history,
     };
   }
@@ -405,7 +414,7 @@ export class PlatformService {
 
   private async historyOf(companyId: string) {
     const rows = await this.prisma.auditLog.findMany({
-      where: { companyId, OR: [{ action: { startsWith: 'platform.' } }, { action: { startsWith: 'billing.' } }] },
+      where: { companyId, OR: [{ action: { startsWith: 'platform.' } }, { action: { startsWith: 'billing.' } }, { action: { in: ['support.granted', 'support.revoked', 'support.session_started'] } }] },
       orderBy: { createdAt: 'desc' },
       take: 50,
     });

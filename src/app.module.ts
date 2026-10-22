@@ -38,6 +38,8 @@ import { ReportsModule } from './modules/reports/reports.module';
 import { ClosingsModule } from './modules/closings/closings.module';
 import { ContractsModule } from './modules/contracts/contracts.module';
 import { MetricsModule } from './modules/metrics/metrics.module';
+import { PrivacyModule } from './modules/privacy/privacy.module';
+import { SupportAccessModule } from './modules/support-access/support-access.module';
 import { PrismaModule } from './prisma/prisma.module';
 
 @Module({
@@ -110,6 +112,8 @@ import { PrismaModule } from './prisma/prisma.module';
     DashboardModule,
     // Fase 6 — produção
     MetricsModule,
+    SupportAccessModule,
+    PrivacyModule,
   ],
   controllers: [HealthController, MetaController],
   providers: [
