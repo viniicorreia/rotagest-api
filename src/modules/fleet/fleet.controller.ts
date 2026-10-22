@@ -55,6 +55,15 @@ export class DriversController {
   async remove(@Tenant() ctx: TenantContext, @Param('id', ParseUUIDPipe) id: string, @ReqMeta() meta: RequestMeta) {
     await this.fleet.removeDriver(ctx, id, meta);
   }
+
+  @Post(':id/anonymize')
+  @HttpCode(200)
+  @RequirePermissions('fleet:manage')
+  @ApiOkResponse({ type: DriverDto })
+  @ApiOperation({ summary: 'Remove os dados pessoais de um motorista inativo (LGPD), mantendo o histórico' })
+  anonymize(@Tenant() ctx: TenantContext, @Param('id', ParseUUIDPipe) id: string, @ReqMeta() meta: RequestMeta) {
+    return this.fleet.anonymizeDriver(ctx, id, meta);
+  }
 }
 
 @ApiTags('routes')

@@ -17,11 +17,17 @@ export class MeCompanyDto {
   @ApiProperty() roleLabel: string;
 }
 
+export class SupportSessionDto {
+  @ApiProperty({ description: 'Fim da autorização dada pelo dono', format: 'date-time' }) expiresAt: Date;
+}
+
 export class ActiveCompanyDto {
   @ApiProperty({ format: 'uuid' }) id: string;
   @ApiProperty() tradeName: string;
   @ApiProperty(MemberRoleEnum) role: MemberRole;
   @ApiProperty({ ...PermissionEnum, isArray: true }) permissions: Permission[];
+  @ApiProperty({ type: SupportSessionDto, nullable: true, description: 'Preenchido quando é o suporte da plataforma (somente leitura)' })
+  support: SupportSessionDto | null;
 }
 
 export class MeResponseDto {

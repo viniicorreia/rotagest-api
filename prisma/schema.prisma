@@ -18,9 +18,12 @@ generator client {
   provider = "prisma-client-js"
 }
 
+// DATABASE_URL: papel da aplicação (rotagest_app), sujeito ao RLS.
+// DIRECT_DATABASE_URL: dono do banco, usado pelo Prisma CLI (migrations).
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_DATABASE_URL")
 }
 
 // -----------------------------------------------------------------------------
@@ -265,6 +268,8 @@ model User {
   platformRole PlatformRole @default(USER)
   status       UserStatus   @default(ACTIVE)
   lastLoginAt  DateTime?
+  /// Conta excluída a pedido do titular (LGPD): nome e e-mail foram anonimizados.
+  anonymizedAt DateTime?
   createdAt    DateTime     @default(now())
   updatedAt    DateTime     @updatedAt
 
@@ -273,6 +278,8 @@ model User {
   passwordResetTokens PasswordResetToken[]
   invitationsSent     CompanyInvitation[]  @relation("InvitationInvitedBy")
   invitationsAccepted CompanyInvitation[]  @relation("InvitationAcceptedBy")
+  supportGrants       SupportGrant[]       @relation("SupportGrantGrantedBy")
+  supportRevocations  SupportGrant[]       @relation("SupportGrantRevokedBy")
 
   @@map("users")
 }
@@ -335,6 +342,7 @@ model Company {
   subscription  Subscription?
   billingEvents BillingEvent[]
   auditLogs     AuditLog[]
+  supportGrants SupportGrant[]
 
   vehicles           Vehicle[]
   drivers            Driver[]
@@ -516,6 +524,26 @@ model BillingEvent {
 }
 
 /// Trilha de auditoria append-only (UPDATE/DELETE bloqueados por trigger).
+/// Autorização do dono para o suporte da plataforma ver os dados da empresa
+/// (somente leitura, por prazo limitado, cada acesso auditado). §5 e §23.
+model SupportGrant {
+  id          String    @id @default(uuid()) @db.Uuid
+  companyId   String    @db.Uuid
+  grantedById String    @db.Uuid
+  reason      String
+  expiresAt   DateTime
+  revokedAt   DateTime?
+  revokedById String?   @db.Uuid
+  createdAt   DateTime  @default(now())
+
+  company   Company @relation(fields: [companyId], references: [id], onDelete: Restrict)
+  grantedBy User    @relation("SupportGrantGrantedBy", fields: [grantedById], references: [id], onDelete: Restrict)
+  revokedBy User?   @relation("SupportGrantRevokedBy", fields: [revokedById], references: [id], onDelete: Restrict)
+
+  @@index([companyId, expiresAt])
+  @@map("support_grants")
+}
+
 model AuditLog {
   id          String   @id @default(uuid()) @db.Uuid
   companyId   String?  @db.Uuid
@@ -586,6 +614,8 @@ model Driver {
   status         RecordStatus   @default(ACTIVE)
   /// Usuário vinculado (opcional) — via CompanyMember da MESMA empresa.
   memberId       String?        @db.Uuid
+  /// Dados pessoais removidos a pedido (LGPD); o histórico operacional fica.
+  anonymizedAt   DateTime?
   createdAt      DateTime       @default(now())
   updatedAt      DateTime       @updatedAt
 

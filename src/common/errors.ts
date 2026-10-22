@@ -23,6 +23,10 @@ export const ErrorCode = {
   IDEMPOTENCY_CONFLICT: 'IDEMPOTENCY_CONFLICT',
   /** Operação válida no formato, mas proibida pela regra de negócio (ex.: pagar mais que o saldo em aberto). */
   BUSINESS_RULE: 'BUSINESS_RULE',
+  /** Suporte da plataforma tentando gravar numa empresa (o acesso autorizado é só leitura). */
+  SUPPORT_READ_ONLY: 'SUPPORT_READ_ONLY',
+  /** Dono de empresa ativa tentando excluir a própria conta. */
+  ACCOUNT_OWNS_COMPANY: 'ACCOUNT_OWNS_COMPANY',
 } as const;
 
 export type ErrorCodeValue = (typeof ErrorCode)[keyof typeof ErrorCode];

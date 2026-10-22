@@ -5,7 +5,8 @@
 import { Prisma, PrismaClient } from '@prisma/client';
 import * as argon2 from 'argon2';
 
-const prisma = new PrismaClient();
+// Roda como dono do banco quando disponível (mesma conexão das migrations).
+const prisma = new PrismaClient({ datasourceUrl: process.env.DIRECT_DATABASE_URL ?? process.env.DATABASE_URL });
 
 const PLANS = [
   {

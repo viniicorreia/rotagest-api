@@ -1,7 +1,17 @@
+# Mantém o contexto do build pequeno e sem segredos.
 node_modules
 dist
-.env
-*.tsbuildinfo
-.git
 storage
 coverage
+.env
+.env.*
+*.tsbuildinfo
+*.log
+.git
+.github
+.DS_Store
+docker-compose.yml
+# Testes e artefatos de teste (não entram na imagem)
+test
+**/*.spec.ts
+junit*.xml

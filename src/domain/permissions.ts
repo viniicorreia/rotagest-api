@@ -26,6 +26,7 @@ export const PERMISSIONS = [
   'closing:manage',
   'closing:reopen',
   'settings:manage',
+  'support:grant',
 ] as const;
 
 export type Permission = (typeof PERMISSIONS)[number];
@@ -110,7 +111,22 @@ export const PERMISSION_LABELS: Record<Permission, string> = {
   'closing:manage': 'Realizar fechamento mensal',
   'closing:reopen': 'Reabrir fechamento mensal',
   'settings:manage': 'Gerenciar configurações',
+  'support:grant': 'Autorizar o acesso do suporte',
 };
+
+/**
+ * Permissões do suporte da plataforma dentro de uma empresa que autorizou o
+ * acesso: só leitura (o TenantGuard também recusa qualquer método de escrita).
+ */
+export const SUPPORT_PERMISSIONS: readonly Permission[] = [
+  'company:read',
+  'members:read',
+  'subscription:read',
+  'fleet:read',
+  'contracts:read',
+  'finance:read',
+  'reports:read',
+];
 
 export function isPermission(value: string): value is Permission {
   return (PERMISSIONS as readonly string[]).includes(value);

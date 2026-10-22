@@ -124,8 +124,15 @@ export class PlatformAuditEntryDto {
   @ApiProperty({ type: 'object', additionalProperties: true, nullable: true }) after: unknown;
 }
 
+export class PlatformSupportAccessDto {
+  @ApiProperty({ format: 'date-time' }) expiresAt: Date;
+  @ApiProperty() reason: string;
+}
+
 export class PlatformCompanyDetailDto extends PlatformCompanyDto {
   @ApiProperty({ type: [PlatformPersonDto], description: 'Proprietários (OWNER) ativos' }) owners: PlatformPersonDto[];
+  @ApiProperty({ type: PlatformSupportAccessDto, nullable: true, description: 'Autorização vigente do dono para o suporte ver os dados' })
+  supportAccess: PlatformSupportAccessDto | null;
   @ApiProperty({ type: [PlatformAuditEntryDto], description: 'Ações da plataforma e do gateway sobre esta empresa' }) history: PlatformAuditEntryDto[];
 }
 

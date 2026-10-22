@@ -10,6 +10,37 @@
             "description": ""
           }
         },
+        "summary": "Saúde geral (inclui o banco); mantido por compatibilidade",
+        "tags": [
+          "health"
+        ]
+      }
+    },
+    "/api/v1/health/live": {
+      "get": {
+        "operationId": "Health_live",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Liveness: o processo está de pé (não consulta o banco)",
+        "tags": [
+          "health"
+        ]
+      }
+    },
+    "/api/v1/health/ready": {
+      "get": {
+        "operationId": "Health_ready",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "summary": "Readiness: banco respondendo; 503 quando indisponível",
         "tags": [
           "health"
         ]
@@ -3062,6 +3093,52 @@
           }
         ],
         "summary": "Exclui motorista sem histórico; com histórico, marque como inativo",
+        "tags": [
+          "drivers"
+        ]
+      }
+    },
+    "/api/v1/drivers/{id}/anonymize": {
+      "post": {
+        "operationId": "Drivers_anonymize",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DriverDto"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Erro (formato padrão)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Remove os dados pessoais de um motorista inativo (LGPD), mantendo o histórico",
         "tags": [
           "drivers"
         ]
@@ -6589,6 +6666,341 @@
           "attachments"
         ]
       }
+    },
+    "/api/v1/support-access": {
+      "get": {
+        "operationId": "SupportAccess_overview",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SupportAccessOverviewDto"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Erro (formato padrão)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "support-access"
+        ]
+      },
+      "post": {
+        "operationId": "SupportAccess_grant",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateSupportGrantDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SupportGrantDto"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Erro (formato padrão)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Autoriza o suporte a ver os dados da empresa (somente leitura, até 72 h)",
+        "tags": [
+          "support-access"
+        ]
+      }
+    },
+    "/api/v1/support-access/{id}/revoke": {
+      "post": {
+        "operationId": "SupportAccess_revoke",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SupportGrantDto"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Erro (formato padrão)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "tags": [
+          "support-access"
+        ]
+      }
+    },
+    "/api/v1/support-access/{id}/log": {
+      "get": {
+        "operationId": "SupportAccess_log",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SupportAccessLogEntryDto"
+                  }
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Erro (formato padrão)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "O que o suporte consultou com esta autorização (últimas 200 leituras)",
+        "tags": [
+          "support-access"
+        ]
+      }
+    },
+    "/api/v1/platform/companies/{id}/support-session": {
+      "post": {
+        "operationId": "SupportSession_start",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TokenResponseDto"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Erro (formato padrão)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Abre a empresa em modo suporte (exige autorização vigente do dono)",
+        "tags": [
+          "platform"
+        ]
+      }
+    },
+    "/api/v1/platform/support-session/end": {
+      "post": {
+        "operationId": "SupportSession_end",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TokenResponseDto"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Erro (formato padrão)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Sai do modo suporte e volta ao painel da plataforma",
+        "tags": [
+          "platform"
+        ]
+      }
+    },
+    "/api/v1/me/data-export": {
+      "get": {
+        "operationId": "Privacy_export",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PersonalDataExportDto"
+                }
+              }
+            }
+          },
+          "default": {
+            "description": "Erro (formato padrão)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Baixa os dados pessoais do usuário (LGPD)",
+        "tags": [
+          "privacy"
+        ]
+      }
+    },
+    "/api/v1/me/delete": {
+      "post": {
+        "operationId": "Privacy_remove",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DeleteAccountDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "default": {
+            "description": "Erro (formato padrão)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiErrorDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Exclui a conta do usuário (anonimiza nome e e-mail, encerra sessões e vínculos)",
+        "tags": [
+          "privacy"
+        ]
+      }
     }
   },
   "info": {
@@ -6640,7 +7052,8 @@
           "reports:read",
           "closing:manage",
           "closing:reopen",
-          "settings:manage"
+          "settings:manage",
+          "support:grant"
         ]
       },
       "RoleInfoDto": {
@@ -6887,6 +7300,19 @@
           "roleLabel"
         ]
       },
+      "SupportSessionDto": {
+        "type": "object",
+        "properties": {
+          "expiresAt": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Fim da autorização dada pelo dono"
+          }
+        },
+        "required": [
+          "expiresAt"
+        ]
+      },
       "ActiveCompanyDto": {
         "type": "object",
         "properties": {
@@ -6909,13 +7335,23 @@
             "items": {
               "$ref": "#/components/schemas/Permission"
             }
+          },
+          "support": {
+            "nullable": true,
+            "description": "Preenchido quando é o suporte da plataforma (somente leitura)",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/SupportSessionDto"
+              }
+            ]
           }
         },
         "required": [
           "id",
           "tradeName",
           "role",
-          "permissions"
+          "permissions",
+          "support"
         ]
       },
       "MeResponseDto": {
@@ -7574,6 +8010,22 @@
           "email"
         ]
       },
+      "PlatformSupportAccessDto": {
+        "type": "object",
+        "properties": {
+          "expiresAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "reason": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "expiresAt",
+          "reason"
+        ]
+      },
       "PlatformAuditEntryDto": {
         "type": "object",
         "properties": {
@@ -7681,6 +8133,15 @@
               "$ref": "#/components/schemas/PlatformPersonDto"
             }
           },
+          "supportAccess": {
+            "nullable": true,
+            "description": "Autorização vigente do dono para o suporte ver os dados",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/PlatformSupportAccessDto"
+              }
+            ]
+          },
           "history": {
             "description": "Ações da plataforma e do gateway sobre esta empresa",
             "type": "array",
@@ -7703,6 +8164,7 @@
           "subscription",
           "usage",
           "owners",
+          "supportAccess",
           "history"
         ]
       },
@@ -10463,6 +10925,10 @@
               }
             ]
           },
+          "anonymized": {
+            "type": "boolean",
+            "description": "Dados pessoais removidos (LGPD); o cadastro não pode mais ser editado"
+          },
           "member": {
             "nullable": true,
             "description": "Usuário vinculado (portal do motorista)",
@@ -10488,6 +10954,7 @@
           "hiredAt",
           "employmentType",
           "status",
+          "anonymized",
           "member",
           "currentRoutes"
         ]
@@ -14581,6 +15048,236 @@
         "required": [
           "settlement",
           "receivable"
+        ]
+      },
+      "SupportGrantStatus": {
+        "type": "string",
+        "enum": [
+          "ACTIVE",
+          "EXPIRED",
+          "REVOKED"
+        ]
+      },
+      "SupportPersonDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name"
+        ]
+      },
+      "SupportGrantDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/SupportGrantStatus"
+              }
+            ]
+          },
+          "reason": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "expiresAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "revokedAt": {
+            "type": "string",
+            "format": "date-time",
+            "nullable": true
+          },
+          "grantedBy": {
+            "$ref": "#/components/schemas/SupportPersonDto"
+          },
+          "revokedBy": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/SupportPersonDto"
+              }
+            ]
+          },
+          "accessCount": {
+            "type": "number",
+            "description": "Quantas leituras o suporte fez com esta autorização"
+          }
+        },
+        "required": [
+          "id",
+          "status",
+          "reason",
+          "createdAt",
+          "expiresAt",
+          "revokedAt",
+          "grantedBy",
+          "revokedBy",
+          "accessCount"
+        ]
+      },
+      "SupportAccessOverviewDto": {
+        "type": "object",
+        "properties": {
+          "active": {
+            "nullable": true,
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/SupportGrantDto"
+              }
+            ]
+          },
+          "grants": {
+            "description": "Últimas 20 autorizações",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SupportGrantDto"
+            }
+          },
+          "supportEmail": {
+            "type": "string",
+            "nullable": true,
+            "description": "E-mail de suporte da plataforma"
+          }
+        },
+        "required": [
+          "active",
+          "grants",
+          "supportEmail"
+        ]
+      },
+      "CreateSupportGrantDto": {
+        "type": "object",
+        "properties": {
+          "hours": {
+            "type": "number",
+            "minimum": 1,
+            "maximum": 72,
+            "description": "Por quantas horas o suporte pode ver os dados",
+            "example": 24
+          },
+          "reason": {
+            "type": "string",
+            "minLength": 10,
+            "maxLength": 500,
+            "example": "Conferir o relatório de setembro que não fecha"
+          }
+        },
+        "required": [
+          "hours",
+          "reason"
+        ]
+      },
+      "SupportAccessLogEntryDto": {
+        "type": "object",
+        "properties": {
+          "at": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "actorName": {
+            "type": "string",
+            "nullable": true
+          },
+          "method": {
+            "type": "string",
+            "example": "GET"
+          },
+          "path": {
+            "type": "string",
+            "example": "/api/v1/reports/vehicle-result"
+          }
+        },
+        "required": [
+          "at",
+          "actorName",
+          "method",
+          "path"
+        ]
+      },
+      "PersonalDataExportDto": {
+        "type": "object",
+        "properties": {
+          "generatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "user": {
+            "type": "object",
+            "description": "Cadastro do usuário"
+          },
+          "memberships": {
+            "description": "Vínculos com empresas",
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          },
+          "driverProfiles": {
+            "description": "Cadastros de motorista ligados ao usuário",
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          },
+          "sessions": {
+            "description": "Sessões (aparelhos e IPs)",
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          },
+          "invitations": {
+            "description": "Convites recebidos",
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          },
+          "activity": {
+            "description": "Ações registradas na auditoria (últimas 1000)",
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          }
+        },
+        "required": [
+          "generatedAt",
+          "user",
+          "memberships",
+          "driverProfiles",
+          "sessions",
+          "invitations",
+          "activity"
+        ]
+      },
+      "DeleteAccountDto": {
+        "type": "object",
+        "properties": {
+          "password": {
+            "type": "string",
+            "description": "Senha atual, para confirmar"
+          }
+        },
+        "required": [
+          "password"
         ]
       }
     }

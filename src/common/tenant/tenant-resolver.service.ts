@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { resolvePermissions } from '../../domain';
+import { resolvePermissions, SUPPORT_PERMISSIONS } from '../../domain';
 import { PrismaService } from '../../prisma/prisma.service';
 import { ErrorCode, forbidden } from '../errors';
 import type { TenantContext } from './tenant-context';
@@ -13,20 +13,20 @@ export class TenantResolver {
   constructor(private readonly prisma: PrismaService) {}
 
   /** Retorna o contexto ou lança 403 se o vínculo/empresa não estiver ativo. */
-  async resolve(userId: string, companyId: string): Promise<TenantContext> {
-    const ctx = await this.tryResolve(userId, companyId);
+  async resolve(userId: string, companyId: string, opts: ResolveOptions = {}): Promise<TenantContext> {
+    const ctx = await this.tryResolve(userId, companyId, opts);
     if (ctx === 'SUSPENDED') throw forbidden('O acesso a esta empresa está suspenso. Fale com o suporte da plataforma.', ErrorCode.COMPANY_SUSPENDED);
     if (!ctx) throw forbidden('Você não tem acesso a esta empresa', ErrorCode.COMPANY_ACCESS_DENIED);
     return ctx;
   }
 
-  async tryResolve(userId: string, companyId: string): Promise<TenantContext | 'SUSPENDED' | null> {
+  async tryResolve(userId: string, companyId: string, opts: ResolveOptions = {}): Promise<TenantContext | 'SUSPENDED' | null> {
     if (!isUuid(companyId)) return null;
     const member = await this.prisma.companyMember.findUnique({
       where: { companyId_userId: { companyId, userId } },
       select: { id: true, role: true, permissions: true, status: true, company: { select: { status: true, subscription: { select: { status: true } } } } },
     });
-    if (!member || member.status !== 'ACTIVE') return null;
+    if (!member || member.status !== 'ACTIVE') return opts.allowSupport ? this.trySupport(userId, companyId) : null;
     if (effectiveCompanyStatus(member.company) !== 'ACTIVE') return 'SUSPENDED';
     return {
       companyId,
@@ -36,6 +36,34 @@ export class TenantResolver {
       permissions: resolvePermissions(member.role, member.permissions),
     };
   }
+
+  /**
+   * SUPER_ADMIN sem vínculo só entra numa empresa com autorização vigente do
+   * dono (support_grants), e sempre com permissões de leitura.
+   */
+  private async trySupport(userId: string, companyId: string): Promise<TenantContext | null> {
+    const user = await this.prisma.user.findUnique({ where: { id: userId }, select: { platformRole: true, status: true } });
+    if (user?.platformRole !== 'SUPER_ADMIN' || user.status !== 'ACTIVE') return null;
+    const grant = await this.prisma.supportGrant.findFirst({
+      where: { companyId, revokedAt: null, expiresAt: { gt: new Date() }, company: { status: { not: 'CANCELED' } } },
+      orderBy: { expiresAt: 'desc' },
+      select: { id: true, expiresAt: true },
+    });
+    if (!grant) return null;
+    return {
+      companyId,
+      userId,
+      memberId: '',
+      role: 'MANAGER',
+      permissions: SUPPORT_PERMISSIONS,
+      support: { grantId: grant.id, expiresAt: grant.expiresAt },
+    };
+  }
+}
+
+export interface ResolveOptions {
+  /** Aceita o acesso de suporte autorizado (só o TenantGuard, a sessão de suporte e o refresh). */
+  allowSupport?: boolean;
 }
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;

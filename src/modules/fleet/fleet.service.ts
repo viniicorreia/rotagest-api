@@ -66,6 +66,7 @@ export class FleetService {
     return this.prisma.$transaction(async (tx) => {
       const before = await tx.driver.findFirst({ where: { id, companyId: ctx.companyId } });
       if (!before) throw notFound('Motorista não encontrado');
+      if (before.anonymizedAt) throw conflict('Os dados deste motorista foram removidos e o cadastro não pode ser editado');
       if (dto.document && dto.document !== before.document) await this.assertDocumentFree(tx, ctx.companyId, dto.document);
       if (dto.memberId && dto.memberId !== before.memberId) await this.assertMemberFree(tx, ctx.companyId, dto.memberId);
       await tx.driver.update({
@@ -89,6 +90,28 @@ export class FleetService {
     });
   }
 
+  /**
+   * LGPD: remove nome, CPF, telefone e vínculo de um motorista inativo,
+   * mantendo o histórico (rotas, diários, despesas) com um rótulo neutro.
+   * Irreversível.
+   */
+  async anonymizeDriver(ctx: TenantContext, id: string, meta: RequestMeta) {
+    return this.prisma.$transaction(async (tx) => {
+      const d = await tx.driver.findFirst({ where: { id, companyId: ctx.companyId }, select: { status: true, anonymizedAt: true } });
+      if (!d) throw notFound('Motorista não encontrado');
+      if (d.anonymizedAt) throw conflict('Os dados deste motorista já foram removidos');
+      if (d.status !== 'INACTIVE') throw businessRule('Marque o motorista como inativo antes de remover os dados pessoais.');
+      const tag = id.slice(0, 8);
+      await tx.driver.update({
+        where: { id },
+        data: { name: `Motorista removido ${tag}`, document: `anon-${tag}`, phone: null, hiredAt: null, memberId: null, anonymizedAt: new Date() },
+      });
+      // Sem "antes": a auditoria não guarda de novo os dados que estão sendo removidos.
+      await this.audit.log({ companyId: ctx.companyId, actorUserId: ctx.userId, action: 'driver.anonymized', entityType: 'Driver', entityId: id, meta }, tx);
+      return this.driverById(tx, ctx, id);
+    });
+  }
+
   private async driverById(tx: Tx, ctx: TenantContext, id: string) {
     const [d] = await this.findDrivers(tx, { companyId: ctx.companyId, id });
     return d;
@@ -108,6 +131,7 @@ export class FleetService {
       hiredAt: dateOnly(d.hiredAt),
       employmentType: d.employmentType,
       status: d.status,
+      anonymized: d.anonymizedAt !== null,
       member: d.member ? { id: d.member.id, name: d.member.user.name } : null,
       currentRoutes: d.routeAssignments.map((a) => a.route.name),
     }));
