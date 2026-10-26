@@ -19,6 +19,16 @@ import { MetaController } from './modules/meta/meta.controller';
 import { MailModule } from './modules/mail/mail.module';
 import { MembershipsModule } from './modules/memberships/memberships.module';
 import { SubscriptionsModule } from './modules/subscriptions/subscriptions.module';
+import { FinancialAccountsModule } from './modules/accounts/accounts.module';
+import { AttachmentsModule } from './modules/attachments/attachments.module';
+import { CategoriesModule } from './modules/categories/categories.module';
+import { DashboardModule } from './modules/dashboard/dashboard.module';
+import { ObligationsModule } from './modules/obligations/obligations.module';
+import { PayablesModule } from './modules/payables/payables.module';
+import { ReceivablesModule } from './modules/receivables/receivables.module';
+import { SettlementsModule } from './modules/settlements/settlements.module';
+import { TransactionsModule } from './modules/transactions/transactions.module';
+import { VehiclesModule } from './modules/vehicles/vehicles.module';
 import { PrismaModule } from './prisma/prisma.module';
 
 @Module({
@@ -67,6 +77,17 @@ import { PrismaModule } from './prisma/prisma.module';
     SubscriptionsModule,
     CompaniesModule,
     MembershipsModule,
+    // Fase 2 — Financeiro MVP
+    TransactionsModule,
+    CategoriesModule,
+    FinancialAccountsModule,
+    SettlementsModule,
+    ObligationsModule,
+    VehiclesModule,
+    PayablesModule,
+    ReceivablesModule,
+    AttachmentsModule,
+    DashboardModule,
   ],
   controllers: [HealthController, MetaController],
   providers: [

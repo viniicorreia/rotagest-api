@@ -1,8 +1,10 @@
+import { randomUUID } from 'node:crypto';
 import { INestApplication } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import request from 'supertest';
 import { AppModule } from '../src/app.module';
 import { AppConfig } from '../src/config/app-config.service';
+import { addMonths, firstOfMonth, formatDate, formatMonth, today as businessToday } from '../src/domain';
 import { validateEnv, type Env } from '../src/config/env';
 import { MAIL_TRANSPORT, type MailMessage, type MailTransport } from '../src/modules/mail/mail.service';
 import { PrismaService } from '../src/prisma/prisma.service';
@@ -153,3 +155,53 @@ export async function addMember(t: TestApp, owner: Session, role: string, permis
 }
 
 export const bearer = (s: Session) => ({ Authorization: `Bearer ${s.token}` });
+
+// ---------------------------------------------------------------------------
+// Fase 2 — financeiro
+// ---------------------------------------------------------------------------
+
+
+/** Datas relativas a hoje (fuso de São Paulo), para os testes não envelhecerem. */
+export const dates = {
+  today: () => formatDate(businessToday()),
+  daysAgo: (n: number) => formatDate(new Date(businessToday().getTime() - n * 86_400_000)),
+  daysAhead: (n: number) => formatDate(new Date(businessToday().getTime() + n * 86_400_000)),
+  month: (offset = 0) => formatMonth(addMonths(firstOfMonth(businessToday()), offset, 1)),
+  /** Dia `day` do mês com deslocamento `offset` em relação ao atual. */
+  dayOfMonth: (offset: number, day: number) => formatDate(addMonths(firstOfMonth(businessToday()), offset, day)),
+};
+
+export const key = () => randomUUID();
+
+export async function categoryId(t: TestApp, s: Session, systemKey: string): Promise<string> {
+  const res = await t.http().get('/api/v1/categories').set(bearer(s)).expect(200);
+  const found = (res.body as { id: string; systemKey: string | null }[]).find((c) => c.systemKey === systemKey);
+  if (!found) throw new Error(`Categoria ${systemKey} não encontrada`);
+  return found.id;
+}
+
+export async function createAccount(t: TestApp, s: Session, name = 'Conta Corrente', openingBalance = '0.00', openingBalanceDate = dates.daysAgo(30)) {
+  const res = await t
+    .http()
+    .post('/api/v1/accounts')
+    .set(bearer(s))
+    .send({ name, type: 'CHECKING', openingBalance, openingBalanceDate })
+    .expect(201);
+  return res.body as { id: string; balance: string };
+}
+
+let plateSeq = 100;
+export function nextPlate(): string {
+  plateSeq += 1;
+  return `RGT${String(plateSeq).padStart(4, '0')}`;
+}
+
+export async function createVehicle(t: TestApp, s: Session, name = 'Van') {
+  const res = await t.http().post('/api/v1/vehicles').set(bearer(s)).send({ name, plate: nextPlate() }).expect(201);
+  return res.body as { id: string; name: string; plate: string };
+}
+
+export async function balanceOf(t: TestApp, s: Session, accountId: string): Promise<string> {
+  const res = await t.http().get(`/api/v1/accounts/${accountId}`).set(bearer(s)).expect(200);
+  return res.body.balance;
+}
