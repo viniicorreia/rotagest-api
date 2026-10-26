@@ -6,6 +6,7 @@ import { AppModule } from '../src/app.module';
 import { AppConfig } from '../src/config/app-config.service';
 import { addMonths, firstOfMonth, formatDate, formatMonth, today as businessToday } from '../src/domain';
 import { validateEnv, type Env } from '../src/config/env';
+import { PAYMENT_GATEWAYS, type PaymentGateway } from '../src/modules/billing/payment-gateway';
 import { MAIL_TRANSPORT, type MailMessage, type MailTransport } from '../src/modules/mail/mail.service';
 import { PrismaService } from '../src/prisma/prisma.service';
 import { setupApp } from '../src/setup-app';
@@ -28,7 +29,7 @@ export interface TestApp {
   close: () => Promise<void>;
 }
 
-export async function createTestApp(envOverrides: Partial<Env> = {}): Promise<TestApp> {
+export async function createTestApp(envOverrides: Partial<Env> = {}, gateways: PaymentGateway[] = []): Promise<TestApp> {
   const mail = new InMemoryMailTransport();
   const env: Env = { ...validateEnv(process.env), ...envOverrides };
   const config = Object.assign(Object.create(AppConfig.prototype) as AppConfig, {
@@ -39,8 +40,10 @@ export async function createTestApp(envOverrides: Partial<Env> = {}): Promise<Te
     .useValue(mail)
     .overrideProvider(AppConfig)
     .useValue(config)
+    .overrideProvider(PAYMENT_GATEWAYS)
+    .useValue(gateways)
     .compile();
-  const app = moduleRef.createNestApplication({ logger: false });
+  const app = moduleRef.createNestApplication({ logger: false, rawBody: true });
   setupApp(app);
   await app.init();
   return {

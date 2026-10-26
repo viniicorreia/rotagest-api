@@ -330,10 +330,11 @@ model Company {
   createdAt  DateTime      @default(now())
   updatedAt  DateTime      @updatedAt
 
-  members      CompanyMember[]
-  invitations  CompanyInvitation[]
-  subscription Subscription?
-  auditLogs    AuditLog[]
+  members       CompanyMember[]
+  invitations   CompanyInvitation[]
+  subscription  Subscription?
+  billingEvents BillingEvent[]
+  auditLogs     AuditLog[]
 
   vehicles           Vehicle[]
   drivers            Driver[]
@@ -432,6 +433,7 @@ model Plan {
 
   features      PlanFeature[]
   subscriptions Subscription[]
+  defaultFor    PlatformSettings[]
 
   @@map("plans")
 }
@@ -475,6 +477,42 @@ model Subscription {
 
   @@index([status])
   @@map("subscriptions")
+}
+
+/// Configurações globais da plataforma (linha única, id = 1). Sem linha, valem
+/// as variáveis de ambiente DEFAULT_PLAN_CODE e TRIAL_DAYS.
+model PlatformSettings {
+  id                Int      @id @default(1)
+  allowNewCompanies Boolean  @default(true)
+  defaultPlanId     String?  @db.Uuid
+  trialDays         Int      @default(14)
+  supportEmail      String?
+  updatedById       String?  @db.Uuid
+  updatedAt         DateTime @updatedAt
+
+  defaultPlan Plan? @relation(fields: [defaultPlanId], references: [id], onDelete: Restrict)
+
+  @@map("platform_settings")
+}
+
+/// Eventos recebidos do gateway de pagamento (webhooks). A unicidade por
+/// provedor + id externo torna o processamento idempotente.
+model BillingEvent {
+  id          String    @id @default(uuid()) @db.Uuid
+  provider    String
+  externalId  String
+  type        String
+  companyId   String?   @db.Uuid
+  payload     Json
+  receivedAt  DateTime  @default(now())
+  processedAt DateTime?
+  error       String?
+
+  company Company? @relation(fields: [companyId], references: [id], onDelete: Restrict)
+
+  @@unique([provider, externalId])
+  @@index([companyId, receivedAt])
+  @@map("billing_events")
 }
 
 /// Trilha de auditoria append-only (UPDATE/DELETE bloqueados por trigger).

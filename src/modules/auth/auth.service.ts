@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { MEMBER_ROLE_LABELS, resolvePermissions } from '../../domain';
 import { ErrorCode, conflict, unauthorized } from '../../common/errors';
 import type { AuthUser, RequestMeta } from '../../common/tenant/tenant-context';
-import { TenantResolver } from '../../common/tenant/tenant-resolver.service';
+import { BLOCKED_SUBSCRIPTION, TenantResolver, effectiveCompanyStatus } from '../../common/tenant/tenant-resolver.service';
 import { addMinutes } from '../../common/utils/dates';
 import { generateToken, sha256 } from '../../common/utils/crypto';
 import { AppConfig } from '../../config/app-config.service';
@@ -109,19 +109,19 @@ export class AuthService {
       select: {
         role: true,
         permissions: true,
-        company: { select: { id: true, tradeName: true, status: true } },
+        company: { select: { id: true, tradeName: true, status: true, subscription: { select: { status: true } } } },
       },
       orderBy: { company: { tradeName: 'asc' } },
     });
     const companies = memberships.map((m) => ({
       id: m.company.id,
       tradeName: m.company.tradeName,
-      status: m.company.status,
+      status: effectiveCompanyStatus(m.company),
       role: m.role,
       roleLabel: MEMBER_ROLE_LABELS[m.role],
     }));
     const active = memberships.find(
-      (m) => m.company.id === user.claimedCompanyId && m.company.status === 'ACTIVE',
+      (m) => m.company.id === user.claimedCompanyId && effectiveCompanyStatus(m.company) === 'ACTIVE',
     );
     return {
       user: { id: user.userId, name: user.name, email: user.email, platformRole: user.platformRole },
@@ -200,7 +200,11 @@ export class AuthService {
       if (ctx && ctx !== 'SUSPENDED') return ctx.companyId;
     }
     const first = await this.prisma.companyMember.findFirst({
-      where: { userId, status: 'ACTIVE', company: { status: 'ACTIVE' } },
+      where: {
+        userId,
+        status: 'ACTIVE',
+        company: { status: 'ACTIVE', OR: [{ subscription: null }, { subscription: { status: { notIn: [...BLOCKED_SUBSCRIPTION] } } }] },
+      },
       orderBy: { joinedAt: 'asc' },
       select: { companyId: true },
     });

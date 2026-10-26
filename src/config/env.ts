@@ -24,6 +24,8 @@ export const envSchema = z.object({
   TRIAL_DAYS: z.coerce.number().int().min(0).max(90).default(14),
   RATE_LIMIT_DEFAULT: z.coerce.number().int().positive().default(120),
   RATE_LIMIT_AUTH: z.coerce.number().int().positive().default(10),
+  // Gateway de pagamento da assinatura SaaS. Vazio = sem cobrança automática (ativação administrativa).
+  BILLING_PROVIDER: z.string().trim().optional(),
   STORAGE_DIR: z.string().default('./storage'),
   ATTACHMENT_MAX_MB: z.coerce.number().int().min(1).max(50).default(10),
 });

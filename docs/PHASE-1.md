@@ -94,7 +94,7 @@ npm test                           # no web
 - **E-mail**: sem SMTP configurado, os e-mails vão para o log (o link só aparece fora de produção). O convite também devolve o link para compartilhar manualmente. O SMTP real fica para a Fase 6.
 - **Painel SUPER_ADMIN** (`/platform/*`): Fase 5. O papel já existe no banco e no seed.
 - **Limite de veículos**: já é calculado e exibido; a verificação no cadastro de veículos entra na Fase 2.
-- **Row-Level Security**: desenhada em `ARCHITECTURE.md §5.6`, com implementação na Fase 6.
+- **Row-Level Security**: desenhada em `ARCHITECTURE.md §5.7`, com implementação na Fase 6.
 - **Cookie de sessão**: em produção, web e API precisam estar no mesmo site (subdomínios do mesmo domínio) e com HTTPS.
 - **Política de privacidade e termos**: os textos jurídicos dependem de definição do negócio (Fase 6).
 
