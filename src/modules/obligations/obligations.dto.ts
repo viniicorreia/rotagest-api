@@ -216,7 +216,7 @@ export class AllocationInputDto {
 
 /** Campos de rateio aceitos na criação e edição de despesas e receitas. */
 export class SplitInputDto {
-  @ApiPropertyOptional({ enum: SPLIT_METHODS, enumName: 'SplitMethod', description: 'Rateio entre veículos: EQUAL (partes iguais), PERCENT ou FIXED (valores)' })
+  @ApiPropertyOptional({ enum: SPLIT_METHODS, enumName: 'SplitMethod', description: 'Rateio entre veículos: EQUAL (partes iguais), PERCENT, FIXED (valores) ou REVENUE_PROPORTIONAL (pela receita de cada veículo na competência; só despesas)' })
   @IsOptional()
   @IsIn(SPLIT_METHODS)
   allocationMethod?: SplitMethod;

@@ -10,7 +10,7 @@ import { AuditService } from '../audit/audit.service';
 import { CategoriesService } from '../categories/categories.service';
 import type { CancelObligationDto, SettleDto } from '../obligations/obligations.dto';
 import { RecurrenceService, type RecurrenceTemplate } from '../obligations/recurrence.service';
-import { assertVehiclesUsable, currentSplit, splitFromInput, writeAllocations, type AllocationSplit } from '../obligations/allocation';
+import { assertVehiclesUsable, currentSplit, resolveRevenueWeights, splitFromInput, writeAllocations, type AllocationSplit } from '../obligations/allocation';
 import { installmentSchedule, isOverdue, monthDiff, type Occurrence } from '../obligations/schedule';
 import { attachmentDto } from '../attachments/attachment-dto';
 import { SettlementsService, SETTLEMENT_INCLUDE, statusFor } from '../settlements/settlements.service';
@@ -118,12 +118,13 @@ export class PayablesService {
       }
     }
 
-    const split = this.splitOf(dto, totalCents);
+    let split = this.splitOf(dto, totalCents);
 
     const result = await this.prisma.$transaction(async (tx) => {
       await this.categories.assertUsable(tx, ctx.companyId, dto.categoryId, 'EXPENSE');
       if (dto.vehicleId) await this.assertVehicle(tx, ctx.companyId, dto.vehicleId);
       if (split) await assertVehiclesUsable(tx, ctx.companyId, split.items.map((i) => i.vehicleId));
+      if (split) split = await resolveRevenueWeights(tx, ctx.companyId, split, competence);
 
       let occurrences: Occurrence[];
       let recurrenceRuleId: string | null = null;
@@ -226,6 +227,7 @@ export class PayablesService {
       else if (dto.vehicleId !== undefined) split = null;
       else split = await currentSplit(tx, 'PAYABLE', ctx.companyId, id);
       if (split && dto.allocations?.length) await assertVehiclesUsable(tx, ctx.companyId, split.items.map((i) => i.vehicleId));
+      if (split) split = await resolveRevenueWeights(tx, ctx.companyId, split, competence);
       const vehicleId = split ? null : dto.vehicleId !== undefined ? dto.vehicleId : before.vehicleId;
 
       await tx.payable.update({
