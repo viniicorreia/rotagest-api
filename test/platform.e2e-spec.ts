@@ -1,3 +1,4 @@
+import { TrialExpiryJob } from '../src/modules/subscriptions/trial-expiry.job';
 import { createHmac, randomUUID } from 'node:crypto';
 import type { GatewayEvent, PaymentGateway } from '../src/modules/billing/payment-gateway';
 import { bearer, createCompany, createTestApp, createVehicle, ownerWithCompany, register, resetDb, type Session, type TestApp } from './helpers';
@@ -217,5 +218,19 @@ describe('Painel da plataforma (e2e)', () => {
         await g.close();
       }
     });
+  });
+
+  it('fim do teste: a rotina marca a assinatura como em atraso, sem bloquear o acesso', async () => {
+    const trial = await ownerWithCompany(t, 'Teste Vencendo');
+    const sub = await t.prisma.subscription.findFirstOrThrow({ where: { companyId: trial.company.id } });
+    // Um teste anterior zerou os dias de teste; força uma assinatura em teste já vencida.
+    await t.prisma.subscription.update({ where: { id: sub.id }, data: { status: 'TRIALING', trialEndsAt: new Date(Date.now() - 60_000) } });
+    const job = t.app.get(TrialExpiryJob);
+    expect(await job.run()).toBeGreaterThanOrEqual(1);
+    expect((await t.prisma.subscription.findUniqueOrThrow({ where: { id: sub.id } })).status).toBe('PAST_DUE');
+    expect(await job.run()).toBe(0);
+    const audit = await t.prisma.auditLog.findFirstOrThrow({ where: { action: 'platform.subscription.trial_expired', entityId: sub.id } });
+    expect(audit.after).toEqual({ status: 'PAST_DUE' });
+    await t.http().get('/api/v1/vehicles').set(bearer(trial.owner)).expect(200);
   });
 });

@@ -104,6 +104,7 @@ export class DriverDto {
   @ApiProperty({ type: String, format: 'date', nullable: true }) hiredAt: string | null;
   @ApiProperty(EmploymentTypeEnum) employmentType: EmploymentTypeValue;
   @ApiProperty(RecordStatusEnum) status: RecordStatusValue;
+  @ApiProperty({ description: 'Dados pessoais removidos (LGPD); o cadastro não pode mais ser editado' }) anonymized: boolean;
   @ApiProperty({ type: RefDto, nullable: true, description: 'Usuário vinculado (portal do motorista)' }) member: RefDto | null;
   @ApiProperty({ type: [String], description: 'Rotas em que está atribuído hoje' }) currentRoutes: string[];
 }

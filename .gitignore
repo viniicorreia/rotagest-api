@@ -8,3 +8,4 @@ storage/
 *.log
 *.tsbuildinfo
 .DS_Store
+backups/

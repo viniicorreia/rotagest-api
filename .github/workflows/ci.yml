@@ -1,0 +1,70 @@
+# CI da rotagest-api: typecheck, testes (unitários + e2e contra PostgreSQL 16),
+# build e verificação de que o openapi.json versionado está atualizado.
+name: CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    name: Typecheck, testes e build
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: rotagest_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d rotagest_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      # Dono do banco: o globalSetup do jest roda migrations, o script do papel e o seed com ele.
+      TEST_DIRECT_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/rotagest_test?schema=public
+      # Papel da aplicação (sem posse das tabelas, sujeito ao RLS).
+      TEST_DATABASE_URL: postgresql://rotagest_app:rotagest_app@localhost:5432/rotagest_test?schema=public
+      APP_DB_PASSWORD: rotagest_app
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Instalar dependências
+        run: npm ci
+
+      - name: Gerar Prisma Client
+        run: npx prisma generate
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      # Inclui test/contract.e2e-spec.ts, que falha se o openapi.json versionado
+      # estiver desatualizado (corrija com: npm run openapi:export).
+      - name: Testes (unitários + e2e)
+        run: npm test
+
+      - name: Build
+        run: npm run build
+
+      - name: Conferir openapi.json sem alterações
+        run: git diff --exit-code -- openapi.json

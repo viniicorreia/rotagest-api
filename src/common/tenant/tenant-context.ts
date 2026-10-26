@@ -22,6 +22,8 @@ export interface TenantContext {
   readonly memberId: string;
   readonly role: MemberRole;
   readonly permissions: readonly Permission[];
+  /** Presente quando é o suporte da plataforma, com autorização do dono (somente leitura). */
+  readonly support?: { readonly grantId: string; readonly expiresAt: Date };
 }
 
 export interface RequestMeta {

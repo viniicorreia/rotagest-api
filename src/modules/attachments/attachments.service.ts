@@ -43,7 +43,7 @@ export class AttachmentsService {
     await this.assertOwner(ctx, dto);
     const id = randomUUID();
     const storageKey = `${ctx.companyId}/${id}.${type.ext}`;
-    await this.storage.put(storageKey, file.buffer);
+    await this.storage.put(storageKey, file.buffer, type.mime);
     const attachment = await this.prisma.attachment.create({
       data: {
         id,
@@ -74,7 +74,7 @@ export class AttachmentsService {
         : 0;
       if (!ofDriverExpense) throw notFound('Comprovante não encontrado');
     }
-    return { stream: this.storage.read(a.storageKey), mimeType: a.mimeType, fileName: a.originalName, size: a.sizeBytes };
+    return { stream: await this.storage.read(a.storageKey), mimeType: a.mimeType, fileName: a.originalName, size: a.sizeBytes };
   }
 
   /** Remoção lógica: o arquivo continua guardado para auditoria. */

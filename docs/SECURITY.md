@@ -18,22 +18,27 @@
 | Logs estruturados (pino) com redação de tokens, senhas e cookies | `app.module.ts` |
 | Tokens de convite e redefinição de uso único, só hash no banco | `invitations.service.ts`, `auth.service.ts` |
 
-## Backups (procedimento recomendado)
+## Controles da Fase 6
 
-1. **Dump lógico diário** com retenção de 30 dias, fora do servidor do banco:
-   `pg_dump --format=custom --no-owner "$DATABASE_URL" > rotagest-$(date +%F).dump`
-2. **WAL/PITR** (ex.: serviço gerenciado ou pgBackRest) para recuperar até poucos minutos antes de uma falha.
-3. **Criptografia** dos arquivos de backup em repouso e acesso restrito ao time de operação.
-4. **Teste de restauração mensal** em ambiente isolado:
-   `pg_restore --clean --no-owner -d rotagest_restore rotagest-AAAA-MM-DD.dump` e conferência de contagens por empresa.
-5. O volume de comprovantes (`storage`) segue a mesma política de retenção.
+| Controle | Onde |
+|---|---|
+| Row-Level Security: a API conecta como `rotagest_app`, sem acesso a linhas de outra empresa (ARCHITECTURE §5.7) | migration `row_level_security`, `prisma/prisma.service.ts`, `common/tenant/db-context.ts` |
+| `audit_logs` só aceita inserção para o papel da aplicação | migration `row_level_security` |
+| Acesso do suporte só com autorização do dono, prazo de até 72 h, somente leitura, cada leitura auditada e visível ao dono | `modules/support-access`, `common/guards/tenant.guard.ts` |
+| Exportação de dados e exclusão de conta (LGPD); anonimização de motorista | `modules/privacy`, `modules/fleet` |
+| Lançamentos e fechamento do mês serializados por lock no banco | `transactions/period-lock.service.ts`, `closings.service.ts` |
+| Anexos privados em S3 (sem ACL pública nem URL assinada), download só pela API | `modules/attachments` |
+| `/metrics` protegido por token; health sem dados sensíveis | `modules/metrics`, `modules/health` |
+| Imagens Docker sem root; CSP e cabeçalhos de segurança no nginx do web | `Dockerfile`, `rotagest-web/nginx.conf` |
 
-A automação (job, monitoramento e alerta de falha) entra na Fase 6.
+## Backups
+
+Scripts `scripts/backup.sh` e `scripts/restore.sh`, com política, retenção, teste
+mensal de restauração e monitoramento em [OPERATIONS.md](OPERATIONS.md). O
+backup usa `DIRECT_DATABASE_URL` (dono do banco): o papel `rotagest_app` está
+sujeito ao RLS e geraria um dump incompleto.
 
 ## Dados pessoais (LGPD)
 
-- **Dados tratados**: nome, e-mail e senha (hash) dos usuários; dados cadastrais da empresa (CPF quando pessoa física); IP e navegador em sessões e auditoria. Nas próximas fases: dados de motoristas (CPF, telefone) e contratantes.
-- **Finalidade**: operar a conta, controlar acesso e manter trilha de auditoria. Não há venda nem compartilhamento com terceiros.
-- **Minimização**: logs não registram senhas, tokens ou cookies; mensagens de erro não expõem dados de outros tenants.
-- **Isolamento**: cada empresa só acessa os próprios dados; o SUPER_ADMIN não acessa dados financeiros por padrão.
-- **Pendências (Fase 6)**: política de privacidade publicada, termo de uso, fluxo de exportação e exclusão de dados do titular, prazo de retenção de logs e auditoria, encarregado (DPO) definido.
+Inventário, bases legais, retenção, direitos do titular e acesso do suporte em
+[PRIVACY.md](PRIVACY.md). A política pública fica no web, em `/privacidade`.
