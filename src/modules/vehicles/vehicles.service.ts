@@ -2,7 +2,8 @@ import { Injectable } from '@nestjs/common';
 import { Prisma, type Vehicle } from '@prisma/client';
 import { ErrorCode, badRequest, conflict, notFound } from '../../common/errors';
 import type { RequestMeta, TenantContext } from '../../common/tenant/tenant-context';
-import { addMonths, firstOfMonth, formatMonth, fromCents, monthsBetween, parseMonth, today } from '../../domain';
+import { addMonths, firstOfMonth, formatMonth, formatRate, fromCents, kmAmountCents, monthsBetween, parseMonth, toKmTenths, toRateUnits, today } from '../../domain';
+import { PeriodLockService } from '../transactions/period-lock.service';
 import { PrismaService, type Tx } from '../../prisma/prisma.service';
 import { AuditService } from '../audit/audit.service';
 import { ResultsService } from '../dashboard/results.service';
@@ -17,6 +18,7 @@ const FIELDS = {
   model: true,
   year: true,
   odometerKm: true,
+  ratePerKm: true,
   status: true,
   notes: true,
   archivedAt: true,
@@ -30,6 +32,7 @@ export class VehiclesService {
     private readonly audit: AuditService,
     private readonly limits: PlanLimitsService,
     private readonly results: ResultsService,
+    private readonly periods: PeriodLockService,
   ) {}
 
   async list(ctx: TenantContext, q: ListVehiclesQueryDto) {
@@ -46,7 +49,7 @@ export class VehiclesService {
       this.prisma.vehicle.findMany({ where, select: FIELDS, orderBy: [{ archivedAt: { sort: 'desc', nulls: 'first' } }, { name: 'asc' }] }),
       this.usage(ctx.companyId),
     ]);
-    return { items, usage };
+    return { items: items.map(toVehicleDto), usage };
   }
 
   async usage(companyId: string, tx?: Tx) {
@@ -62,7 +65,7 @@ export class VehiclesService {
     const vehicle = await this.prisma.vehicle.findFirst({ where: { id, companyId: ctx.companyId }, select: FIELDS });
     if (!vehicle) throw notFound('Veículo não encontrado');
     const hasHistory = await this.hasHistory(ctx.companyId, id);
-    if (!ctx.permissions.includes('finance:read')) return { ...vehicle, hasHistory, financial: null };
+    if (!ctx.permissions.includes('finance:read')) return { ...toVehicleDto(vehicle), hasHistory, financial: null };
     const to = q.to ? parseMonth(q.to) : firstOfMonth(today());
     const from = q.from ? parseMonth(q.from) : addMonths(to, -11, 1);
     if (from > to) throw badRequest('A competência inicial deve ser anterior à final');
@@ -83,7 +86,7 @@ export class VehiclesService {
     const shared = sum('shared');
 
     return {
-      ...vehicle,
+      ...toVehicleDto(vehicle),
       hasHistory,
       financial: {
         from: formatMonth(from),
@@ -108,7 +111,7 @@ export class VehiclesService {
     return this.prisma.$transaction(async (tx) => {
       await this.assertCanAddVehicle(tx, ctx.companyId);
       await this.assertPlateFree(tx, ctx.companyId, dto.plate);
-      const vehicle = await tx.vehicle.create({ data: { ...dto, companyId: ctx.companyId }, select: FIELDS });
+      const vehicle = toVehicleDto(await tx.vehicle.create({ data: { ...dto, companyId: ctx.companyId }, select: FIELDS }));
       await this.audit.log({ companyId: ctx.companyId, actorUserId: ctx.userId, action: 'vehicle.created', entityType: 'Vehicle', entityId: vehicle.id, after: vehicle, meta }, tx);
       return vehicle;
     });
@@ -118,8 +121,13 @@ export class VehiclesService {
     return this.prisma.$transaction(async (tx) => {
       const before = await this.findOrThrow(tx, ctx.companyId, id);
       if (dto.plate && dto.plate !== before.plate) await this.assertPlateFree(tx, ctx.companyId, dto.plate);
-      const after = await tx.vehicle.update({ where: { id }, data: dto, select: FIELDS });
-      await this.audit.log({ companyId: ctx.companyId, actorUserId: ctx.userId, action: 'vehicle.updated', entityType: 'Vehicle', entityId: id, before, after, meta }, tx);
+      const { applyRateToUnbilled = true, ...data } = dto;
+      const after = toVehicleDto(await tx.vehicle.update({ where: { id }, data, select: FIELDS }));
+      let recalculated = 0;
+      if (dto.ratePerKm !== undefined && after.ratePerKm !== before.ratePerKm && applyRateToUnbilled) {
+        recalculated = await this.applyRate(tx, ctx.companyId, id, after.ratePerKm);
+      }
+      await this.audit.log({ companyId: ctx.companyId, actorUserId: ctx.userId, action: 'vehicle.updated', entityType: 'Vehicle', entityId: id, before, after: { ...after, recalculatedLogs: recalculated }, meta }, tx);
       return after;
     });
   }
@@ -129,7 +137,7 @@ export class VehiclesService {
     return this.prisma.$transaction(async (tx) => {
       const before = await this.findOrThrow(tx, ctx.companyId, id);
       if (before.archivedAt) return before;
-      const after = await tx.vehicle.update({ where: { id }, data: { archivedAt: new Date(), status: 'INACTIVE' }, select: FIELDS });
+      const after = toVehicleDto(await tx.vehicle.update({ where: { id }, data: { archivedAt: new Date(), status: 'INACTIVE' }, select: FIELDS }));
       await this.audit.log({ companyId: ctx.companyId, actorUserId: ctx.userId, action: 'vehicle.archived', entityType: 'Vehicle', entityId: id, before, after, meta }, tx);
       return after;
     });
@@ -140,7 +148,7 @@ export class VehiclesService {
       const before = await this.findOrThrow(tx, ctx.companyId, id);
       if (!before.archivedAt) return before;
       await this.assertCanAddVehicle(tx, ctx.companyId);
-      const after = await tx.vehicle.update({ where: { id }, data: { archivedAt: null, status: 'ACTIVE' }, select: FIELDS });
+      const after = toVehicleDto(await tx.vehicle.update({ where: { id }, data: { archivedAt: null, status: 'ACTIVE' }, select: FIELDS }));
       await this.audit.log({ companyId: ctx.companyId, actorUserId: ctx.userId, action: 'vehicle.restored', entityType: 'Vehicle', entityId: id, before, after, meta }, tx);
       return after;
     });
@@ -158,6 +166,24 @@ export class VehiclesService {
     });
   }
 
+  /**
+   * Nova taxa vale para os registros diários ainda não faturados (em meses
+   * abertos). O que já virou conta a receber mantém a taxa da época.
+   */
+  private async applyRate(tx: Tx, companyId: string, vehicleId: string, rate: string | null): Promise<number> {
+    const logs = await tx.vehicleDailyLog.findMany({ where: { companyId, vehicleId, receivableId: null }, select: { id: true, date: true, kmDriven: true } });
+    if (logs.length === 0) return 0;
+    const closed = await this.periods.closedMonths(companyId, logs.map((l) => l.date), tx);
+    let n = 0;
+    for (const log of logs) {
+      if (closed.has(formatMonth(log.date))) continue;
+      const amount = rate === null ? null : fromCents(kmAmountCents(toKmTenths(log.kmDriven), toRateUnits(rate)));
+      await tx.vehicleDailyLog.update({ where: { id: log.id }, data: { ratePerKm: rate, amount } });
+      n += 1;
+    }
+    return n;
+  }
+
   private async hasHistory(companyId: string, vehicleId: string, tx?: Tx): Promise<boolean> {
     const client = tx ?? this.prisma;
     const where = { companyId, vehicleId };
@@ -169,6 +195,7 @@ export class VehiclesService {
       client.fuelExpenseDetail.count({ where }),
       client.routeAssignment.count({ where }),
       client.contractVehicle.count({ where }),
+      client.vehicleDailyLog.count({ where }),
     ]);
     return counts.some((c) => c > 0);
   }
@@ -176,7 +203,7 @@ export class VehiclesService {
   private async findOrThrow(tx: Tx, companyId: string, id: string) {
     const vehicle = await tx.vehicle.findFirst({ where: { id, companyId }, select: FIELDS });
     if (!vehicle) throw notFound('Veículo não encontrado');
-    return vehicle;
+    return toVehicleDto(vehicle);
   }
 
   private async assertPlateFree(tx: Tx, companyId: string, plate: string) {
@@ -195,3 +222,8 @@ export class VehiclesService {
 }
 
 export type VehicleRecord = Pick<Vehicle, keyof typeof FIELDS>;
+
+/** Converte a taxa Decimal em texto ("3.50") para a resposta. */
+export function toVehicleDto(v: VehicleRecord) {
+  return { ...v, ratePerKm: v.ratePerKm === null ? null : formatRate(toRateUnits(v.ratePerKm)) };
+}

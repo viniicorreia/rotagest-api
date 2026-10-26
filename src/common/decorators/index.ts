@@ -6,6 +6,7 @@ import type { AuthUser, RequestMeta, TenantContext } from '../tenant/tenant-cont
 export const IS_PUBLIC = 'rg:isPublic';
 export const NO_TENANT = 'rg:noTenant';
 export const PERMISSIONS_KEY = 'rg:permissions';
+export const ANY_PERMISSIONS_KEY = 'rg:anyPermissions';
 
 /** Rota acessível sem autenticação. */
 export const Public = () => SetMetadata(IS_PUBLIC, true);
@@ -15,6 +16,9 @@ export const NoTenant = () => SetMetadata(NO_TENANT, true);
 
 /** Exige todas as permissões listadas na empresa ativa. */
 export const RequirePermissions = (...permissions: Permission[]) => SetMetadata(PERMISSIONS_KEY, permissions);
+
+/** Exige pelo menos uma das permissões (ex.: gestor OU o próprio motorista); o serviço restringe o escopo. */
+export const RequireAnyPermission = (...permissions: Permission[]) => SetMetadata(ANY_PERMISSIONS_KEY, permissions);
 
 export const CurrentUser = createParamDecorator((_: unknown, ctx: ExecutionContext): AuthUser => {
   const req = ctx.switchToHttp().getRequest<Request>();

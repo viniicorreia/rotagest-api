@@ -10,18 +10,19 @@ import { AuditService } from '../audit/audit.service';
 import { CategoriesService } from '../categories/categories.service';
 import type { CancelObligationDto, SettleDto } from '../obligations/obligations.dto';
 import { RecurrenceService, type RecurrenceTemplate } from '../obligations/recurrence.service';
+import { assertVehiclesUsable, currentSplit, splitFromInput, writeAllocations, type AllocationSplit } from '../obligations/allocation';
 import { installmentSchedule, isOverdue, monthDiff, type Occurrence } from '../obligations/schedule';
 import { attachmentDto } from '../attachments/attachment-dto';
 import { SettlementsService, SETTLEMENT_INCLUDE, statusFor } from '../settlements/settlements.service';
 import { PeriodLockService } from '../transactions/period-lock.service';
 import type { CreatePayableDto, ListPayablesQueryDto, UpdatePayableDto } from './payables.dto';
 
-const LIST_INCLUDE = {
+export const LIST_INCLUDE = {
   category: { select: { id: true, name: true, type: true, systemKey: true } },
   vehicle: { select: { id: true, name: true, plate: true } },
-  _count: { select: { attachments: { where: { deletedAt: null } } } },
+  _count: { select: { attachments: { where: { deletedAt: null } }, allocations: { where: { method: { not: 'DIRECT' } } } } },
 } satisfies Prisma.PayableInclude;
-type PayableRow = Prisma.PayableGetPayload<{ include: typeof LIST_INCLUDE }>;
+export type PayableRow = Prisma.PayableGetPayload<{ include: typeof LIST_INCLUDE }>;
 
 const DETAIL_INCLUDE = {
   ...LIST_INCLUDE,
@@ -117,9 +118,12 @@ export class PayablesService {
       }
     }
 
+    const split = this.splitOf(dto, totalCents);
+
     const result = await this.prisma.$transaction(async (tx) => {
       await this.categories.assertUsable(tx, ctx.companyId, dto.categoryId, 'EXPENSE');
       if (dto.vehicleId) await this.assertVehicle(tx, ctx.companyId, dto.vehicleId);
+      if (split) await assertVehiclesUsable(tx, ctx.companyId, split.items.map((i) => i.vehicleId));
 
       let occurrences: Occurrence[];
       let recurrenceRuleId: string | null = null;
@@ -139,6 +143,7 @@ export class PayablesService {
           categoryId: dto.categoryId,
           amount: fromCents(totalCents),
           vehicleId: dto.vehicleId ?? null,
+          split,
           supplierName: dto.supplierName ?? null,
           notes: dto.notes ?? null,
           dueDay: dueDate.getUTCDate(),
@@ -187,7 +192,7 @@ export class PayablesService {
           },
           select: { id: true },
         });
-        await this.syncDirectAllocation(tx, ctx.companyId, created.id, dto.vehicleId ?? null, o.amountCents);
+        await writeAllocations(tx, 'PAYABLE', ctx.companyId, created.id, dto.vehicleId ?? null, split, o.amountCents);
         ids.push(created.id);
       }
       if (dto.settleNow) {
@@ -215,7 +220,13 @@ export class PayablesService {
       const amountCents = dto.amount ? toCents(dto.amount) : toCents(before.amount);
       const paidCents = toCents(before.paidAmount);
       if (amountCents < paidCents) throw businessRule(`O valor não pode ficar abaixo do já pago (R$ ${fromCents(paidCents).replace('.', ',')})`);
-      const vehicleId = dto.vehicleId !== undefined ? dto.vehicleId : before.vehicleId;
+      // Rateio novo, veículo único novo, ou o rateio atual reaplicado ao novo valor.
+      let split: AllocationSplit | null;
+      if (dto.allocations !== undefined) split = dto.allocations.length ? this.splitOf(dto, amountCents) : null;
+      else if (dto.vehicleId !== undefined) split = null;
+      else split = await currentSplit(tx, 'PAYABLE', ctx.companyId, id);
+      if (split && dto.allocations?.length) await assertVehiclesUsable(tx, ctx.companyId, split.items.map((i) => i.vehicleId));
+      const vehicleId = split ? null : dto.vehicleId !== undefined ? dto.vehicleId : before.vehicleId;
 
       await tx.payable.update({
         where: { id },
@@ -231,7 +242,7 @@ export class PayablesService {
           status: statusFor('PAYABLE', paidCents, amountCents) as 'PENDING' | 'PARTIALLY_PAID' | 'PAID',
         },
       });
-      await this.syncDirectAllocation(tx, ctx.companyId, id, vehicleId, amountCents);
+      await writeAllocations(tx, 'PAYABLE', ctx.companyId, id, vehicleId, split, amountCents);
       const after = await tx.payable.findUniqueOrThrow({ where: { id }, include: DETAIL_INCLUDE });
       await this.audit.log(
         { companyId: ctx.companyId, actorUserId: ctx.userId, action: 'payable.updated', entityType: 'Payable', entityId: id, before: this.toDto({ ...before }), after: this.toDto(after), meta },
@@ -304,6 +315,8 @@ export class PayablesService {
     if (q.competenceFrom || q.competenceTo) {
       and.push({ competence: { gte: q.competenceFrom ? parseMonth(q.competenceFrom) : undefined, lte: q.competenceTo ? parseMonth(q.competenceTo) : undefined } });
     }
+    // Despesas de motorista aguardando aprovação ficam fora até alguém aprovar.
+    if (q.approval !== 'ALL') and.push({ approvalStatus: q.approval ?? 'APPROVED' });
     if (q.categoryId) and.push({ categoryId: q.categoryId });
     if (q.vehicleId) and.push({ OR: [{ vehicleId: q.vehicleId }, { allocations: { some: { vehicleId: q.vehicleId } } }] });
     if (q.search) and.push({ OR: [{ description: { contains: q.search, mode: 'insensitive' } }, { supplierName: { contains: q.search, mode: 'insensitive' } }] });
@@ -322,15 +335,10 @@ export class PayablesService {
     if (v.archivedAt) throw businessRule('Este veículo está arquivado');
   }
 
-  /**
-   * Despesa com veículo = 100% de custo direto daquele veículo. Rateios entre
-   * veículos (EQUAL, PERCENT...) chegam na Fase 3; enquanto isso, só DIRECT.
-   */
-  private async syncDirectAllocation(tx: Tx, companyId: string, payableId: string, vehicleId: string | null, amountCents: number) {
-    await tx.expenseAllocation.deleteMany({ where: { companyId, payableId, method: 'DIRECT' } });
-    if (vehicleId) {
-      await tx.expenseAllocation.create({ data: { companyId, payableId, vehicleId, method: 'DIRECT', percent: 100, amount: fromCents(amountCents) } });
-    }
+  private splitOf(dto: { vehicleId?: string | null; allocationMethod?: AllocationSplit['method']; allocations?: { vehicleId: string; percent?: string; amount?: string }[] }, totalCents: number): AllocationSplit | null {
+    if (!dto.allocations?.length) return null;
+    if (dto.vehicleId) throw badRequest('Escolha um veículo ou um rateio entre veículos, não os dois');
+    return splitFromInput(dto.allocationMethod ?? 'EQUAL', dto.allocations, totalCents);
   }
 
   toDto(p: PayableRow) {
@@ -359,6 +367,7 @@ export class PayablesService {
       canceledAt: p.canceledAt,
       cancelReason: p.cancelReason,
       attachmentsCount: p._count.attachments,
+      splitVehicles: p._count.allocations,
       createdAt: p.createdAt,
     };
   }
@@ -369,7 +378,7 @@ export class PayablesService {
       settlements: p.settlements.map((s) => this.settlements.toDto(s)),
       // Comprovantes do lançamento e dos seus pagamentos.
       attachments: [...p.attachments, ...p.settlements.flatMap((s) => s.attachments)].map(attachmentDto),
-      allocations: p.allocations.map((a) => ({ vehicle: a.vehicle, method: a.method, amount: money(a.amount) })),
+      allocations: p.allocations.map((a) => ({ vehicle: a.vehicle, method: a.method, percent: a.percent?.toFixed(6) ?? '100.000000', amount: money(a.amount) })),
     };
   }
 }

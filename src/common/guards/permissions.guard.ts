@@ -2,7 +2,7 @@ import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import type { Request } from 'express';
 import { hasPermissions, type Permission } from '../../domain';
-import { PERMISSIONS_KEY } from '../decorators';
+import { ANY_PERMISSIONS_KEY, PERMISSIONS_KEY } from '../decorators';
 import { forbidden } from '../errors';
 
 /** Global: aplica @RequirePermissions(...) sobre o TenantContext já resolvido. */
@@ -15,9 +15,12 @@ export class PermissionsGuard implements CanActivate {
       context.getHandler(),
       context.getClass(),
     ]);
-    if (!required?.length) return true;
+    const any = this.reflector.getAllAndOverride<Permission[]>(ANY_PERMISSIONS_KEY, [context.getHandler(), context.getClass()]);
+    if (!required?.length && !any?.length) return true;
     const req = context.switchToHttp().getRequest<Request>();
-    if (!req.tenant || !hasPermissions(req.tenant.permissions, required)) throw forbidden();
+    if (!req.tenant) throw forbidden();
+    if (required?.length && !hasPermissions(req.tenant.permissions, required)) throw forbidden();
+    if (any?.length && !any.some((p) => req.tenant!.permissions.includes(p))) throw forbidden();
     return true;
   }
 }

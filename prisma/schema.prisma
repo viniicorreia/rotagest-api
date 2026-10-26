@@ -358,6 +358,7 @@ model Company {
   recurrenceRules    RecurrenceRule[]
   monthlyClosings    MonthlyClosing[]
   attachments        Attachment[]
+  vehicleDailyLogs   VehicleDailyLog[]
 
   @@index([document])
   @@index([status])
@@ -512,6 +513,8 @@ model Vehicle {
   model      String?
   year       Int?
   odometerKm Int           @default(0)
+  /// Quanto o veículo fatura por km rodado (R$/km). Vale para novos registros diários.
+  ratePerKm  Decimal?      @db.Decimal(10, 4)
   status     VehicleStatus @default(ACTIVE)
   notes      String?
   archivedAt DateTime?
@@ -519,6 +522,7 @@ model Vehicle {
   updatedAt  DateTime      @updatedAt
 
   company            Company             @relation(fields: [companyId], references: [id], onDelete: Restrict)
+  dailyLogs          VehicleDailyLog[]
   routeAssignments   RouteAssignment[]
   contractVehicles   ContractVehicle[]
   maintenances       Maintenance[]
@@ -551,6 +555,7 @@ model Driver {
   member           CompanyMember?    @relation(fields: [companyId, memberId], references: [companyId, id], onDelete: Restrict)
   routeAssignments RouteAssignment[]
   payables         Payable[]
+  dailyLogs        VehicleDailyLog[]
 
   @@unique([companyId, id])
   @@unique([companyId, document])
@@ -576,6 +581,7 @@ model Route {
   payables           Payable[]
   expenseAllocations ExpenseAllocation[]
   revenueAllocations RevenueAllocation[]
+  dailyLogs          VehicleDailyLog[]
 
   @@unique([companyId, id])
   @@unique([companyId, name])
@@ -722,6 +728,42 @@ model Maintenance {
   @@unique([companyId, payableId])
   @@index([companyId, vehicleId, date])
   @@map("maintenances")
+}
+
+/// Registro diário de km rodados por um veículo (um por veículo por dia).
+/// O valor a receber = km × R$/km; a taxa fica gravada no registro para que
+/// mudar a taxa do veículo não altere o que já foi faturado. Ao faturar, o
+/// registro aponta para a conta a receber gerada e deixa de ser editável.
+model VehicleDailyLog {
+  id            String   @id @default(uuid()) @db.Uuid
+  companyId     String   @db.Uuid
+  vehicleId     String   @db.Uuid
+  date          DateTime @db.Date
+  kmDriven      Decimal  @db.Decimal(10, 1)
+  odometerStart Int?
+  odometerEnd   Int?
+  ratePerKm     Decimal? @db.Decimal(10, 4)
+  /// km × taxa, arredondado ao centavo; nulo enquanto o veículo não tem taxa.
+  amount        Decimal? @db.Decimal(14, 2)
+  driverId      String?  @db.Uuid
+  routeId       String?  @db.Uuid
+  receivableId  String?  @db.Uuid
+  notes         String?
+  createdById   String   @db.Uuid
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  company    Company     @relation(fields: [companyId], references: [id], onDelete: Restrict)
+  vehicle    Vehicle     @relation(fields: [companyId, vehicleId], references: [companyId, id], onDelete: Restrict)
+  driver     Driver?     @relation(fields: [companyId, driverId], references: [companyId, id], onDelete: Restrict)
+  route      Route?      @relation(fields: [companyId, routeId], references: [companyId, id], onDelete: Restrict)
+  receivable Receivable? @relation(fields: [companyId, receivableId], references: [companyId, id], onDelete: Restrict)
+
+  @@unique([companyId, id])
+  @@unique([companyId, vehicleId, date])
+  @@index([companyId, date])
+  @@index([companyId, receivableId])
+  @@map("vehicle_daily_logs")
 }
 
 /// Detalhe de abastecimento de um Payable da categoria combustível.
@@ -938,6 +980,7 @@ model Receivable {
   settlements    Settlement[]
   allocations    RevenueAllocation[]
   attachments    Attachment[]
+  dailyLogs      VehicleDailyLog[]
 
   @@unique([companyId, id])
   /// Uma conta a receber por contrato e competência (geração idempotente).

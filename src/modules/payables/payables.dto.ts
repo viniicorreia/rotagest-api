@@ -12,6 +12,7 @@ import {
   RecurrenceInputDto,
   SettlementDto,
   SettleNowDto,
+  SplitInputDto,
   VehicleRefDto,
   type EntryKindValue,
 } from '../obligations/obligations.dto';
@@ -22,7 +23,7 @@ export const PayableStatusEnum = { enum: PAYABLE_STATUSES, enumName: 'PayableSta
 export const PAYABLE_FILTERS = [...PAYABLE_STATUSES, 'OPEN', 'OVERDUE'] as const;
 export const PayableFilterEnum = { enum: PAYABLE_FILTERS, enumName: 'PayableStatusFilter' } as const;
 
-export class CreatePayableDto {
+export class CreatePayableDto extends SplitInputDto {
   @ApiProperty({ example: 'Seguro da Van 01' })
   @Transform(trimOrUndefined)
   @IsString()
@@ -90,7 +91,7 @@ export class CreatePayableDto {
   settleNow?: SettleNowDto;
 }
 
-export class UpdatePayableDto {
+export class UpdatePayableDto extends SplitInputDto {
   @ApiPropertyOptional()
   @Transform(trimOrUndefined)
   @IsOptional()
@@ -144,6 +145,11 @@ export class ListPayablesQueryDto extends ObligationQueryDto {
   @IsOptional()
   @IsIn(PAYABLE_FILTERS)
   status?: (typeof PAYABLE_FILTERS)[number];
+
+  @ApiPropertyOptional({ enum: ['APPROVED', 'PENDING_APPROVAL', 'REJECTED', 'ALL'], enumName: 'ApprovalFilter', default: 'APPROVED', description: 'Despesas enviadas por motoristas entram como PENDING_APPROVAL' })
+  @IsOptional()
+  @IsIn(['APPROVED', 'PENDING_APPROVAL', 'REJECTED', 'ALL'])
+  approval?: 'APPROVED' | 'PENDING_APPROVAL' | 'REJECTED' | 'ALL';
 }
 
 export class PayableDto {
@@ -169,6 +175,7 @@ export class PayableDto {
   @ApiProperty({ type: String, format: 'date-time', nullable: true }) canceledAt: Date | null;
   @ApiProperty({ type: String, nullable: true }) cancelReason: string | null;
   @ApiProperty() attachmentsCount: number;
+  @ApiProperty({ description: 'Quantos veículos dividem o valor (0 = sem rateio)' }) splitVehicles: number;
   @ApiProperty({ type: String, format: 'date-time' }) createdAt: Date;
 }
 
