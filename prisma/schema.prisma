@@ -607,7 +607,7 @@ model Driver {
   id             String         @id @default(uuid()) @db.Uuid
   companyId      String         @db.Uuid
   name           String
-  document       String // CPF, apenas dígitos
+  document       String? // CPF, apenas dígitos (opcional)
   phone          String?
   hiredAt        DateTime?      @db.Date
   employmentType EmploymentType @default(EMPLOYEE)

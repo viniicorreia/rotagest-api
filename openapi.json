@@ -10900,7 +10900,8 @@
             "type": "string"
           },
           "document": {
-            "type": "string"
+            "type": "string",
+            "nullable": true
           },
           "phone": {
             "type": "string",
@@ -10968,8 +10969,9 @@
           },
           "document": {
             "type": "string",
+            "nullable": true,
             "example": "52998224725",
-            "description": "CPF; pontos e traço são aceitos"
+            "description": "CPF (opcional); pontos e traço são aceitos"
           },
           "phone": {
             "type": "string",
@@ -11003,8 +11005,7 @@
           }
         },
         "required": [
-          "name",
-          "document"
+          "name"
         ]
       },
       "UpdateDriverDto": {
@@ -11016,8 +11017,9 @@
           },
           "document": {
             "type": "string",
+            "nullable": true,
             "example": "52998224725",
-            "description": "CPF; pontos e traço são aceitos"
+            "description": "CPF (opcional); pontos e traço são aceitos"
           },
           "phone": {
             "type": "string",
