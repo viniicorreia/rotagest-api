@@ -38,10 +38,12 @@ export class CreateDriverDto {
   @MaxLength(80)
   name: string;
 
-  @ApiProperty({ example: '52998224725', description: 'CPF; pontos e traço são aceitos' })
-  @Transform(({ value }) => (typeof value === 'string' ? onlyDigits(value) : value))
+  @ApiPropertyOptional({ type: String, nullable: true, example: '52998224725', description: 'CPF (opcional); pontos e traço são aceitos' })
+  // Vazio vira null: o CPF pode ficar para depois.
+  @Transform(({ value }) => (typeof value === 'string' ? onlyDigits(value) || null : value))
+  @IsOptional()
   @Validate(CpfConstraint)
-  document: string;
+  document?: string | null;
 
   @ApiPropertyOptional({ type: String, nullable: true })
   @Transform(trimOrNull)
@@ -99,7 +101,7 @@ export class VehicleRefDto extends RefDto {
 export class DriverDto {
   @ApiProperty({ format: 'uuid' }) id: string;
   @ApiProperty() name: string;
-  @ApiProperty() document: string;
+  @ApiProperty({ type: String, nullable: true }) document: string | null;
   @ApiProperty({ type: String, nullable: true }) phone: string | null;
   @ApiProperty({ type: String, format: 'date', nullable: true }) hiredAt: string | null;
   @ApiProperty(EmploymentTypeEnum) employmentType: EmploymentTypeValue;

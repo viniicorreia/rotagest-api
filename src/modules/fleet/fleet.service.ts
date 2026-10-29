@@ -51,7 +51,7 @@ export class FleetService {
 
   async createDriver(ctx: TenantContext, dto: CreateDriverDto, meta: RequestMeta) {
     return this.prisma.$transaction(async (tx) => {
-      await this.assertDocumentFree(tx, ctx.companyId, dto.document);
+      if (dto.document) await this.assertDocumentFree(tx, ctx.companyId, dto.document);
       if (dto.memberId) await this.assertMemberFree(tx, ctx.companyId, dto.memberId);
       const d = await tx.driver.create({
         data: { ...dto, hiredAt: dto.hiredAt ? parseDate(dto.hiredAt) : null, companyId: ctx.companyId },
